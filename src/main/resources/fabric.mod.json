@@ -1,0 +1,45 @@
+{
+	"schemaVersion": 1,
+	"id": "skyfall",
+	"version": "0.0.0-dev",
+	"name": "SkyFall",
+	"description": "QOL Hypixel Skyblock mod for newest versions of Minecraft",
+	"authors": [
+		"Frostzie"
+	],
+	"contact": {
+		"homepage": "https://frostzie.github.io/main",
+		"sources": "https://github.com/Frostzie/SkyFall",
+		"issues": "https://github.com/Frostzie/SkyFall/issues"
+	},
+	"license": "LGPL-3.0",
+	"icon": "assets/skyfall/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"io.github.frostzie.skyfall.SkyFall::onInitialize"],
+		"modmenu": [
+			"io.github.frostzie.skyfall.utils.SkyFallModMenu"
+		]
+	},
+	"mixins": [
+		"skyfall.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/qZ885qTvkx"
+			}
+		}
+	}
+}

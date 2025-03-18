@@ -1,5 +1,6 @@
 package io.github.frostzie.skyfall
 
+import io.github.frostzie.skyfall.commands.CommandManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.config.gui.ConfigGuiManager
@@ -11,7 +12,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screen.Screen
 import org.slf4j.LoggerFactory
-
 
 class SkyFall : ModInitializer {
 
@@ -26,16 +26,7 @@ class SkyFall : ModInitializer {
 			configManager.saveConfig("shutdown-hook")
 		})
 
-		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-			dispatcher.register(literal("sf").executes {
-				ConfigGuiManager.openConfigGui()
-				0
-			})
-			dispatcher.register(literal("test").executes {
-				ChatUtils.messageToChat("Test successful!")
-				0
-			})
-		}
+		CommandManager.loadCommands()
 
 		ExampleFeature.register()
 	}

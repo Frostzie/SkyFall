@@ -11,7 +11,6 @@ class ChatConfig {
     @ConfigEditorBoolean
     var ColorCodeHelper: Boolean = false
 
-
     @Expose
     @ConfigOption(name = "Chat Test", desc = "Test if Chat Test is active")
     @ConfigEditorBoolean

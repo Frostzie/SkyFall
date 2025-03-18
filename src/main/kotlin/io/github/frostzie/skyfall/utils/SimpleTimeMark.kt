@@ -1,6 +1,5 @@
 package io.github.frostzie.skyfall.utils
 
-import java.text.SimpleDateFormat
 import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds

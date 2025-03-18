@@ -3,7 +3,6 @@ object GradientCreator
 
 //TODO: add support for this later on (prob with art who knows color codes)
 
-
 fun createGradientText(text: String, startColor: Int, endColor: Int): String {
     val startRed = (startColor shr 16) and 0xFF
     val startGreen = (startColor shr 8) and 0xFF
@@ -25,8 +24,6 @@ fun createGradientText(text: String, startColor: Int, endColor: Int): String {
     }
     return result.toString()
 }
-
-
 
 private fun findClosestColorCode(red: Int, green: Int, blue: Int): Char {
     val colors = mapOf(

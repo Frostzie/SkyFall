@@ -5,5 +5,8 @@ object CommandManager {
         AlwaysOnCommands.openConfig()
         AlwaysOnCommands.sfColor()
         AlwaysOnCommands.sfHelp()
+
+        DungeonCommands.requeue()
+        DungeonCommands.shortening()
     }
 }

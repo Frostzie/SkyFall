@@ -4,5 +4,6 @@ object CommandManager {
     fun loadCommands() {
         AlwaysOnCommands.openConfig()
         AlwaysOnCommands.sfColor()
+        AlwaysOnCommands.sfHelp()
     }
 }

@@ -4,6 +4,7 @@ import io.github.frostzie.skyfall.commands.CommandManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.config.gui.ConfigGuiManager
+import io.github.frostzie.skyfall.features.dungeon.RequeueKey
 import io.github.frostzie.skyfall.features.misc.ExampleFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import net.fabricmc.api.ModInitializer
@@ -28,6 +29,7 @@ class SkyFall : ModInitializer {
 
 		CommandManager.loadCommands()
 
+		RequeueKey.load()
 		ExampleFeature.register()
 	}
 

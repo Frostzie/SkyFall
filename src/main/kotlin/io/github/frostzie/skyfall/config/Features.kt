@@ -18,7 +18,6 @@ open class Features : Config() {
 
     }
 
-
     // TODO: Make socials open directly in the browser
     private val discord = MyResourceLocation("skyfall", "social/discord.png")
     private val github = MyResourceLocation("skyfall", "social/github.png")
@@ -31,14 +30,6 @@ open class Features : Config() {
             Social.forLink("Patreon", patreon, "https://www.patreon.com/Frostzie"),
         )
     }
-
-
-    //override fun saveNow() {
-    //    SkyFall.configManager.saveConfig(Features, "close-gui")
-    //}
-
-
-
 
     //  Config Start
     
@@ -62,7 +53,6 @@ open class Features : Config() {
     @Expose
     @Category(name = "Misc", desc = "Miscellaneous features.")
     var miscFeatures: MiscFeatures = MiscFeatures()
-
 
     //  Config End
 }

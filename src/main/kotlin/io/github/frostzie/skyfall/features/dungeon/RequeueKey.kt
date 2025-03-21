@@ -1,11 +1,13 @@
 package io.github.frostzie.skyfall.features.dungeon
 
+import com.mojang.brigadier.context.CommandContext
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.ChatUtils
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.MinecraftClient
 import org.lwjgl.glfw.GLFW
 
-//TODO: keybind not being registered when pressed
+//TODO: Rework this fully
 
 object RequeueKey {
     fun load() {
@@ -15,3 +17,4 @@ object RequeueKey {
         }
     }
 }
+

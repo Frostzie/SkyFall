@@ -13,7 +13,7 @@ object AlwaysOnCommands {
         Command.register { a, _ ->
             a.register(literal("sf").executes {
                 ConfigGuiManager.openConfigGui()
-                0
+                1
             })
         }
     }
@@ -38,7 +38,7 @@ object AlwaysOnCommands {
                             "§f&r = Reset\n" +
                     "§c==================================================="
                 )
-                0
+                1
             })
         }
     }
@@ -53,7 +53,7 @@ object AlwaysOnCommands {
                             "§f/sfhelp - Display this help message\n" +
                     "§9---------------------------------------------------"
                 )
-                0
+                1
             })
         }
     }

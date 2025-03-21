@@ -1,100 +1,66 @@
 package io.github.frostzie.skyfall.commands
 
+import com.mojang.brigadier.context.CommandContext
 import io.github.frostzie.skyfall.utils.ChatUtils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.MinecraftClient
 
 object DungeonCommands {
-
-    val Command = ClientCommandRegistrationCallback.EVENT
-    val Execute = MinecraftClient.getInstance().player?.networkHandler
+    val clientCommand = ClientCommandRegistrationCallback.EVENT
 
     fun requeue() {
-        Command.register { a, _ ->
-            a.register(literal("requeue").executes {
-                Execute?.sendChatCommand("instancerequeue")
-                0
-            })
+        clientCommand.register { a, _ ->
+            val executeRequeue = { context: CommandContext<FabricClientCommandSource> ->
+                val player = MinecraftClient.getInstance().player
+                if (player != null) {
+                    player.networkHandler.sendChatCommand("instancerequeue")
+                    ChatUtils.messageToChat("§aRequeueing")
+                }
+                1
+            }
+            a.register(literal("requeue").executes(executeRequeue))
+            a.register(literal("rq").executes(executeRequeue))
         }
     }
 
-    //TODO: add a toggle to turn these chat commands on and off
-    //TODO: fix not actually sending the commands... -- to late to do rn
-    fun shortening() {
-        Command.register { a, _ ->
-            // Normal Floors
-            a.register(literal("f1").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 1")
-                ChatUtils.messageToChat("§aJoining Floor 1")
-                0
-            })
-            a.register(literal("f2").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 2")
-                ChatUtils.messageToChat("§aJoining Floor 2")
-                0
-            })
-            a.register(literal("f3").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 3")
-                ChatUtils.messageToChat("§aJoining Floor 3")
-                0
-            })
-            a.register(literal("f4").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 4")
-                ChatUtils.messageToChat("§aJoining Floor 4")
-                0
-            })
-            a.register(literal("f5").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 5")
-                ChatUtils.messageToChat("§aJoining Floor 5")
-                0
-            })
-            a.register(literal("f6").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 6")
-                ChatUtils.messageToChat("§aJoining Floor 6")
-                0
-            })
-            a.register(literal("f7").executes {
-                Execute?.sendChatCommand("joindungeon catacombs 7")
-                ChatUtils.messageToChat("§aJoining Floor 7")
-                0
-            })
-            // Master Mode Floors
-            a.register(literal("m1").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 1")
-                ChatUtils.messageToChat("§aJoining Master Mode 1")
-                0
-            })
-            a.register(literal("m2").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 2")
-                ChatUtils.messageToChat("§aJoining Master Mode 2")
-                0
-            })
-            a.register(literal("m3").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 3")
-                ChatUtils.messageToChat("§aJoining Master Mode 3")
-                0
-            })
-            a.register(literal("m4").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 4")
-                ChatUtils.messageToChat("§aJoining Master Mode 4")
-                0
-            })
-            a.register(literal("m5").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 5")
-                ChatUtils.messageToChat("§aJoining Master Mode 5")
-                0
-            })
-            a.register(literal("m6").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 6")
-                ChatUtils.messageToChat("§aJoining Master Mode 6")
-                0
-            })
-            a.register(literal("m7").executes {
-                Execute?.sendChatCommand("joindungeon master_catacombs 7")
-                ChatUtils.messageToChat("§aJoining Master Mode 7")
-                0
-            })
+    //TODO: Add a toggle to turn these chat commands on and off
+    // Because they might interfere with other mods unless I later change to /sf Floor
+
+    fun floorCommands() {
+        clientCommand.register { a, _ ->
+            val floorOptions = mapOf(
+                // Normal Floors
+                "f1" to Pair("joindungeon catacombs 1", "§aJoining Floor 1"),
+                "f2" to Pair("joindungeon catacombs 2", "§aJoining Floor 2"),
+                "f3" to Pair("joindungeon catacombs 3", "§aJoining Floor 3"),
+                "f4" to Pair("joindungeon catacombs 4", "§aJoining Floor 4"),
+                "f5" to Pair("joindungeon catacombs 5", "§aJoining Floor 5"),
+                "f6" to Pair("joindungeon catacombs 6", "§aJoining Floor 6"),
+                "f7" to Pair("joindungeon catacombs 7", "§aJoining Floor 7"),
+                // Master mode Floors
+                "m1" to Pair("joindungeon master_catacombs 1", "§aJoining Master Mode 1"),
+                "m2" to Pair("joindungeon master_catacombs 2", "§aJoining Master Mode 2"),
+                "m3" to Pair("joindungeon master_catacombs 3", "§aJoining Master Mode 3"),
+                "m4" to Pair("joindungeon master_catacombs 4", "§aJoining Master Mode 4"),
+                "m5" to Pair("joindungeon master_catacombs 5", "§aJoining Master Mode 5"),
+                "m6" to Pair("joindungeon master_catacombs 6", "§aJoining Master Mode 6"),
+                "m7" to Pair("joindungeon master_catacombs 7", "§aJoining Master Mode 7")
+            )
+
+            floorOptions.forEach { (commandName, commandData) ->
+                val (serverCommand, message) = commandData
+
+                a.register(literal(commandName).executes { context ->
+                    val player = MinecraftClient.getInstance().player
+                    if (player != null) {
+                        player.networkHandler.sendChatCommand(serverCommand)
+                        ChatUtils.messageToChat(message)
+                    }
+                    1
+                })
+            }
         }
     }
 }

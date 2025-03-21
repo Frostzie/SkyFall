@@ -9,9 +9,9 @@ import org.lwjgl.glfw.GLFW
 class DungeonConfig {
 
     @Expose
-    @ConfigOption(name = "Dungeon Test", desc = "Test if Dungeon Test is active")
+    @ConfigOption(name = "Join Commands", desc = "Shortens the Catacombs join commands to\n/f1, etc. and /m1, etc.")
     @ConfigEditorBoolean
-    var DungeonTest: Boolean = false
+    var floorCommands: Boolean = false
 
     @Expose
     @ConfigOption(name = "Requeue Key", desc = "Press this key to requeue for another run")

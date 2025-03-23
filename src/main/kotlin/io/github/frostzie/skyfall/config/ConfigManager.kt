@@ -23,7 +23,6 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.concurrent.fixedRateTimer
 
-
 object ConfigManager {
     val gson = GsonBuilder().setPrettyPrinting()
         .excludeFieldsWithoutExposeAnnotation()
@@ -46,7 +45,6 @@ object ConfigManager {
         configDirectory.mkdirs()
         configFile = File(configDirectory, "config.json")
         println("Trying to load config from $configFile")
-
         if (configFile!!.exists()) {
             try {
                 println("load-config-now")

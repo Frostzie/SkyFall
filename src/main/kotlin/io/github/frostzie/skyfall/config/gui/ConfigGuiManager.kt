@@ -5,7 +5,6 @@ import io.github.frostzie.skyfall.config.Features
 import io.github.notenoughupdates.moulconfig.gui.GuiElementWrapper
 import io.github.notenoughupdates.moulconfig.gui.MoulConfigEditor
 
-
 object ConfigGuiManager {
     var editor:  MoulConfigEditor<Features>? = null
 

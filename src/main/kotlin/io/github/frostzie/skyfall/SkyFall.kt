@@ -3,13 +3,11 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.CommandManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
-import io.github.frostzie.skyfall.config.gui.ConfigGuiManager
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
+import io.github.frostzie.skyfall.features.gui.ConfigOpen
 import io.github.frostzie.skyfall.features.misc.ExampleFeature
-import io.github.frostzie.skyfall.utils.ChatUtils
+import io.github.frostzie.skyfall.features.misc.Test
 import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screen.Screen
 import org.slf4j.LoggerFactory
@@ -29,8 +27,10 @@ class SkyFall : ModInitializer {
 
 		CommandManager.loadCommands()
 
-		RequeueKey.load()
+		//Test.test()
 		ExampleFeature.register()
+		RequeueKey()
+		ConfigOpen()
 	}
 
 	fun registerTickEvent() {

@@ -1,13 +1,20 @@
 package io.github.frostzie.skyfall.config.features.garden
 
 import com.google.gson.annotations.Expose
+import io.github.frostzie.skyfall.config.features.garden.keybind.KeybindConfig
+import io.github.frostzie.skyfall.config.features.misc.keybind.KeyBinds
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
+import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
 class GardenConfig {
+
+    @Expose
+    @Category(name = "Keybinds", desc = "")
+    var keybindConfig = KeybindConfig()
 
     @Expose
     @Accordion

@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall.features
 
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
+import io.github.frostzie.skyfall.features.garden.GardenKeybinds
 import io.github.frostzie.skyfall.features.misc.ExampleFeature
 import io.github.frostzie.skyfall.features.misc.Test.test
 import io.github.frostzie.skyfall.features.misc.keybind.EquipmentMenuKeybind
@@ -23,7 +24,10 @@ object FeatureManager {
         EquipmentMenuKeybind()
         StorageMenuKeybind()
 
-        // Test Features
+        // Garden Features
+        GardenKeybinds
+
+        // WIP features, might be removed or changed completely
         test()
         ExampleFeature.register()
     }

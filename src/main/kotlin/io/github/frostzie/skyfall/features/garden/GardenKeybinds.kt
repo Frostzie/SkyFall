@@ -3,12 +3,15 @@ package io.github.frostzie.skyfall.features.garden
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ConditionalUtils
+import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
+import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 import io.github.notenoughupdates.moulconfig.observer.Property
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.SignEditScreen
 import net.minecraft.client.option.KeyBinding
+import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
@@ -33,7 +36,7 @@ object GardenKeybinds {
     fun isKeyDown(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
         val override = map[keyBinding] ?: run {
-            if (map.containsValue(keyBinding.code)) {
+            if (map.containsValue(InputUtil.fromTranslationKey(keyBinding.boundKeyTranslationKey).code)) {
                 cir.returnValue = false
             }
             return
@@ -44,7 +47,7 @@ object GardenKeybinds {
     fun isKeyPressed(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
         val override = map[keyBinding] ?: run {
-            if (map.containsValue(keyBinding.keycode)) {
+            if (map.containsValue(InputUtil.fromTranslationKey(keyBinding.boundKeyTranslationKey).code)) {
                 cir.returnValue = false
             }
             return
@@ -75,18 +78,33 @@ object GardenKeybinds {
         }
     }
 
+    private fun calculateDuplicates() {
+        isDuplicated = map.values
+            .filter { it != GLFW.GLFW_KEY_UNKNOWN }
+            .let { values -> values.size != values.toSet().size }
+    }
+
     private fun updateSettings() {
         with(config) {
             with(mcKeybinds) {
                 map = buildMap {
-                    fun add(keyBinding: KeyBinding, property: Property<Int>) {
-                        put(keyBinding, property.get())
+                    fun add(keyBinding: KeyBinding, property: Property<Int?>) {
+                        put(keyBinding, property.get() ?: GLFW.GLFW_KEY_UNKNOWN)
                     }
                     add(attackKey, leftClick)
                     add(useKey, rightClick)
+                    add(forwardKey, moveForwards)
+                    add(leftKey, moveLeft)
+                    add(rightKey, moveRight)
+                    add(backKey, moveBackwards)
+                    add(jumpKey, moveJump)
+                    add(sneakKey, moveSneak)
                 }
             }
         }
+        calculateDuplicates()
+        lastDuplicatedKeybindWarning = SimpleTimeMark.farPast()
+        KeyBinding.unpressAll() // Make sure you have the correct equivalent for Fabric
     }
 
     @JvmStatic

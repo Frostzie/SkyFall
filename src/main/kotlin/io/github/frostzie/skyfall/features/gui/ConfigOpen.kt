@@ -5,6 +5,7 @@ import io.github.frostzie.skyfall.config.gui.ConfigGuiManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.InputUtil
+import org.lwjgl.glfw.GLFW
 
 class ConfigOpen {
     private var keyWasPressed = false
@@ -12,18 +13,26 @@ class ConfigOpen {
     init {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             if (client.currentScreen == null) {
-                val openKey = SkyFall.Companion.feature.gui.openConfigKey
-                if (openKey == -1) return@register
-                val isPressed = InputUtil.isKeyPressed(MinecraftClient.getInstance().window.handle, openKey)
+                val openKey = SkyFall.feature.gui.openConfigKey
+                val window = MinecraftClient.getInstance().window.handle
 
-                if (isPressed && !keyWasPressed) {
-                    val player = client.player
-                    if (player != null) {
-                        ConfigGuiManager.openConfigGui()
+                if (openKey != GLFW.GLFW_KEY_UNKNOWN) {
+                    val isPressed = if (openKey >= GLFW.GLFW_MOUSE_BUTTON_1 && openKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+                        GLFW.glfwGetMouseButton(window, openKey) == GLFW.GLFW_PRESS
+                    } else {
+                        InputUtil.isKeyPressed(window, openKey)
                     }
-                }
 
-                keyWasPressed = isPressed
+                    if (isPressed && !keyWasPressed) {
+                        val player = client.player
+                        if (player != null) {
+                            ConfigGuiManager.openConfigGui()
+                        }
+                    }
+                    keyWasPressed = isPressed
+                } else {
+                    keyWasPressed = false
+                }
             } else {
                 keyWasPressed = false
             }

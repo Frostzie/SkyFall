@@ -22,7 +22,7 @@ class GardenConfig {
     var mouseSensitivity = MouseSensitivityConfig()
 
     @Expose
-    @ConfigOption(name = "Garden Test", desc = "Test if Garden Test is active")
+    @ConfigOption(name = "Garden Check", desc = "Check if in garden") //TODO: Move this to dev category and make check what island
     @ConfigEditorBoolean
     var GardenTest: Boolean = false
 

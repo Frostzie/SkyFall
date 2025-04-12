@@ -1,13 +1,14 @@
 package io.github.frostzie.skyfall.config.features.garden.keybind
 
 import com.google.gson.annotations.Expose
+import io.github.frostzie.skyfall.features.garden.GardenKeybinds.resetAll
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorButton
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import io.github.notenoughupdates.moulconfig.observer.Property
+import kotlinx.coroutines.Runnable
 import org.lwjgl.glfw.GLFW
-import io.github.frostzie.skyfall.features.garden.GardenKeybinds.resetAll
 
 class KeybindConfig {
 
@@ -16,10 +17,11 @@ class KeybindConfig {
     @ConfigEditorBoolean
     var enabled: Boolean = false
 
-    @Expose
-    @ConfigOption(name = "Reset All", desc = "")
-    @ConfigEditorButton(buttonText = "Reset")
-    var presetDefault: Runnable = KeybindConfig::resetAll
+    //TODO: when on, makes all config data not save
+    //@Expose
+    //@ConfigOption(name = "Reset All", desc = "Reset all keybinds to nothing")
+    //@ConfigEditorButton(buttonText = "Reset")
+    //var resetDefault = Runnable { resetAll() }
 
     @Expose
     @ConfigOption(name = "Attack & Break", desc = "")

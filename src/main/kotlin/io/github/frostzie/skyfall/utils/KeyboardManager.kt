@@ -8,17 +8,16 @@ import org.lwjgl.glfw.GLFW
 import net.minecraft.client.util.InputUtil
 
 /**
- * Manages keyboard and mouse input for the mod
+ * Manages keyboard and mouse input
  */
 object KeyboardManager {
 
-    const val LEFT_MOUSE = -100
-    const val RIGHT_MOUSE = -99
-    const val MIDDLE_MOUSE = -98
+    const val LEFT_MOUSE = GLFW.GLFW_MOUSE_BUTTON_LEFT
+    const val RIGHT_MOUSE = GLFW.GLFW_MOUSE_BUTTON_RIGHT
+    const val MIDDLE_MOUSE = GLFW.GLFW_MOUSE_BUTTON_MIDDLE
 
     private var lastClickedMouseButton = -1
 
-    // Store GLFW key constants
     private const val GLFW_KEY_LMETA = GLFW.GLFW_KEY_LEFT_SUPER
     private const val GLFW_KEY_RMETA = GLFW.GLFW_KEY_RIGHT_SUPER
     private const val GLFW_KEY_LMENU = GLFW.GLFW_KEY_LEFT_ALT
@@ -32,12 +31,10 @@ object KeyboardManager {
     private const val GLFW_KEY_C = GLFW.GLFW_KEY_C
     private const val GLFW_KEY_LAST = GLFW.GLFW_KEY_LAST
 
-    // Track key/character events for GLFW
     private var lastEventKey = 0
     private var lastEventChar = '\u0000'
     private var lastEventKeyState = false
 
-    // Need to register these callbacks during initialization
     fun setupKeyboardCallbacks(window: Long) {
         GLFW.glfwSetKeyCallback(window) { _, key, _, action, _ ->
             lastEventKey = key
@@ -76,11 +73,9 @@ object KeyboardManager {
 
     private data class EventKey(val key: Int, val pressed: Boolean)
 
-    // For modern versions, we handle events through GLFW callbacks
     private fun getEventKey(): EventKey {
         val window = MinecraftClient.getInstance().window.handle
 
-        // If there is a keyboard event from our callback tracking
         if (lastEventKey != 0) {
             return when (lastEventKey) {
                 0 -> EventKey(lastEventChar.code + 256, lastEventKeyState)
@@ -99,7 +94,6 @@ object KeyboardManager {
             }
         }
 
-        // Check if previously clicked mouse button is still down
         if (lastClickedMouseButton != -1) {
             val originalButton = lastClickedMouseButton + 100
             if (GLFW.glfwGetMouseButton(window, originalButton) == GLFW.GLFW_PRESS) {
@@ -143,9 +137,6 @@ object KeyboardManager {
         // Example: KeyDownEvent(keyCode).fire()
     }
 
-    /**
-     * Checks if a KeyBinding is currently active
-     */
     /**
      * Checks if a KeyBinding is currently active
      */

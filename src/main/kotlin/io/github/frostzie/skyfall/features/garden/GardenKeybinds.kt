@@ -2,11 +2,10 @@ package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.ChatUtils
-import io.github.frostzie.skyfall.utils.ConditionalUtils
+import io.github.frostzie.skyfall.utils.ConditionalUtils.onToggle
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
-import io.github.notenoughupdates.moulconfig.observer.Property
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.SignEditScreen
@@ -17,22 +16,42 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-//TODO: Check other mods that register their keybinds in the minecraft options
-//TODO: Finish this :skull:
-
 object GardenKeybinds {
 
     private val config get() = SkyFall.feature.garden.keybindConfig
-    private val mcKeybinds get() = MinecraftClient.getInstance().options
 
     private var map: Map<KeyBinding, Int> = emptyMap()
     private var lastWindowOpenTime = SimpleTimeMark.farPast()
     private var lastDuplicatedKeybindWarning = SimpleTimeMark.farPast()
     private var isDuplicated = false
 
-    private fun isEnabled() = config.enabled // Add if on garden // for now just use farming tool detection and later on change that to repo
-    private fun isActive() = isEnabled() && lastWindowOpenTime.passedSince() < 400.milliseconds
+    //TODO: Add detection for tool in hand
+    private val toolInHand: Boolean
+        get() {
+            val item = MinecraftClient.getInstance().player?.mainHandStack?.item
+            // Add your logic to detect if the item is a farming tool
+            return item != null // Replace with proper tool detection
+        }
 
+    // Check if user is in garden
+    private fun inGarden(): Boolean {
+        // Add your logic to detect if the player is in garden
+        return true // Replace with proper garden detection
+    }
+
+    fun init() {
+        ClientTickEvents.END_CLIENT_TICK.register { onClientTick() }
+
+        configLoad()
+    }
+
+    private fun isEnabled() = config.enabled && inGarden() && toolInHand
+    private fun isActive() = isEnabled() && !isDuplicated && !hasGuiOpen() &&
+            lastWindowOpenTime.passedSince() > 300.milliseconds
+
+    private fun hasGuiOpen() = MinecraftClient.getInstance().currentScreen != null
+
+    @JvmStatic
     fun isKeyDown(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
         val override = map[keyBinding] ?: run {
@@ -41,9 +60,16 @@ object GardenKeybinds {
             }
             return
         }
-        cir.returnValue = override.isKeyHeld()
+
+        val window = MinecraftClient.getInstance().window.handle
+        cir.returnValue = if (override >= GLFW.GLFW_MOUSE_BUTTON_1 && override <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+            GLFW.glfwGetMouseButton(window, override) == GLFW.GLFW_PRESS
+        } else {
+            override.isKeyHeld()
+        }
     }
 
+    @JvmStatic
     fun isKeyPressed(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
         val override = map[keyBinding] ?: run {
@@ -52,26 +78,30 @@ object GardenKeybinds {
             }
             return
         }
-        cir.returnValue = override.isKeyClicked()
+
+        val window = MinecraftClient.getInstance().window.handle
+        cir.returnValue = if (override >= GLFW.GLFW_MOUSE_BUTTON_1 && override <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+            GLFW.glfwGetMouseButton(window, override) == GLFW.GLFW_PRESS
+        } else {
+            override.isKeyClicked()
+        }
     }
 
-    fun onTick(event: ClientTickEvents) {
-        if (!isEnabled()) return
-        val screen = MinecraftClient.getInstance().currentScreen ?: return
-        if (screen !is SignEditScreen) return
-        lastWindowOpenTime = SimpleTimeMark.now()
-    }
+    private fun onClientTick() {
+        val screen = MinecraftClient.getInstance().currentScreen
+        if (screen is SignEditScreen) {
+            lastWindowOpenTime = SimpleTimeMark.now()
+        }
 
-    fun passedSecond() {
-        if (isEnabled()) return
-        if (!isDuplicated || lastDuplicatedKeybindWarning.passedSince() < 30.seconds) return
-        ChatUtils.messageToChat("You aren't allowed having multiple keybinds with the same key!")
-        lastDuplicatedKeybindWarning = SimpleTimeMark.now()
+        if (isEnabled() && isDuplicated && lastDuplicatedKeybindWarning.passedSince() > 30.seconds) {
+            ChatUtils.messageToChat("You aren't allowed having multiple keybinds with the same key!")
+            lastDuplicatedKeybindWarning = SimpleTimeMark.now()
+        }
     }
 
     fun configLoad() {
         with(config) {
-            ConditionalUtils.onToggle(leftClick, rightClick, moveForwards, moveRight, moveLeft, moveBackwards, moveJump, moveSneak) {
+            onToggle(leftClick, rightClick, moveForwards, moveRight, moveLeft, moveBackwards, moveJump, moveSneak) {
                 updateSettings()
             }
             updateSettings()
@@ -85,39 +115,45 @@ object GardenKeybinds {
     }
 
     private fun updateSettings() {
+        val minecraft = MinecraftClient.getInstance()
+        val options = minecraft.options
+
+        if (options == null) {
+            return
+        }
+
         with(config) {
-            with(mcKeybinds) {
-                map = buildMap {
-                    fun add(keyBinding: KeyBinding, property: Property<Int?>) {
-                        put(keyBinding, property.get() ?: GLFW.GLFW_KEY_UNKNOWN)
-                    }
-                    add(attackKey, leftClick)
-                    add(useKey, rightClick)
-                    add(forwardKey, moveForwards)
-                    add(leftKey, moveLeft)
-                    add(rightKey, moveRight)
-                    add(backKey, moveBackwards)
-                    add(jumpKey, moveJump)
-                    add(sneakKey, moveSneak)
+            map = buildMap {
+                fun add(keyBinding: KeyBinding, property: io.github.notenoughupdates.moulconfig.observer.Property<Int?>) {
+                    put(keyBinding, property.get() ?: GLFW.GLFW_KEY_UNKNOWN)
                 }
+                add(options.attackKey, leftClick)
+                add(options.useKey, rightClick)
+                add(options.forwardKey, moveForwards)
+                add(options.leftKey, moveLeft)
+                add(options.rightKey, moveRight)
+                add(options.backKey, moveBackwards)
+                add(options.jumpKey, moveJump)
+                add(options.sneakKey, moveSneak)
             }
         }
+
         calculateDuplicates()
         lastDuplicatedKeybindWarning = SimpleTimeMark.farPast()
-        KeyBinding.unpressAll() // Make sure you have the correct equivalent for Fabric
+        KeyBinding.unpressAll()
     }
 
     @JvmStatic
     fun resetAll() {
         with(config) {
-            leftClick.set(GLFW.GLFW_KEY_UNKNOWN)
-            rightClick.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveForwards.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveLeft.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveRight.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveBackwards.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveJump.set(GLFW.GLFW_KEY_UNKNOWN)
-            moveSneak.set(GLFW.GLFW_KEY_UNKNOWN)
+            leftClick.set(GLFW.GLFW_MOUSE_BUTTON_LEFT)
+            rightClick.set(GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+            moveForwards.set(GLFW.GLFW_KEY_W)
+            moveLeft.set(GLFW.GLFW_KEY_A)
+            moveRight.set(GLFW.GLFW_KEY_D)
+            moveBackwards.set(GLFW.GLFW_KEY_S)
+            moveJump.set(GLFW.GLFW_KEY_SPACE)
+            moveSneak.set(GLFW.GLFW_KEY_LEFT_SHIFT)
         }
     }
 }

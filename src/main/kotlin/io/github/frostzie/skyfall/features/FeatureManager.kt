@@ -25,7 +25,7 @@ object FeatureManager {
         StorageMenuKeybind()
 
         // Garden Features
-        GardenKeybinds
+        GardenKeybinds.init()
 
         // WIP features, might be removed or changed completely
         test()

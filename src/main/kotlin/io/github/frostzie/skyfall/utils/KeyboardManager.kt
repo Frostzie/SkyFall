@@ -126,15 +126,11 @@ object KeyboardManager {
         } else clickedKeys.remove(key)
     }
 
-    // Event handling - implement these with your mod's event system
+    // Event handling - implement this
     private fun fireKeyPressEvent(keyCode: Int) {
-        // Replace with your mod's event system
-        // Example: KeyPressEvent(keyCode).fire()
     }
 
     private fun fireKeyDownEvent(keyCode: Int) {
-        // Replace with your mod's event system
-        // Example: KeyDownEvent(keyCode).fire()
     }
 
     /**

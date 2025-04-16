@@ -21,5 +21,4 @@ class MiscFeatures {
     @ConfigOption(name = "Render Triangle", desc = "Enable rendering of a triangle on the screen")
     @ConfigEditorBoolean
     var renderTriangle: Boolean = false
-
 }

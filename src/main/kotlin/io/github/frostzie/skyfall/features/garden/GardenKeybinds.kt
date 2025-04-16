@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.SignEditScreen
 import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,23 +19,21 @@ object GardenKeybinds {
 
     private val config get() = SkyFall.feature.garden.keybindConfig
 
+    private const val GLFW_KEY_NONE = -1
     private var map: Map<KeyBinding, Int> = emptyMap()
     private var lastWindowOpenTime = SimpleTimeMark.farPast()
     private var lastDuplicatedKeybindWarning = SimpleTimeMark.farPast()
     private var isDuplicated = false
 
-    //TODO: Add detection for tool in hand
+    //TODO: Add detection for tool in hand and if in garden
     private val toolInHand: Boolean
         get() {
             val item = MinecraftClient.getInstance().player?.mainHandStack?.item
-            // Add your logic to detect if the item is a farming tool
-            return item != null // Replace with proper tool detection
+            return item != null
         }
 
-    // Check if user is in garden
     private fun inGarden(): Boolean {
-        // Add your logic to detect if the player is in garden
-        return true // Replace with proper garden detection
+        return true
     }
 
     fun init() {
@@ -54,10 +51,9 @@ object GardenKeybinds {
     @JvmStatic
     fun isKeyDown(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
-        val override = map[keyBinding] ?: run {
-            if (map.containsValue(InputUtil.fromTranslationKey(keyBinding.boundKeyTranslationKey).code)) {
-                cir.returnValue = false
-            }
+        val override = map[keyBinding] ?: GLFW_KEY_NONE
+        if (override == GLFW_KEY_NONE) {
+            cir.returnValue = false
             return
         }
 
@@ -72,10 +68,9 @@ object GardenKeybinds {
     @JvmStatic
     fun isKeyPressed(keyBinding: KeyBinding, cir: CallbackInfoReturnable<Boolean>) {
         if (!isActive()) return
-        val override = map[keyBinding] ?: run {
-            if (map.containsValue(InputUtil.fromTranslationKey(keyBinding.boundKeyTranslationKey).code)) {
-                cir.returnValue = false
-            }
+        val override = map[keyBinding] ?: GLFW_KEY_NONE
+        if (override == GLFW_KEY_NONE) {
+            cir.returnValue = false
             return
         }
 
@@ -94,17 +89,36 @@ object GardenKeybinds {
         }
 
         if (isEnabled() && isDuplicated && lastDuplicatedKeybindWarning.passedSince() > 30.seconds) {
-            ChatUtils.messageToChat("You aren't allowed having multiple keybinds with the same key!")
+            ChatUtils.messageToChat("§3§lSkyFall§r §8» §eYou aren't allowed having multiple keybinds with the same key!")
             lastDuplicatedKeybindWarning = SimpleTimeMark.now()
         }
     }
 
     fun configLoad() {
         with(config) {
+            processClickKeys()
             onToggle(leftClick, rightClick, moveForwards, moveRight, moveLeft, moveBackwards, moveJump, moveSneak) {
                 updateSettings()
             }
             updateSettings()
+        }
+    }
+
+    private fun processClickKeys() {
+        with(config) {
+            leftClick.get()?.let { key ->
+                if (key >= GLFW.GLFW_MOUSE_BUTTON_1 && key <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+                    ChatUtils.messageToChat("§3§lSkyFall§r §8» §eMouse keys are not allowed!")
+                    leftClick.set(GLFW_KEY_NONE)
+                }
+            }
+
+            rightClick.get()?.let { key ->
+                if (key >= GLFW.GLFW_MOUSE_BUTTON_1 && key <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+                    ChatUtils.messageToChat("§3§lSkyFall§r §8» §eMouse keys are not allowed!")
+                    rightClick.set(GLFW_KEY_NONE)
+                }
+            }
         }
     }
 
@@ -121,6 +135,7 @@ object GardenKeybinds {
         if (options == null) {
             return
         }
+        processClickKeys()
 
         with(config) {
             map = buildMap {
@@ -146,14 +161,14 @@ object GardenKeybinds {
     @JvmStatic
     fun resetAll() {
         with(config) {
-            leftClick.set(GLFW.GLFW_MOUSE_BUTTON_LEFT)
-            rightClick.set(GLFW.GLFW_MOUSE_BUTTON_RIGHT)
-            moveForwards.set(GLFW.GLFW_KEY_W)
-            moveLeft.set(GLFW.GLFW_KEY_A)
-            moveRight.set(GLFW.GLFW_KEY_D)
-            moveBackwards.set(GLFW.GLFW_KEY_S)
-            moveJump.set(GLFW.GLFW_KEY_SPACE)
-            moveSneak.set(GLFW.GLFW_KEY_LEFT_SHIFT)
+            leftClick.set(GLFW_KEY_NONE)
+            rightClick.set(GLFW_KEY_NONE)
+            moveForwards.set(GLFW.GLFW_KEY_UNKNOWN)
+            moveLeft.set(GLFW.GLFW_KEY_UNKNOWN)
+            moveRight.set(GLFW.GLFW_KEY_UNKNOWN)
+            moveBackwards.set(GLFW.GLFW_KEY_UNKNOWN)
+            moveJump.set(GLFW.GLFW_KEY_UNKNOWN)
+            moveSneak.set(GLFW.GLFW_KEY_UNKNOWN)
         }
     }
 }

@@ -19,10 +19,10 @@ object Test {
 
             val buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR)
 
-            buffer.vertex(transformationMatrix, 20f, 20f, 5f).color(-0xbebebf)
+            buffer.vertex(transformationMatrix, 20f, 20f, 5f).color(-0xbf0011)
             buffer.vertex(transformationMatrix, 5f, 40f, 5f).color(-0x1000000)
             buffer.vertex(transformationMatrix, 35f, 40f, 5f).color(-0x1000000)
-            buffer.vertex(transformationMatrix, 20f, 60f, 5f).color(-0xbebebf)
+            buffer.vertex(transformationMatrix, 20f, 60f, 5f).color(-0x00bf05)
 
             RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR)
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)

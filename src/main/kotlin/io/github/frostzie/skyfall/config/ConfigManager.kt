@@ -2,6 +2,7 @@ package io.github.frostzie.skyfall.config
 
 import com.google.gson.GsonBuilder
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.config.features.dev.DevConfig
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 
 import io.github.notenoughupdates.moulconfig.observer.PropertyTypeAdapterFactory
@@ -75,7 +76,7 @@ object ConfigManager {
         fixedRateTimer(name = "skyfall-config-auto-save", period = 60_000L, initialDelay = 60_000L) {
             try {
                 saveConfig("auto-save-60s")
-            } catch (e: Throwable) {
+            } catch (_: Throwable) {
                 println("Error auto-saving config!")
             }
         }
@@ -91,10 +92,15 @@ object ConfigManager {
     }
 
     fun saveConfig(reason: String) {
-        println("saveConfig: $reason")
+        val showSaveMessage = features.dev.enabledDevMode && features.dev.showSaveConfigMessages
+        if (showSaveMessage) {
+            println("saveConfig: $reason")
+        }
         val file = configFile ?: throw Error("Can't save config, configFile is null")
         try {
-            println("Saving config file")
+            if (showSaveMessage) {
+                println("Saving config file")
+            }
             file.parentFile.mkdirs()
             val unit = file.parentFile.resolve("config.json.write")
             unit.createNewFile()

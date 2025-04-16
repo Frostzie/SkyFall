@@ -4,9 +4,6 @@ import io.github.frostzie.skyfall.commands.CommandManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.features.FeatureManager
-import io.github.frostzie.skyfall.features.dungeon.RequeueKey
-import io.github.frostzie.skyfall.features.gui.ConfigOpen
-import io.github.frostzie.skyfall.features.misc.ExampleFeature
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screen.Screen
@@ -25,10 +22,8 @@ class SkyFall : ModInitializer {
 			configManager.saveConfig("shutdown-hook")
 		})
 
-		CommandManager.loadCommands()
+		CommandManager.loadCommands() //TODO: Rework this
 		FeatureManager.loadFeatures()
-
-		ConfigOpen()
 	}
 
 	fun registerTickEvent() {

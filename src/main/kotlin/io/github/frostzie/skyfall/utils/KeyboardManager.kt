@@ -1,6 +1,5 @@
 package io.github.frostzie.skyfall.utils
 
-import io.github.frostzie.skyfall.events.EventBus
 import io.github.frostzie.skyfall.events.KeyDownEvent
 import io.github.frostzie.skyfall.events.KeyPressEvent
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents

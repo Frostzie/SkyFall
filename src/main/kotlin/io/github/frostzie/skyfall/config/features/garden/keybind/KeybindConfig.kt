@@ -7,7 +7,6 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorButton
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import io.github.notenoughupdates.moulconfig.observer.Property
-import kotlinx.coroutines.Runnable
 import org.lwjgl.glfw.GLFW
 
 class KeybindConfig {

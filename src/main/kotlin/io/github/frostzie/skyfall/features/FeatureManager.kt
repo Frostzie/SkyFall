@@ -3,16 +3,10 @@ package io.github.frostzie.skyfall.features
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
 import io.github.frostzie.skyfall.features.garden.GardenKeybinds
 import io.github.frostzie.skyfall.features.gui.ConfigOpen
-//import io.github.frostzie.skyfall.features.garden.MouseSensitivity
 import io.github.frostzie.skyfall.features.misc.EntityHighlightFeature
 import io.github.frostzie.skyfall.features.misc.ExampleFeature
 import io.github.frostzie.skyfall.features.misc.Test.test
-import io.github.frostzie.skyfall.features.misc.keybind.EquipmentMenuKeybind
-import io.github.frostzie.skyfall.features.misc.keybind.PetsMenuKeybind
-import io.github.frostzie.skyfall.features.misc.keybind.PotionBagKeybind
-import io.github.frostzie.skyfall.features.misc.keybind.StorageMenuKeybind
-import io.github.frostzie.skyfall.features.misc.keybind.TradeMenuKeybind
-import io.github.frostzie.skyfall.features.misc.keybind.WardrobeMenuKeybind
+import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
 
 object FeatureManager {
     fun loadFeatures() {
@@ -23,22 +17,13 @@ object FeatureManager {
         RequeueKey()
 
         // Misc Features
-        PetsMenuKeybind()
-        WardrobeMenuKeybind()
-        TradeMenuKeybind()
-        PotionBagKeybind()
-        EquipmentMenuKeybind()
-        StorageMenuKeybind()
+        MiscKeybindManager()
 
         // Garden Features
         GardenKeybinds.init()
         //MouseSensitivity
 
         // Dev Features
-        //loadDevFeatures()
-        fun loadDevFeatures() {
-
-        }
 
         // WIP features, might be removed or changed completely
         test()

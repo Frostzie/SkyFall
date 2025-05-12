@@ -1,13 +1,16 @@
 package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.data.FarmingToolTypes
+import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ConditionalUtils.onToggle
-import io.github.frostzie.skyfall.utils.KeyboardManager
+import io.github.frostzie.skyfall.utils.IslandManager
 import io.github.frostzie.skyfall.utils.KeyboardManager.KEY_NONE
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
+import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.notenoughupdates.moulconfig.observer.Property
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
@@ -20,6 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 
 object GardenKeybinds {
 
+    private val keybinds get() = SkyFall.feature.garden.keybindConfig.customGardenKeybinds
     private val config get() = SkyFall.feature.garden.keybindConfig
 
     private var map: Map<KeyBinding, Int> = emptyMap()
@@ -28,24 +32,40 @@ object GardenKeybinds {
     private var isDuplicated = false
     private var alreadyWarnedMouseKeys = mutableSetOf<Property<Int?>>()
 
-    //TODO: Add detection for tool in hand and if in garden
+    private var wasInGarden = false
+    private var wasHoldingTool = false
+
+    /**
+     * Checks if the player is currently on the Garden island.
+     */
+    private val inGarden: Boolean
+        get() = IslandManager.isOnIsland(IslandType.GARDEN)
+
+    /**
+     * Checks if the player is currently holding any farming tool.
+     */
     private val toolInHand: Boolean
         get() {
-            val item = MinecraftClient.getInstance().player?.mainHandStack?.item
-            return item != null
+            val player = MinecraftClient.getInstance().player ?: return false
+            val heldItem = player.mainHandStack
+            val skyblockId = ItemUtils.getSkyblockId(heldItem) ?: return false
+            return FarmingToolTypes.getToolType(skyblockId) != null
         }
-
-    private fun inGarden(): Boolean {
-        return true
-    }
 
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register { onClientTick() }
-
         configLoad()
+
+        IslandManager.registerIslandChangeListener(object : io.github.frostzie.skyfall.utils.events.IslandChangeListener {
+            override fun onIslandChange(event: io.github.frostzie.skyfall.utils.events.IslandChangeEvent) {
+                if (event.newIsland == IslandType.GARDEN) {
+                    updateSettings()
+                }
+            }
+        })
     }
 
-    private fun isEnabled() = config.enabled && inGarden() && toolInHand
+    private fun isEnabled() = config.enabled && inGarden && toolInHand
     private fun isActive() = isEnabled() && !isDuplicated && !hasGuiOpen() &&
             lastWindowOpenTime.passedSince() > 300.milliseconds
 
@@ -99,10 +119,18 @@ object GardenKeybinds {
             ChatUtils.messageToChat("§3§lSkyFall§r §8» §eYou aren't allowed having multiple keybinds with the same key!")
             lastKeybindWarning = SimpleTimeMark.now()
         }
+        val currentlyInGarden = inGarden
+        val currentlyHoldingTool = toolInHand
+
+        if ((currentlyInGarden && !wasInGarden) || (currentlyHoldingTool && !wasHoldingTool)) {
+            updateSettings()
+        }
+        wasInGarden = currentlyInGarden
+        wasHoldingTool = currentlyHoldingTool
     }
 
     fun configLoad() {
-        with(config) {
+        with(keybinds) {
             processAllKeybinds()
             onToggle(leftClick, rightClick, moveForwards, moveRight, moveLeft, moveBackwards, moveJump, moveSneak) {
                 updateSettings()
@@ -112,7 +140,7 @@ object GardenKeybinds {
     }
 
     private fun processAllKeybinds() {
-        with(config) {
+        with(keybinds) {
             val allKeybinds = listOf(
                 leftClick, rightClick, moveForwards, moveLeft, moveRight, moveBackwards, moveJump, moveSneak
             )
@@ -150,7 +178,7 @@ object GardenKeybinds {
         }
         processAllKeybinds()
 
-        with(config) {
+        with(keybinds) {
             map = buildMap {
                 fun add(keyBinding: KeyBinding, property: Property<Int?>) {
                     put(keyBinding, property.get() ?: KEY_NONE)
@@ -171,9 +199,9 @@ object GardenKeybinds {
         KeyBinding.unpressAll()
     }
 
-    @JvmStatic
+    //TODO: add this with mouse button support
     fun resetAll() {
-        with(config) {
+        with(keybinds) {
             leftClick.set(KEY_NONE)
             rightClick.set(KEY_NONE)
             moveForwards.set(KEY_NONE)
@@ -182,6 +210,23 @@ object GardenKeybinds {
             moveBackwards.set(KEY_NONE)
             moveJump.set(KEY_NONE)
             moveSneak.set(KEY_NONE)
+        }
+    }
+
+    private var lastHomeCommandTime = SimpleTimeMark.farPast()
+
+    fun homeHotkey() {
+        ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (isEnabled()) {
+                val homeKey = config.homeHotkey.get()
+                if (homeKey != KEY_NONE && homeKey?.isKeyClicked() == true && lastHomeCommandTime.passedSince() >= 500.milliseconds) {
+                    val player = client.player
+                    if (player != null && inGarden) {
+                        player.networkHandler.sendChatCommand("warp garden")
+                        lastHomeCommandTime = SimpleTimeMark.now()
+                    }
+                }
+            }
         }
     }
 }

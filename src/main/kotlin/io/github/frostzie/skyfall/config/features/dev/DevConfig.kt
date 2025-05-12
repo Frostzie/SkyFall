@@ -14,5 +14,4 @@ class DevConfig {
     @ConfigOption(name = "Config Save", desc = "Show config save messages in console")
     @ConfigEditorBoolean
     var showSaveConfigMessages: Boolean = false
-
 }

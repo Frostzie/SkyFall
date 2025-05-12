@@ -1,8 +1,9 @@
 plugins {
-    id("fabric-loom") version "1.9-SNAPSHOT"
-    id("maven-publish")
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    java
+    `maven-publish`
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.fabric.loom)
 }
 
 version = project.findProperty("mod_version") as String
@@ -12,32 +13,27 @@ base {
     archivesName.set(project.findProperty("archives_base_name") as String)
 }
 
-val shadowModImpl by configurations.creating {
-    configurations.modImplementation.get().extendsFrom(this)
-}
-
 repositories {
     mavenLocal()
     maven("https://maven.notenoughupdates.org/releases/")
-    maven( "https://maven.fabricmc.net/")
+    maven("https://maven.fabricmc.net/")
     maven("https://maven.terraformersmc.com/releases/")
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     mavenCentral()
 }
 
 dependencies {
-    "minecraft"("com.mojang:minecraft:${project.findProperty("minecraft_version")}")
+    "minecraft"(libs.minecraft)
     "mappings"("net.fabricmc:yarn:${project.findProperty("yarn_mappings")}:v2")
-    "modImplementation"("net.fabricmc:fabric-loader:${project.findProperty("loader_version")}")
-    "modImplementation"("net.fabricmc.fabric-api:fabric-api:${project.findProperty("fabric_version")}")
-    "modImplementation"("net.fabricmc:fabric-language-kotlin:1.13.0+kotlin.2.1.0")
-    implementation("com.google.code.gson:gson:2.11.0")
-    modImplementation("com.terraformersmc:modmenu:13.0.3")
-    "shadowModImpl"("org.notenoughupdates.moulconfig:modern-1.21.4:3.6.0")
-}
-
-tasks.shadowJar {
-    configurations = listOf(shadowModImpl)
-    relocate("io.github.notenoughupdates.moulconfig", "io.github.frostzie.skyfall.deps.moulconfig")
+    modCompileOnly(libs.fabric.api)
+    implementation(libs.gson)
+    modImplementation(libs.modmenu)
+    modImplementation(libs.moulconfig)
+    modImplementation(libs.fabric.loader)
+    modImplementation(libs.fabric.kotlin)
+    modImplementation(libs.fabric.api)
+    modRuntimeOnly(libs.devauth)
+    include(libs.moulconfig)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -62,7 +58,6 @@ tasks.named<Jar>("jar") {
     }
 }
 
-// configure the maven publication
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {

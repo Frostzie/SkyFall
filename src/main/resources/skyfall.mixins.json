@@ -1,12 +1,16 @@
 {
-	"required": true,
-	"package": "io.github.frostzie.skyfall.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin",
-		"KeyBindingMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "io.github.frostzie.skyfall.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "KeyBindingMixin",
+    "PropertySignatureIgnorePatchForSession",
+    "TabListAccessor",
+    "TextureUnpackBase64PadPatch",
+    "YggdrasilSignatureIgnorePatch"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

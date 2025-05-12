@@ -11,3 +11,8 @@ pluginManagement {
 }
 
 rootProject.name = "SkyFall"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+include("symbols")
+include("javaplugin")
+include("testagent")

@@ -1,9 +1,8 @@
 package io.github.frostzie.skyfall.config.features.garden.keybind
 
 import com.google.gson.annotations.Expose
-import io.github.frostzie.skyfall.features.garden.GardenKeybinds
+import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorButton
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import io.github.notenoughupdates.moulconfig.observer.Property
@@ -16,13 +15,22 @@ class KeybindConfig {
     @ConfigEditorBoolean
     var enabled: Boolean = false
 
-    //TODO: when on, makes all config data not save
-    /*
     @Expose
-    @ConfigOption(name = "Reset All", desc = "Reset all keybinds to default values")
-    @ConfigEditorButton(buttonText = "Reset")
-    var resetDefault = Runnable { GardenKeybinds.resetAll() }
-    */
+    @ConfigOption(name = "Home Hotkey", desc = "Press this to teleport yourself to your /sethome location. §cOnly works in the Garden!")
+    @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
+    var homeHotkey: Property<Int?> = Property.of<Int?>(GLFW.GLFW_KEY_UNKNOWN)
+
+    //@Expose //TODO: fix this resetting all keybinds after game restart
+    //@ConfigOption(name = "Reset All", desc = "Reset all keybinds to default values")
+    //@ConfigEditorButton(buttonText = "Reset")
+    //var resetDefault = Runnable { GardenKeybinds.resetAll() }
+
+    @Expose
+    @Accordion
+    @ConfigOption(name = "Keybinds", desc = "")
+    var customGardenKeybinds: CustomGardenKeybinds = CustomGardenKeybinds()
+
+    class CustomGardenKeybinds {
     @Expose
     @ConfigOption(name = "Attack & Break", desc = "")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
@@ -62,4 +70,5 @@ class KeybindConfig {
     @ConfigOption(name = "Sneak", desc = "")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
     var moveSneak: Property<Int?> = Property.of<Int?>(GLFW.GLFW_KEY_UNKNOWN)
+    }
 }

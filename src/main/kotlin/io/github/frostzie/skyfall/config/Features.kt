@@ -6,7 +6,7 @@ import io.github.frostzie.skyfall.config.features.dev.DevConfig
 import io.github.frostzie.skyfall.config.features.dungeon.DungeonConfig
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.config.features.gui.GuiConfig
-import io.github.frostzie.skyfall.config.features.misc.MiscFeatures
+import io.github.frostzie.skyfall.config.features.misc.MiscConfig
 import io.github.notenoughupdates.moulconfig.Config
 import io.github.notenoughupdates.moulconfig.Social
 import io.github.notenoughupdates.moulconfig.annotations.Category
@@ -24,7 +24,7 @@ open class Features : Config() {
     private val github = MyResourceLocation("skyfall", "social/github.png")
     private val patreon = MyResourceLocation("skyfall", "social/patreon.png")
 
-        override fun getSocials(): List<Social?>? {
+    override fun getSocials(): List<Social?>? {
         return listOf(
             Social.forLink("Discord", discord, "https://discord.gg/qZ885qTvkx"),
             Social.forLink("GitHub", github, "https://github.com/Frostzie/SkyFall"),
@@ -37,7 +37,6 @@ open class Features : Config() {
     @Category(name = "Gui", desc = "Gui Settings")
     var gui: GuiConfig = GuiConfig()
 
-    @JvmField
     @Expose
     @Category(name = "Chat", desc = "Chat related features")
     var chat: ChatConfig = ChatConfig()
@@ -52,7 +51,7 @@ open class Features : Config() {
 
     @Expose
     @Category(name = "Misc", desc = "Miscellaneous features")
-    var miscFeatures: MiscFeatures = MiscFeatures()
+    var miscFeatures: MiscConfig = MiscConfig()
 
     @Expose
     @Category(name = "Dev", desc = "Developer features")

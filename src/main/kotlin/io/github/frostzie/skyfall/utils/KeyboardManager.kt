@@ -9,6 +9,7 @@ import net.minecraft.client.option.KeyBinding
 import org.apache.commons.lang3.SystemUtils
 import org.lwjgl.glfw.GLFW
 import net.minecraft.client.util.InputUtil
+import kotlin.math.abs
 
 /**
  * Manages keyboard and mouse input
@@ -192,9 +193,8 @@ object KeyboardManager {
         if (minecraft?.window == null) return false
 
         if (this < 0) {
-            // Mouse button
-            val button = Math.abs(this + 100)
-            if (button < 0 || button >= MAX_MOUSE_BUTTON) return false
+            val button = abs(this + 100)
+            if (button >= MAX_MOUSE_BUTTON) return false
 
             return try {
                 mouseButtonStates[button] ||

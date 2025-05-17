@@ -5,6 +5,7 @@ import io.github.frostzie.skyfall.features.garden.GardenKeybinds
 import io.github.frostzie.skyfall.features.gui.ConfigOpen
 import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
 import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
+import io.github.frostzie.skyfall.features.garden.MouseSensitivity
 
 object FeatureManager {
     fun loadFeatures() {
@@ -21,6 +22,7 @@ object FeatureManager {
         // Garden Features
         GardenKeybinds.init()
         GardenKeybinds.homeHotkey()
+        MouseSensitivity.init()
         //MouseSensitivity
 
         // Dev Features

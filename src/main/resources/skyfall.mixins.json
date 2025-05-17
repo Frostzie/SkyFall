@@ -5,10 +5,12 @@
   "mixins": [],
   "client": [
     "KeyBindingMixin",
+    "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",
     "TabListAccessor",
     "TextureUnpackBase64PadPatch",
-    "YggdrasilSignatureIgnorePatch"
+    "YggdrasilSignatureIgnorePatch",
+    "accessor.MouseAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

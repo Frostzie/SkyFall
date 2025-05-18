@@ -2,6 +2,7 @@ package io.github.frostzie.skyfall.features.misc.funny
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
+import io.github.frostzie.skyfall.utils.item.ItemUtils
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
 import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
@@ -10,8 +11,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.util.Identifier
 import io.github.frostzie.skyfall.utils.item.SkyBlockItemData
-
-//TODO: Add a check if it's spaceman helmet and not just a glass block
 
 object RealisticSpacemanHelmet {
     private val config get() = SkyFall.feature.miscFeatures.funny.spacemanHelmetConfig
@@ -49,26 +48,28 @@ object RealisticSpacemanHelmet {
 
         if (onHead.isEmpty) return null
 
-        val glassColors = mapOf(
-            "minecraft:red_stained_glass" to COLORS[0],
-            "minecraft:orange_stained_glass" to COLORS[1],
-            "minecraft:yellow_stained_glass" to COLORS[2],
-            "minecraft:lime_stained_glass" to COLORS[3],
-            "minecraft:green_stained_glass" to COLORS[4],
-            "minecraft:cyan_stained_glass" to COLORS[5],
-            "minecraft:light_blue_stained_glass" to COLORS[6],
-            "minecraft:blue_stained_glass" to COLORS[7],
-            "minecraft:purple_stained_glass" to COLORS[8],
-            "minecraft:pink_stained_glass" to COLORS[9]
-        )
+        val skyblockId = ItemUtils.getSkyblockId(onHead)
+        if (skyblockId == "DCTR_SPACE_HELM") {
+            val glassColors = mapOf(
+                "minecraft:red_stained_glass" to COLORS[0],
+                "minecraft:orange_stained_glass" to COLORS[1],
+                "minecraft:yellow_stained_glass" to COLORS[2],
+                "minecraft:lime_stained_glass" to COLORS[3],
+                "minecraft:green_stained_glass" to COLORS[4],
+                "minecraft:cyan_stained_glass" to COLORS[5],
+                "minecraft:light_blue_stained_glass" to COLORS[6],
+                "minecraft:blue_stained_glass" to COLORS[7],
+                "minecraft:purple_stained_glass" to COLORS[8],
+                "minecraft:pink_stained_glass" to COLORS[9]
+            )
 
-        for ((itemId, texture) in glassColors) {
-            if (SkyBlockItemData.isItem(onHead, itemId)) {
-                return texture
+            for ((itemId, texture) in glassColors) {
+                if (SkyBlockItemData.isItem(onHead, itemId)) {
+                    return texture
+                }
             }
         }
-
-        return COLORS[0]
+        return null
     }
 
     private fun renderOverlay(context: DrawContext) {

@@ -30,7 +30,7 @@ class RequeueKey {
                         val player = client.player
                         if (player != null) {
                             player.networkHandler.sendChatCommand("instancerequeue")
-                            ChatUtils.messageToChat("§aRequeueing")
+                            ChatUtils.messageToChat("§aRequeueing").send()
                             lastCommandTime = SimpleTimeMark.now()
                         }
                     }

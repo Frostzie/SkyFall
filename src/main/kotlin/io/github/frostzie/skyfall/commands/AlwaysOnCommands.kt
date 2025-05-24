@@ -37,7 +37,7 @@ object AlwaysOnCommands {
                             "§f&o = §oItalic            §f&n = §nUnderline\n" +
                             "§f&r = Reset\n" +
                     "§c==================================================="
-                )
+                ).send()
                 1
             })
         }
@@ -52,7 +52,40 @@ object AlwaysOnCommands {
                             "§f/sfcolor - Display the color codes\n" +
                             "§f/sfhelp - Display this help message\n" +
                     "§9---------------------------------------------------"
+                ).send()
+                1
+            })
+        }
+    }
+
+    fun sfcommandtest() {
+
+        Command.register { dispatcher, _ ->
+            dispatcher.register(literal("sfcommandtest").executes { context ->
+
+                println("Executing /sfcommandtest for player: ${context.source.player}")
+
+                ChatUtils.messageToChat("This is an info message example.")
+
+                ChatUtils.warning("This is a warning message example. Be aware!")
+
+                ChatUtils.error("This is an error message. Click me to copy this text.")
+
+                ChatUtils.error(
+                    errorMessage = "Another error. Click to copy '/skyfall help errors'.",
+                    copyableText = "/skyfall help errors"
                 )
+
+                ChatUtils.messageToChat("All test messages have been sent successfully!")
+
+                ChatUtils.messageToChat("Click me to copy!")
+                    .copyContent("This is the text to copy")
+                    .send()
+
+                ChatUtils.messageToChat("Click me to run a command!")
+                    .clickToRun("/help")
+                    .send()
+
                 1
             })
         }

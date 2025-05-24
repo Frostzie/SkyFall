@@ -24,7 +24,7 @@ class SkyFall : ModInitializer {
 		})
 
 		IslandManager.init()
-		CommandManager.loadCommands() //TODO: Rework this
+		CommandManager.loadCommands()
 		FeatureManager.loadFeatures()
 	}
 

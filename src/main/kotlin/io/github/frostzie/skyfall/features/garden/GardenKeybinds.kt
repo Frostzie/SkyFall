@@ -21,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+//TODO: rework once MoulConfig adds KeyBinding wrapper
+
 object GardenKeybinds {
 
     private val keybinds get() = SkyFall.feature.garden.keybindConfig.customGardenKeybinds
@@ -116,7 +118,7 @@ object GardenKeybinds {
         }
 
         if (isEnabled() && isDuplicated && lastKeybindWarning.passedSince() > 30.seconds) {
-            ChatUtils.messageToChat("§3§lSkyFall§r §8» §eYou aren't allowed having multiple keybinds with the same key!")
+            ChatUtils.messageToChat("§eYou aren't allowed having multiple keybinds with the same key!").send()
             lastKeybindWarning = SimpleTimeMark.now()
         }
         val currentlyInGarden = inGarden
@@ -155,7 +157,7 @@ object GardenKeybinds {
         property.get()?.let { key ->
             if (key >= GLFW.GLFW_MOUSE_BUTTON_1 && key <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
                 if (!alreadyWarnedMouseKeys.contains(property)) {
-                    ChatUtils.messageToChat("§3§lSkyFall§r §8» §eMouse buttons are not allowed for keybinds!")
+                    ChatUtils.messageToChat("§eMouse buttons are not allowed for keybinds!").send()
                     alreadyWarnedMouseKeys.add(property)
                 }
                 property.set(KEY_NONE)

@@ -52,19 +52,19 @@ object MouseSensitivity {
                 if (isToggleCurrentlyPressed && !wasToggleKeyPressedLastTick && client.currentScreen == null) {
                     if (isLockActive) {
                         isLockActive = false
-                        ChatUtils.messageToChat("§3§lSkyFall§r §8» §rMouse Lock §cDisabled")
+                        ChatUtils.messageToChat("Mouse Lock §cDisabled").send()
                     } else if (conditionsMet) {
                         isLockActive = true
-                        ChatUtils.messageToChat("§3§lSkyFall§r §8» §rMouse Lock §aEnabled")
+                        ChatUtils.messageToChat("Mouse Lock §aEnabled").send()
                     } else {
-                        ChatUtils.messageToChat("§3§lSkyFall§r §8» §rMouse Lock can only be enabled on the Garden island.")
+                        ChatUtils.messageToChat("§eMouse Lock can only be enabled on the Garden island.").send()
                     }
                 }
                 wasToggleKeyPressedLastTick = isToggleCurrentlyPressed
             } else {
                 if (isLockActive) {
                     isLockActive = false
-                    ChatUtils.messageToChat("§3§lSkyFall§r §8» §rMouse Lock §cDisabled (key unassigned)")
+                    ChatUtils.messageToChat("Mouse Lock §cDisabled §r(key unassigned)").send()
                 }
                 wasToggleKeyPressedLastTick = false
             }

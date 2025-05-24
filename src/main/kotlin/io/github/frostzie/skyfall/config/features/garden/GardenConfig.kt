@@ -27,7 +27,7 @@ class GardenConfig {
         var mouseSensitivity = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
-        @ConfigOption(name = "Om Garden", desc = "Only works on the garden island")
+        @ConfigOption(name = "On Garden", desc = "Only works on the garden island")
         @ConfigEditorBoolean
         var onGarden = true
     }

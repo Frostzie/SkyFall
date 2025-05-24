@@ -1,10 +1,91 @@
 package io.github.frostzie.skyfall.utils
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.text.ClickEvent
+import net.minecraft.text.HoverEvent
+import net.minecraft.text.MutableText
+import net.minecraft.text.Style
 import net.minecraft.text.Text
+import net.minecraft.text.TextColor
 
 object ChatUtils {
-    fun messageToChat(message: String) {
-        MinecraftClient.getInstance().player?.sendMessage(Text.of(message), false)
+
+    private fun skyFallPrefix(): MutableText {
+        val text = "SkyFall"
+        val colors = listOf(
+            0x00D0DD, // S
+            0x00BFD8, // k
+            0x00AED2, // y
+            0x009DCD, // F
+            0x008CC7, // a
+            0x007BC2, // l
+            0x006ABC  // l
+        )
+        val result = Text.empty()
+        for (i in text.indices) {
+            result.append(
+                Text.literal(text[i].toString())
+                    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(colors[i])))
+            )
+        }
+        return result
+    }
+
+    private val CHAT_PREFIX_STRING: MutableText = skyFallPrefix()
+        .append(Text.literal(" §l§8» ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF))))
+
+    fun messageToChat(message: String, style: Style = Style.EMPTY) {
+        val styledMessage = Text.literal(message).setStyle(style)
+        val fullMessage = Text.empty()
+            .append(CHAT_PREFIX_STRING)
+            .append(styledMessage)
+        MinecraftClient.getInstance().player?.sendMessage(fullMessage, false)
+    }
+
+    fun messageToChat(message: String): MessageBuilder {
+        return MessageBuilder(message)
+    }
+
+    fun warning(warningMessage: String) {
+        val styledMessage = Text.literal(warningMessage)
+            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFFF00))) // Yellow
+        val fullMessage = Text.empty()
+            .append(CHAT_PREFIX_STRING)
+            .append(styledMessage)
+        MinecraftClient.getInstance().player?.sendMessage(fullMessage, false)
+    }
+
+    fun error(errorMessage: String, copyableText: String = errorMessage) {
+        val styledMessage = Text.literal(errorMessage)
+            .setStyle(
+                Style.EMPTY.withColor(TextColor.fromRgb(0xFF5555)) // Light Red
+                    .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyableText))
+                    .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to copy error message")))
+            )
+        val fullMessage = Text.empty()
+            .append(CHAT_PREFIX_STRING)
+            .append(Text.literal("§l[Error]§r ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFF5555))))
+            .append(styledMessage)
+        MinecraftClient.getInstance().player?.sendMessage(fullMessage, false)
+    }
+
+    class MessageBuilder(private val message: String) {
+        private var style: Style = Style.EMPTY
+
+        fun copyContent(copyText: String): MessageBuilder {
+            style = style.withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText))
+                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to copy")))
+            return this
+        }
+
+        fun clickToRun(command: String): MessageBuilder {
+            style = style.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to run:§a\n$command")))
+            return this
+        }
+
+        fun send() {
+            messageToChat(message, style)
+        }
     }
 }

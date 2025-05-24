@@ -13,10 +13,9 @@ import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.common.MyResourceLocation
 
 open class Features : Config() {
-    //TODO: add version change support and better color for title
+    //TODO: add version change support and color gradient title
     override fun getTitle(): String {
-        return "SkyFall§r by §bFrostzie§r, config by §5Moulberry §rand §5nea89"
-
+        return "§b§lSkyFall§r by §3Frostzie§r, config by §5Moulberry §rand §5nea89"
     }
 
     // TODO: Make socials open directly in the browser

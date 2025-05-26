@@ -23,8 +23,9 @@ repositories {
 }
 
 dependencies {
-    "minecraft"(libs.minecraft)
-    "mappings"("net.fabricmc:yarn:${project.findProperty("yarn_mappings")}:v2")
+    minecraft(libs.minecraft)
+    //"mappings"("net.fabricmc:yarn:${project.findProperty("yarn_mappings")}:v2")
+    mappings(libs.yarn)
     modCompileOnly(libs.fabric.api)
     implementation(libs.gson)
     modImplementation(libs.modmenu)

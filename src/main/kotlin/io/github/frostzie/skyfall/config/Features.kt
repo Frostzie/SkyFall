@@ -12,7 +12,7 @@ import io.github.notenoughupdates.moulconfig.Social
 import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.common.MyResourceLocation
 
-open class Features : Config() {
+class Features : Config() {
     //TODO: add version change support and color gradient title
     override fun getTitle(): String {
         return "§b§lSkyFall§r by §3Frostzie§r, config by §5Moulberry §rand §5nea89"

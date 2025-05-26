@@ -9,6 +9,7 @@ modmenu = "13.0.3"
 moulconfig = "3.7.0"
 gson = "2.11.0"
 devauth = "1.2.1"
+#TODO: Add Jarvis support https://github.com/nea89o/jarvis
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }

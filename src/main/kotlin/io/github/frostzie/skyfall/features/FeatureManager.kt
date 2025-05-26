@@ -6,7 +6,7 @@ import io.github.frostzie.skyfall.features.gui.ConfigOpen
 import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
 import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
 import io.github.frostzie.skyfall.features.garden.MouseSensitivity
-import io.github.frostzie.skyfall.features.wip.test
+import io.github.frostzie.skyfall.features.wip.Test
 
 
 object FeatureManager {
@@ -30,7 +30,7 @@ object FeatureManager {
 
         // WIP features. Might be removed or changed completely
         //IslandCommand.register()
-        //test.initialize()
+        //Test.initialize()
         //ExampleFeature.register()
         //ItemDetectorDemo.register()
     }

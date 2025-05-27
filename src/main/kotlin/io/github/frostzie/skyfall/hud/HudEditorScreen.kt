@@ -1,10 +1,12 @@
 package io.github.frostzie.skyfall.hud
 
 import io.github.frostzie.skyfall.SkyFall
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
+import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,19 +27,26 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
     private val infoBoxHeight = 20
 
     companion object {
-        private var hasShownTooltip = false
-        private var lastFullHudEditorState = false
+        private val tooltipShownFile = File(MinecraftClient.getInstance().runDirectory, "config/skyfall/tooltip_shown.flag")
+
+        private fun hasTooltipBeenShown(): Boolean {
+            return tooltipShownFile.exists()
+        }
+
+        private fun markTooltipAsShown() {
+            try {
+                tooltipShownFile.parentFile.mkdirs()
+                tooltipShownFile.createNewFile()
+            } catch (e: Exception) {
+                println("Failed to create tooltip flag file: ${e.message}")
+            }
+        }
     }
 
     override fun init() {
         super.init()
         HudManager.saveConfig()
-        if (!hasShownTooltip || (!lastFullHudEditorState && fullHudEditor)) {
-            showCenterTooltip = true
-        } else {
-            showCenterTooltip = false
-        }
-        lastFullHudEditorState = fullHudEditor
+        showCenterTooltip = !hasTooltipBeenShown()
     }
 
     override fun render(drawContext: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -285,7 +294,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         if (button == 0) {
             if (isClickOnUnderstoodButton(mouseX.toInt(), mouseY.toInt())) {
                 showCenterTooltip = false
-                hasShownTooltip = true
+                markTooltipAsShown()
                 return true
             }
 

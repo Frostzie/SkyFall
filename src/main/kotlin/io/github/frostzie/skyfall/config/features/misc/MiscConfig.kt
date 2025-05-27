@@ -18,12 +18,17 @@ class MiscConfig {
     var funny = FunnyConfig()
 
     @Expose
-    @ConfigOption(name = "Test Feature", desc = "Enables the /sftest cmd")
+    @ConfigOption(name = "Hoppity Call", desc = "Alerts you when Hoppity is calling you.")
     @ConfigEditorBoolean
-    var enabled: Boolean = false
+    var hoppityCallNotifier: Boolean = false
 
     @Expose
-    @ConfigOption(name = "Render Triangle", desc = "Enable rendering of a triangle on the screen")
+    @ConfigOption(name = "Hide Block Particles", desc = "Hide block breaking particles.")
     @ConfigEditorBoolean
-    var renderTriangle: Boolean = false
+    var blockBreakingParticles = false
+
+    @Expose
+    @ConfigOption(name = "Hide Potion Hud", desc = "Hide potion effect hud in inventory.")
+    @ConfigEditorBoolean
+    var hidePotionHud = false
 }

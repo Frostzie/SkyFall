@@ -7,7 +7,7 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
 class GuiConfig {
-//TODO: add text box for info how to use the resizing feature and put it as a tiny icon symbol in the top right corner of the screen
+
     @Expose
     @ConfigOption(name = "Open Config Key", desc = "Keybind to open the config")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)

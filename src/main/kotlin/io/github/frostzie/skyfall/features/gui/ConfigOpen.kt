@@ -7,10 +7,10 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
-class ConfigOpen {
+object ConfigOpen {
     private var keyWasPressed = false
 
-    init {
+    fun init() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             if (client.currentScreen == null) {
                 val openKey = SkyFall.feature.gui.openConfigKey

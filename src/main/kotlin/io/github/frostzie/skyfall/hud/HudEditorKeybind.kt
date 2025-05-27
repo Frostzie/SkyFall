@@ -9,7 +9,7 @@ import org.lwjgl.glfw.GLFW
 object HudEditorKeybind {
     private var keyWasPressed = false
 
-    fun initialize() {
+    fun init() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             if (client.currentScreen == null) {
                 val openKey = SkyFall.feature.gui.openHudEditorKey // Use the shared GuiConfig instance

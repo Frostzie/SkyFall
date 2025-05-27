@@ -4,17 +4,29 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.Features
 import io.github.notenoughupdates.moulconfig.gui.GuiElementWrapper
 import io.github.notenoughupdates.moulconfig.gui.MoulConfigEditor
+import net.minecraft.client.gui.screen.Screen
 
 object ConfigGuiManager {
-    var editor:  MoulConfigEditor<Features>? = null
+    var editor: MoulConfigEditor<Features>? = null
 
-    fun getEditorInstance() = editor ?: MoulConfigEditor(SkyFall.configManager.processor).also { editor = it }
+    fun getEditorInstance(): MoulConfigEditor<Features> {
+        if (editor == null) {
+            editor = MoulConfigEditor(SkyFall.configManager.processor)
+        }
+        return editor!!
+    }
 
     fun openConfigGui(search: String? = null) {
-        val editor = getEditorInstance()
+        val currentEditor = getEditorInstance()
         if (search != null) {
-            editor.search(search)
+            currentEditor.search(search)
         }
-        SkyFall.screenToOpen = GuiElementWrapper(editor)
+        SkyFall.screenToOpen = GuiElementWrapper(currentEditor)
+    }
+
+    fun createModMenuScreen(parentScreenFromModMenu: Screen): Screen {
+        val currentEditor = getEditorInstance()
+        val configScreen = GuiElementWrapper(currentEditor)
+        return configScreen
     }
 }

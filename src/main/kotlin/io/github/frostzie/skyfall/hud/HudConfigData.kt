@@ -21,7 +21,7 @@ object HudManager {
 
     private val HUD_LAYER_ID = Identifier.of("skyfall", "hud_elements")
 
-    fun initialize() {
+    fun init() {
         loadConfig()
 
         HudLayerRegistrationCallback.EVENT.register(

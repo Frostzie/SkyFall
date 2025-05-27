@@ -1,7 +1,6 @@
-// Your MouseSensitivityMixin.java (which is in Java)
 package io.github.frostzie.skyfall.mixin;
 
-import io.github.frostzie.skyfall.features.garden.MouseSensitivity; // This calls the Kotlin object's static method
+import io.github.frostzie.skyfall.features.garden.MouseSensitivity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import org.spongepowered.asm.mixin.Mixin;

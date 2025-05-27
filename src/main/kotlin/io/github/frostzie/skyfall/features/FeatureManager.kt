@@ -1,21 +1,29 @@
 package io.github.frostzie.skyfall.features
 
+import io.github.frostzie.skyfall.features.chat.FilterManager
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
 import io.github.frostzie.skyfall.features.garden.GardenKeybinds
 import io.github.frostzie.skyfall.features.gui.ConfigOpen
 import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
 import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
 import io.github.frostzie.skyfall.features.garden.MouseSensitivity
-import io.github.frostzie.skyfall.features.wip.Test
-
+import io.github.frostzie.skyfall.features.misc.HoppityCallNotifier
+import io.github.frostzie.skyfall.hud.HudEditorKeybind
 
 object FeatureManager {
     fun loadFeatures() {
         // GUI Features
-        ConfigOpen()
+        ConfigOpen.init()
+        HudEditorKeybind.init()
+
+        // Chat Features
+        FilterManager.loadFilters()
 
         // Dungeon Features
         RequeueKey()
+
+        // Event Features
+        HoppityCallNotifier.init()
 
         // Misc Features
         MiscKeybindManager()
@@ -27,11 +35,5 @@ object FeatureManager {
         MouseSensitivity.init()
 
         // Dev Features
-
-        // WIP features. Might be removed or changed completely
-        //IslandCommand.register()
-        //Test.initialize()
-        //ExampleFeature.register()
-        //ItemDetectorDemo.register()
     }
 }

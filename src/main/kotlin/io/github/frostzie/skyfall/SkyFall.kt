@@ -4,6 +4,7 @@ import io.github.frostzie.skyfall.commands.CommandManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.features.FeatureManager
+import io.github.frostzie.skyfall.hud.HudManager
 import io.github.frostzie.skyfall.utils.IslandManager
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -26,6 +27,7 @@ class SkyFall : ModInitializer {
 		IslandManager.init()
 		CommandManager.loadCommands()
 		FeatureManager.loadFeatures()
+		HudManager.init()
 	}
 
 	fun registerTickEvent() {

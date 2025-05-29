@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "skyfall",
-	"version": "0.0.0-dev",
+	"version": "0.0.1",
 	"name": "SkyFall",
 	"description": "QOL Hypixel Skyblock mod for newest versions of Minecraft",
 	"authors": [
@@ -26,8 +26,8 @@
 		"skyfall.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.10",
-		"minecraft": "~1.21.4",
+		"fabricloader": "*",
+		"minecraft": "*",
 		"java": ">=21",
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*"

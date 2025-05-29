@@ -7,7 +7,8 @@ import io.github.frostzie.skyfall.features.gui.ConfigOpen
 import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
 import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
 import io.github.frostzie.skyfall.features.garden.MouseSensitivity
-import io.github.frostzie.skyfall.features.misc.HoppityCallNotifier
+import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
+import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
 import io.github.frostzie.skyfall.hud.HudEditorKeybind
 
 object FeatureManager {
@@ -17,13 +18,14 @@ object FeatureManager {
         HudEditorKeybind.init()
 
         // Chat Features
-        FilterManager.loadFilters()
+        FilterManager
 
         // Dungeon Features
         RequeueKey()
 
-        // Event Features
-        HoppityCallNotifier.init()
+        // IInventory Features
+        FavoritePowerStone.init()
+        FavoriteAbiContact.init()
 
         // Misc Features
         MiscKeybindManager()
@@ -33,7 +35,5 @@ object FeatureManager {
         GardenKeybinds.init()
         GardenKeybinds.homeHotkey()
         MouseSensitivity.init()
-
-        // Dev Features
     }
 }

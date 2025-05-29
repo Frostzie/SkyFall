@@ -14,6 +14,7 @@ public interface MouseAccessor {
     @Mutable
     @Accessor("y")
     void skyfall_setMouseY(double yPos);
+
     @Mutable
     @Accessor("cursorDeltaX")
     void skyfall_setCursorDeltaX(double deltaX);

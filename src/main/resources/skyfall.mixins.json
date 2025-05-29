@@ -6,6 +6,7 @@
   "client": [
     "KeyBindingMixin",
     "MixinBlockParticles",
+    "MixinHandledScreen",
     "MixinHidePotionHud",
     "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",

@@ -22,7 +22,7 @@ class GardenConfig {
 
     class MouseSensitivityConfig {
         @Expose
-        @ConfigOption(name = "Mouse Sensitivity", desc = "Change the mouse sensitivity")
+        @ConfigOption(name = "Disable Mouse", desc = "Disable the mouse sensitivity hotkey")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var mouseSensitivity = GLFW.GLFW_KEY_UNKNOWN
 

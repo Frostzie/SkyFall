@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall.mixin;
 
-import io.github.frostzie.skyfall.utils.ConfigAccessors;
+import io.github.frostzie.skyfall.ConfigAccessors;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinBlockParticles {
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockDestroyEffects(BlockPos pos, BlockState state, CallbackInfo ci) {
-        if (ConfigAccessors.hideBlockBreakingParticles()) { // Use class name
+        if (ConfigAccessors.hideBlockBreakingParticles()) {
             ci.cancel();
         }
     }

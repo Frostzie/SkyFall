@@ -18,11 +18,6 @@ class MiscConfig {
     var funny = FunnyConfig()
 
     @Expose
-    @ConfigOption(name = "Hoppity Call", desc = "Alerts you when Hoppity is calling you.")
-    @ConfigEditorBoolean
-    var hoppityCallNotifier: Boolean = false
-
-    @Expose
     @ConfigOption(name = "Hide Block Particles", desc = "Hide block breaking particles.")
     @ConfigEditorBoolean
     var blockBreakingParticles = false

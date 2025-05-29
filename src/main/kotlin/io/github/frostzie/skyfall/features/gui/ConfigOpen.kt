@@ -1,7 +1,7 @@
 package io.github.frostzie.skyfall.features.gui
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.config.gui.ConfigGuiManager
+import io.github.frostzie.skyfall.config.ConfigGuiManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.InputUtil

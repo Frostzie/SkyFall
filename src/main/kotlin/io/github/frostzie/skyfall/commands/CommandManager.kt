@@ -7,8 +7,6 @@ object CommandManager {
         // Always On Commands
         AlwaysOnCommands.openConfig()
         AlwaysOnCommands.sfColor()
-        AlwaysOnCommands.sfHelp()
-        AlwaysOnCommands.sfcommandtest()
 
         // Dungeon Commands
         ShortCommands.registerCommands()

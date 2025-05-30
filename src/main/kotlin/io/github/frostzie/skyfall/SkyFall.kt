@@ -9,14 +9,10 @@ import io.github.frostzie.skyfall.utils.IslandManager
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screen.Screen
-import org.slf4j.LoggerFactory
 
 class SkyFall : ModInitializer {
 
-	private val logger = LoggerFactory.getLogger("skyfall")
-
 	override fun onInitialize() {
-		logger.info("Hello Fabric world!")
 		registerTickEvent()
 		configManager = ConfigManager
 		configManager.firstLoad()

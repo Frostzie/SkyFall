@@ -15,6 +15,10 @@ object AlwaysOnCommands {
                 ConfigGuiManager.openConfigGui()
                 1
             })
+            a.register(literal("skyfall").executes {
+                ConfigGuiManager.openConfigGui()
+                1
+            })
         }
     }
 

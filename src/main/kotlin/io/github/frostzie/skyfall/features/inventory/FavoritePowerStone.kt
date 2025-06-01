@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall.features.inventory
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
@@ -9,8 +9,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.util.InputUtil
-import net.minecraft.item.Items
-import net.minecraft.screen.GenericContainerScreenHandler
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.slot.Slot
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
@@ -21,11 +20,9 @@ import kotlin.text.contains
 
 object FavoritePowerStone {
     private val configFile = File("config/skyfall/favorite-power-stones.json")
-    private val gson = Gson()
+    private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
     private var highlightedItems = mutableSetOf<String>()
-
-    private val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
 
     private val validSlotRanges = setOf(
         10..16,
@@ -40,6 +37,7 @@ object FavoritePowerStone {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val currentScreen = client.currentScreen
             if (currentScreen is HandledScreen<*> && isAccessoryBagThaumaturgy(currentScreen)) {
+                val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
                 val window = MinecraftClient.getInstance().window.handle
 
                 if (highlightKey != GLFW.GLFW_KEY_UNKNOWN) {
@@ -65,21 +63,20 @@ object FavoritePowerStone {
 
     private fun isAccessoryBagThaumaturgy(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        if (!title.contains("Accessory Bag Thaumaturgy")) {
-            return false
-        }
+        return title.contains("Accessory Bag Thaumaturgy")
+    }
 
-        val handler = screen.screenHandler
-        if (handler is GenericContainerScreenHandler && handler.slots.size > 49) {
-            val slot49 = handler.slots[49]
-            return slot49.stack.item == Items.BARRIER
-        }
-        return false
+    private fun isSlotInChestInventory(slot: Slot): Boolean {
+        return slot.inventory !is PlayerInventory
     }
 
     private fun handleKeyPress(screen: HandledScreen<*>) {
         val hoveredSlot = getHoveredSlot(screen) ?: return
         val slotIndex = hoveredSlot.index
+
+        if (!FavoriteAbiContact.isSlotInChestInventory(hoveredSlot)) {
+            return
+        }
 
         if (!validSlotRanges.any { slotIndex in it }) {
             return
@@ -130,6 +127,10 @@ object FavoritePowerStone {
         }
 
         val slotIndex = slot.index
+
+        if (!FavoriteAbiContact.isSlotInChestInventory(slot)) {
+            return
+        }
 
         if (!validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
             return

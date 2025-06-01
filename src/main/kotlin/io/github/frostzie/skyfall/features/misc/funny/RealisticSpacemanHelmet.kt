@@ -11,6 +11,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.util.Identifier
 import io.github.frostzie.skyfall.utils.item.SkyBlockItemData
+import net.minecraft.entity.EquipmentSlot
 
 object RealisticSpacemanHelmet {
     private val config get() = SkyFall.feature.miscFeatures.funny.spacemanHelmetConfig
@@ -44,7 +45,7 @@ object RealisticSpacemanHelmet {
     private fun isWearing(): Identifier? {
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return null
-        val onHead = player.inventory.armor[3]
+        val onHead = player.getEquippedStack(EquipmentSlot.HEAD)
 
         if (onHead.isEmpty) return null
 

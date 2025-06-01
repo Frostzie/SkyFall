@@ -10,7 +10,6 @@
     "MixinHidePotionHud",
     "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",
-    "SlotRenderingMixin",
     "TabListAccessor",
     "TextureUnpackBase64PadPatch",
     "YggdrasilSignatureIgnorePatch",

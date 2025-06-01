@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall.features.inventory
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
@@ -10,6 +10,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.util.InputUtil
 import net.minecraft.screen.slot.Slot
+import net.minecraft.entity.player.PlayerInventory
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import java.io.File
@@ -18,11 +19,9 @@ import java.io.FileWriter
 
 object FavoriteAbiContact {
     private val configFile = File("config/skyfall/favorite-contacts.json")
-    private val gson = Gson()
+    private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
-
-    private val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
 
     private val validSlotRanges = setOf(
         10..16,
@@ -37,6 +36,7 @@ object FavoriteAbiContact {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val currentScreen = client.currentScreen
             if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
+                val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
                 val window = MinecraftClient.getInstance().window.handle
 
                 if (highlightKey != GLFW.GLFW_KEY_UNKNOWN) {
@@ -65,9 +65,17 @@ object FavoriteAbiContact {
         return title.contains("Abiphone")
     }
 
+    fun isSlotInChestInventory(slot: Slot): Boolean {
+        return slot.inventory !is PlayerInventory
+    }
+
     private fun handleKeyPress(screen: HandledScreen<*>) {
         val hoveredSlot = getHoveredSlot(screen) ?: return
         val slotIndex = hoveredSlot.index
+
+        if (!isSlotInChestInventory(hoveredSlot)) {
+            return
+        }
 
         if (!validSlotRanges.any { slotIndex in it }) {
             return
@@ -118,6 +126,10 @@ object FavoriteAbiContact {
         }
 
         val slotIndex = slot.index
+
+        if (!isSlotInChestInventory(slot)) {
+            return
+        }
 
         if (!validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
             return

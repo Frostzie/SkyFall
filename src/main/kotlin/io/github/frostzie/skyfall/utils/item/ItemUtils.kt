@@ -20,11 +20,8 @@ object ItemUtils {
         val customDataComponent = itemStack.get(DataComponentTypes.CUSTOM_DATA)
         return customDataComponent?.let { data ->
             val nbt = data.copyNbt()
-            if (nbt.contains(SKYBLOCK_ID, NbtCompound.STRING_TYPE.toInt())) {
-                nbt.getString(SKYBLOCK_ID)
-            } else {
-                null
-            }
+            val skyblockIdOptional = nbt.getString(SKYBLOCK_ID)
+            skyblockIdOptional.orElse(null)
         }
     }
 

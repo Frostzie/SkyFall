@@ -2,7 +2,7 @@ package io.github.frostzie.skyfall.utils
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
+import net.minecraft.text.HoverEvent // Ensure this is the correct import
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
@@ -59,8 +59,9 @@ object ChatUtils {
         val styledMessage = Text.literal(errorMessage)
             .setStyle(
                 Style.EMPTY.withColor(TextColor.fromRgb(0xFF5555)) // Light Red
-                    .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyableText))
-                    .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to copy error message")))
+                    .withClickEvent(ClickEvent.CopyToClipboard(copyableText))
+                    // Corrected HoverEvent instantiation
+                    .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to copy error message")))
             )
         val fullMessage = Text.empty()
             .append(CHAT_PREFIX_STRING)
@@ -73,14 +74,16 @@ object ChatUtils {
         private var style: Style = Style.EMPTY
 
         fun copyContent(copyText: String): MessageBuilder {
-            style = style.withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText))
-                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to copy")))
+            style = style.withClickEvent(ClickEvent.CopyToClipboard(copyText))
+                // Corrected HoverEvent instantiation
+                .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to copy")))
             return this
         }
 
         fun clickToRun(command: String): MessageBuilder {
-            style = style.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§eClick to run:§a\n$command")))
+            style = style.withClickEvent(ClickEvent.RunCommand(command))
+                // Corrected HoverEvent instantiation
+                .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to run:§a\n$command")))
             return this
         }
 

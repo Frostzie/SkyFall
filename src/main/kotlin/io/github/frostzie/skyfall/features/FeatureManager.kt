@@ -18,7 +18,7 @@ object FeatureManager {
         HudEditorKeybind.init()
 
         // Chat Features
-        FilterManager
+        FilterManager.loadFilters()
 
         // Dungeon Features
         RequeueKey()

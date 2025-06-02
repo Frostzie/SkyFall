@@ -4,25 +4,30 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
+import io.github.frostzie.skyfall.utils.KeyboardManager
+import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
+import io.github.frostzie.skyfall.utils.item.SlotHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.util.InputUtil
-import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.screen.slot.Slot
+import net.minecraft.entity.player.PlayerInventory
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import kotlin.text.contains
 
 object FavoritePowerStone {
     private val configFile = File("config/skyfall/favorite-power-stones.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
-    private var highlightedItems = mutableSetOf<String>()
+    private var highlightedItems = mutableListOf<String>()
+    private var favoredOnlyToggle = true
 
     private val validSlotRanges = setOf(
         10..16,
@@ -33,27 +38,33 @@ object FavoritePowerStone {
 
     fun init() {
         loadConfig()
+        registerReplaceItemHandler()
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val currentScreen = client.currentScreen
             if (currentScreen is HandledScreen<*> && isAccessoryBagThaumaturgy(currentScreen)) {
                 val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
+                if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+                    keyWasPressed = false
+                    return@register
+                }
+
+                if (KeyboardManager.LEFT_MOUSE.isKeyClicked()) {
+                    handleLeftMouseClick(currentScreen)
+                }
+
                 val window = MinecraftClient.getInstance().window.handle
 
-                if (highlightKey != GLFW.GLFW_KEY_UNKNOWN) {
-                    val isPressed = if (highlightKey >= GLFW.GLFW_MOUSE_BUTTON_1 && highlightKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-                        GLFW.glfwGetMouseButton(window, highlightKey) == GLFW.GLFW_PRESS
-                    } else {
-                        InputUtil.isKeyPressed(window, highlightKey)
-                    }
-
-                    if (isPressed && !keyWasPressed) {
-                        handleKeyPress(currentScreen)
-                    }
-                    keyWasPressed = isPressed
+                val isPressed = if (highlightKey >= GLFW.GLFW_MOUSE_BUTTON_1 && highlightKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+                    GLFW.glfwGetMouseButton(window, highlightKey) == GLFW.GLFW_PRESS
                 } else {
-                    keyWasPressed = false
+                    InputUtil.isKeyPressed(window, highlightKey)
                 }
+
+                if (isPressed && !keyWasPressed) {
+                    handleKeyPress(currentScreen)
+                }
+                keyWasPressed = isPressed
             } else {
                 keyWasPressed = false
             }
@@ -61,20 +72,68 @@ object FavoritePowerStone {
         registerSlotRenderEvent()
     }
 
+    private fun registerReplaceItemHandler() {
+        SlotHandler.registerHandler { event ->
+            val currentScreen = MinecraftClient.getInstance().currentScreen
+            if (currentScreen is HandledScreen<*> && isAccessoryBagThaumaturgy(currentScreen)) {
+                val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
+                if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+                    return@registerHandler
+                }
+
+                val onFavoriteToggleSlot = event.slotNumber == 8 && isSlotInChestInventory(event.slot)
+                if (onFavoriteToggleSlot) {
+                    val fakeItem = if (favoredOnlyToggle) {
+                        ItemStack(Items.DIAMOND)
+                    } else {
+                        ItemStack(Items.EMERALD)
+                    }
+                    event.replaceWith(fakeItem)
+                    event.blockClick()
+                    event.hideTooltip()
+                } else if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
+                    if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
+                        val itemName = event.slot.stack.name.string
+                        if (!highlightedItems.contains(itemName)) {
+                            event.blockAndHide()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleLeftMouseClick(screen: HandledScreen<*>) {
+        val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
+        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+            return
+        }
+
+        val hoveredSlot = getHoveredSlot(screen) ?: return
+        if (hoveredSlot.index == 8 && isSlotInChestInventory(hoveredSlot)) {
+            favoredOnlyToggle = !favoredOnlyToggle
+        }
+    }
+
     private fun isAccessoryBagThaumaturgy(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
         return title.contains("Accessory Bag Thaumaturgy")
     }
 
-    private fun isSlotInChestInventory(slot: Slot): Boolean {
+    fun isSlotInChestInventory(slot: Slot): Boolean {
         return slot.inventory !is PlayerInventory
     }
 
     private fun handleKeyPress(screen: HandledScreen<*>) {
+        val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
+        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+            return
+        }
+
         val hoveredSlot = getHoveredSlot(screen) ?: return
         val slotIndex = hoveredSlot.index
 
-        if (!FavoriteAbiContact.isSlotInChestInventory(hoveredSlot)) {
+        if (!isSlotInChestInventory(hoveredSlot)) {
             return
         }
 
@@ -126,9 +185,14 @@ object FavoritePowerStone {
             return
         }
 
+        val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
+        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+            return
+        }
+
         val slotIndex = slot.index
 
-        if (!FavoriteAbiContact.isSlotInChestInventory(slot)) {
+        if (!isSlotInChestInventory(slot)) {
             return
         }
 
@@ -138,7 +202,7 @@ object FavoritePowerStone {
 
         val itemName = slot.stack.name.string
         if (highlightedItems.contains(itemName)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(15, 255, 0, 100).rgb)
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(15, 255, 0, 175).rgb)
         }
     }
 
@@ -150,12 +214,12 @@ object FavoritePowerStone {
 
         try {
             FileReader(configFile).use { reader ->
-                val type = object : TypeToken<Set<String>>() {}.type
-                highlightedItems = gson.fromJson(reader, type) ?: mutableSetOf()
+                val type = object : TypeToken<List<String>>() {}.type
+                highlightedItems = gson.fromJson(reader, type) ?: mutableListOf()
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            highlightedItems = mutableSetOf()
+            highlightedItems = mutableListOf()
         }
     }
 

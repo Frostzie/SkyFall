@@ -25,6 +25,7 @@ object RealisticSpacemanHelmet {
         Identifier.ofVanilla("textures/block/light_blue_stained_glass.png"),
         Identifier.ofVanilla("textures/block/blue_stained_glass.png"),
         Identifier.ofVanilla("textures/block/purple_stained_glass.png"),
+        Identifier.ofVanilla("textures/block/magenta_stained_glass.png"),
         Identifier.ofVanilla("textures/block/pink_stained_glass.png")
     )
 
@@ -61,7 +62,8 @@ object RealisticSpacemanHelmet {
                 "minecraft:light_blue_stained_glass" to COLORS[6],
                 "minecraft:blue_stained_glass" to COLORS[7],
                 "minecraft:purple_stained_glass" to COLORS[8],
-                "minecraft:pink_stained_glass" to COLORS[9]
+                "minecraft:magenta_stained_glass" to COLORS[9],
+                "minecraft:pink_stained_glass" to COLORS[10]
             )
 
             for ((itemId, texture) in glassColors) {

@@ -41,7 +41,7 @@ object AlwaysOnCommands {
                             "§f&o = §oItalic            §f&n = §nUnderline\n" +
                             "§f&r = Reset\n" +
                     "§c==================================================="
-                )
+                ).send()
                 1
             })
         }

@@ -15,7 +15,7 @@ class InventoryConfig {
 
     class PowerStoneHighlight {
         @Expose
-        @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over the power stone will highlight it")
+        @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over the power stone will highlight it. Adds a toggle item in the top right corner to only show favorites.")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
     }
@@ -27,7 +27,7 @@ class InventoryConfig {
 
     class FavoriteAbiContact {
         @Expose
-        @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over a contact will highlight it")
+        @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over a contact will highlight it. Adds a toggle item in the top right corner to only show favorites.")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
     }

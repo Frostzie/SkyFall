@@ -117,7 +117,7 @@ object FavoritePowerStone {
 
     private fun isAccessoryBagThaumaturgy(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        return title.contains("Accessory Bag Thaumaturgy")
+        return title.equals("Accessory Bag Thaumaturgy")
     }
 
     fun isSlotInChestInventory(slot: Slot): Boolean {

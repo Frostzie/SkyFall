@@ -117,7 +117,7 @@ object FavoriteAbiContact {
 
     private fun isAbiPhoneContacts(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        return title.equals("Abiphone")
+        return title.contains("Abiphone")
     }
 
     fun isSlotInChestInventory(slot: Slot): Boolean {

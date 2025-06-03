@@ -17,5 +17,15 @@ class ChatConfig {
         @ConfigOption(name = "Whatchdog", desc = "Hides the watchdog announcement message in chat.")
         @ConfigEditorBoolean
         var hideWatchdog = false
+
+        @Expose
+        @ConfigOption(name = "Fire Sale", desc = "Hides the fire sale message in chat.")
+        @ConfigEditorBoolean
+        var hideFireSale = false
+
+        @Expose
+        @ConfigOption(name = "Sky Mall", desc = "Hides Sky Mall stat changes when not in mining islands.")
+        @ConfigEditorBoolean
+        var hideSkyMallChange = false
     }
 }

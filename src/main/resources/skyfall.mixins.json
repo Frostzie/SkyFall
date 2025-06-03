@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
+    "InGameHudEffectsMixin",
     "KeyBindingMixin",
     "MixinBlockParticles",
     "MixinHandledScreen",

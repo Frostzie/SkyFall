@@ -8,6 +8,7 @@ import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
 import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
 import io.github.frostzie.skyfall.features.garden.MouseSensitivity
 import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
+import io.github.frostzie.skyfall.features.inventory.FavoritePet
 import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
 import io.github.frostzie.skyfall.hud.HudEditorKeybind
 
@@ -23,9 +24,10 @@ object FeatureManager {
         // Dungeon Features
         RequeueKey()
 
-        // IInventory Features
+        // Inventory Features
         FavoritePowerStone.init()
         FavoriteAbiContact.init()
+        FavoritePet.init()
 
         // Misc Features
         MiscKeybindManager()

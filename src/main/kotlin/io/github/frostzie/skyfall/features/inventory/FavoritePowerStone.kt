@@ -202,7 +202,7 @@ object FavoritePowerStone {
 
         val itemName = slot.stack.name.string
         if (highlightedItems.contains(itemName)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(15, 255, 0, 175).rgb)
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
         }
     }
 

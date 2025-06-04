@@ -7,6 +7,7 @@ import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.item.SlotHandler
+import io.github.frostzie.skyfall.utils.item.ItemUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -22,8 +23,8 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-object FavoriteAbiContact {
-    private val configFile = File("config/skyfall/favorite-contacts.json")
+object FavoritePet {
+    private val configFile = File("config/skyfall/favorite-pets.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
@@ -42,8 +43,8 @@ object FavoriteAbiContact {
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val currentScreen = client.currentScreen
-            if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
-                val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+            if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
+                val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
                 if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
                     keyWasPressed = false
                     return@register
@@ -75,8 +76,8 @@ object FavoriteAbiContact {
     private fun registerReplaceItemHandler() {
         SlotHandler.registerHandler { event ->
             val currentScreen = MinecraftClient.getInstance().currentScreen
-            if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
-                val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+            if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
+                val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
                 if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
                     return@registerHandler
                 }
@@ -93,8 +94,8 @@ object FavoriteAbiContact {
                     event.hideTooltip()
                 } else if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
                     if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
-                        val itemName = event.slot.stack.name.string
-                        if (!highlightedItems.contains(itemName)) {
+                        val itemUuid = ItemUtils.getUuid(event.slot.stack)
+                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
                             event.blockAndHide()
                         }
                     }
@@ -104,7 +105,7 @@ object FavoriteAbiContact {
     }
 
     private fun handleLeftMouseClick(screen: HandledScreen<*>) {
-        val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
@@ -115,9 +116,9 @@ object FavoriteAbiContact {
         }
     }
 
-    private fun isAbiPhoneContacts(screen: HandledScreen<*>): Boolean {
+    private fun isPetMenu(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        return title.contains("Abiphone")
+        return title.contains("Pets") && !title.contains("Choose Pet") && !title.startsWith("Pets: ")
     }
 
     fun isSlotInChestInventory(slot: Slot): Boolean {
@@ -125,7 +126,7 @@ object FavoriteAbiContact {
     }
 
     private fun handleKeyPress(screen: HandledScreen<*>) {
-        val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
@@ -145,11 +146,15 @@ object FavoriteAbiContact {
             return
         }
 
-        val itemName = hoveredSlot.stack.name.string
-        if (highlightedItems.contains(itemName)) {
-            highlightedItems.remove(itemName)
+        val itemUuid = ItemUtils.getUuid(hoveredSlot.stack)
+        if (itemUuid == null) {
+            return
+        }
+
+        if (highlightedItems.contains(itemUuid)) {
+            highlightedItems.remove(itemUuid)
         } else {
-            highlightedItems.add(itemName)
+            highlightedItems.add(itemUuid)
         }
         saveConfig()
     }
@@ -181,11 +186,11 @@ object FavoriteAbiContact {
 
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
-        if (currentScreen !is HandledScreen<*> || !isAbiPhoneContacts(currentScreen)) {
+        if (currentScreen !is HandledScreen<*> || !isPetMenu(currentScreen)) {
             return
         }
 
-        val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
@@ -200,8 +205,8 @@ object FavoriteAbiContact {
             return
         }
 
-        val itemName = slot.stack.name.string
-        if (highlightedItems.contains(itemName)) {
+        val itemUuid = ItemUtils.getUuid(slot.stack)
+        if (itemUuid != null && highlightedItems.contains(itemUuid)) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
         }
     }

@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFW
 
 class InventoryConfig {
     //TODO: add a way to change the color of the highlight and make the green glass not be rendered in favorite power stone
+    //TODO: change favorite only toggle to be a hud element instead of fake item in inventory
     @Expose
     @Accordion
     @ConfigOption(name = "Favorite Power Stone", desc = "")
@@ -39,11 +40,10 @@ class InventoryConfig {
     var petMenu: PetMenuConfig = PetMenuConfig()
 
     class PetMenuConfig {
-        //TODO: soon™
-        //@Expose
-        //@ConfigOption(name = "Highlight Active", desc = "Highlights the currently active pet")
-        //@ConfigEditorBoolean
-        //var activePet: Boolean = false
+        @Expose
+        @ConfigOption(name = "Highlight Active", desc = "Highlights the currently active pet")
+        @ConfigEditorBoolean
+        var activePet: Boolean = false
 
         @Expose
         @ConfigOption(name = "Favorite Hotkey", desc = "Pressing the keybind over a pet will highlight it. Adds a toggle item in the top right corner to only show favorites.")

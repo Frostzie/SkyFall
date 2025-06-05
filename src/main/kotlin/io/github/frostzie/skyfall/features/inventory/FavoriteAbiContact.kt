@@ -4,8 +4,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
-import io.github.frostzie.skyfall.utils.KeyboardManager
-import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.item.SlotHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
@@ -16,6 +14,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import java.io.File
@@ -28,6 +27,8 @@ object FavoriteAbiContact {
     private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
+    private var toggleSlotToRender: Slot? = null
+    private var fakeItemToRender: ItemStack? = null
 
     private val validSlotRanges = setOf(
         10..16,
@@ -47,10 +48,6 @@ object FavoriteAbiContact {
                 if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
                     keyWasPressed = false
                     return@register
-                }
-
-                if (KeyboardManager.LEFT_MOUSE.isKeyClicked()) {
-                    handleLeftMouseClick(currentScreen)
                 }
 
                 val window = MinecraftClient.getInstance().window.handle
@@ -88,9 +85,18 @@ object FavoriteAbiContact {
                     } else {
                         ItemStack(Items.EMERALD)
                     }
-                    event.replaceWith(fakeItem)
-                    event.blockClick()
+
+                    toggleSlotToRender = event.slot
+                    fakeItemToRender = fakeItem
+
                     event.hideTooltip()
+                    event.hide()
+
+                    if (event.clickContext != null &&
+                        event.clickContext.actionType == SlotActionType.PICKUP &&
+                        event.clickContext.button == 0) {
+                        favoredOnlyToggle = !favoredOnlyToggle
+                    }
                 } else if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
                     if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
                         val itemName = event.slot.stack.name.string
@@ -100,18 +106,6 @@ object FavoriteAbiContact {
                     }
                 }
             }
-        }
-    }
-
-    private fun handleLeftMouseClick(screen: HandledScreen<*>) {
-        val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
-        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
-            return
-        }
-
-        val hoveredSlot = getHoveredSlot(screen) ?: return
-        if (hoveredSlot.index == 8 && isSlotInChestInventory(hoveredSlot)) {
-            favoredOnlyToggle = !favoredOnlyToggle
         }
     }
 
@@ -182,6 +176,8 @@ object FavoriteAbiContact {
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
         if (currentScreen !is HandledScreen<*> || !isAbiPhoneContacts(currentScreen)) {
+            toggleSlotToRender = null
+            fakeItemToRender = null
             return
         }
 
@@ -196,13 +192,18 @@ object FavoriteAbiContact {
             return
         }
 
-        if (!validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
-            return
+        if (slot == toggleSlotToRender && fakeItemToRender != null) {
+            val client = MinecraftClient.getInstance()
+            val itemRenderer = client.itemRenderer
+
+            context.drawItem(fakeItemToRender, slot.x, slot.y)
         }
 
-        val itemName = slot.stack.name.string
-        if (highlightedItems.contains(itemName)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
+        if (validSlotRanges.any { slotIndex in it } && !slot.stack.isEmpty) {
+            val itemName = slot.stack.name.string
+            if (highlightedItems.contains(itemName)) {
+                context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
+            }
         }
     }
 

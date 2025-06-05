@@ -4,10 +4,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
-import io.github.frostzie.skyfall.utils.KeyboardManager
-import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.item.SlotHandler
 import io.github.frostzie.skyfall.utils.item.ItemUtils
+import io.github.frostzie.skyfall.utils.item.PetUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -17,6 +16,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import java.io.File
@@ -29,6 +29,8 @@ object FavoritePet {
     private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
+    private var toggleSlotToRender: Slot? = null
+    private var fakeItemToRender: ItemStack? = null
 
     private val validSlotRanges = setOf(
         10..16,
@@ -36,6 +38,9 @@ object FavoritePet {
         28..34,
         37..43
     )
+
+    private val FAVORITE_COLOR = Color(255, 170, 0, 220)
+    private val ACTIVE_PET_COLOR = Color(0, 255, 0, 220)
 
     fun init() {
         loadConfig()
@@ -48,10 +53,6 @@ object FavoritePet {
                 if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
                     keyWasPressed = false
                     return@register
-                }
-
-                if (KeyboardManager.LEFT_MOUSE.isKeyClicked()) {
-                    handleLeftMouseClick(currentScreen)
                 }
 
                 val window = MinecraftClient.getInstance().window.handle
@@ -89,30 +90,33 @@ object FavoritePet {
                     } else {
                         ItemStack(Items.EMERALD)
                     }
-                    event.replaceWith(fakeItem)
-                    event.blockClick()
+
+                    toggleSlotToRender = event.slot
+                    fakeItemToRender = fakeItem
+
                     event.hideTooltip()
+                    event.hide()
+
+                    if (event.clickContext != null &&
+                        event.clickContext.actionType == SlotActionType.PICKUP &&
+                        event.clickContext.button == 0) {
+                        favoredOnlyToggle = !favoredOnlyToggle
+                    }
                 } else if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
                     if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
-                        val itemUuid = ItemUtils.getUuid(event.slot.stack)
-                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
+                        if (PetUtils.isPet(event.slot.stack)) {
+                            val itemUuid = ItemUtils.getUuid(event.slot.stack)
+                            if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
+                                if (!PetUtils.isActivePet(event.slot.stack)) {
+                                    event.blockAndHide()
+                                }
+                            }
+                        } else {
                             event.blockAndHide()
                         }
                     }
                 }
             }
-        }
-    }
-
-    private fun handleLeftMouseClick(screen: HandledScreen<*>) {
-        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
-        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
-            return
-        }
-
-        val hoveredSlot = getHoveredSlot(screen) ?: return
-        if (hoveredSlot.index == 8 && isSlotInChestInventory(hoveredSlot)) {
-            favoredOnlyToggle = !favoredOnlyToggle
         }
     }
 
@@ -143,6 +147,11 @@ object FavoritePet {
         }
 
         if (hoveredSlot.stack.isEmpty) {
+            return
+        }
+
+        // Only allow favoriting pets
+        if (!PetUtils.isPet(hoveredSlot.stack)) {
             return
         }
 
@@ -184,9 +193,27 @@ object FavoritePet {
         }
     }
 
+    private fun getPetHighlightColor(itemStack: ItemStack, isFavorite: Boolean): Color? {
+        if (!PetUtils.isPet(itemStack)) {
+            return null
+        }
+        val activePetConfig = SkyFall.feature.inventory.petMenu.activePet
+        if (activePetConfig && PetUtils.isActivePet(itemStack)) {
+            return ACTIVE_PET_COLOR
+        }
+
+        if (isFavorite) {
+            return FAVORITE_COLOR
+        }
+
+        return null
+    }
+
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
         if (currentScreen !is HandledScreen<*> || !isPetMenu(currentScreen)) {
+            toggleSlotToRender = null
+            fakeItemToRender = null
             return
         }
 
@@ -201,13 +228,25 @@ object FavoritePet {
             return
         }
 
-        if (!validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
-            return
+        if (slot == toggleSlotToRender && fakeItemToRender != null) {
+            val client = MinecraftClient.getInstance()
+            val itemRenderer = client.itemRenderer
+
+            context.drawItem(fakeItemToRender, slot.x, slot.y)
         }
 
-        val itemUuid = ItemUtils.getUuid(slot.stack)
-        if (itemUuid != null && highlightedItems.contains(itemUuid)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
+        if (validSlotRanges.any { slotIndex in it } && !slot.stack.isEmpty) {
+            if (!PetUtils.isPet(slot.stack)) {
+                return
+            }
+
+            val itemUuid = ItemUtils.getUuid(slot.stack)
+            val isFavorite = itemUuid != null && highlightedItems.contains(itemUuid)
+
+            val highlightColor = getPetHighlightColor(slot.stack, isFavorite)
+            if (highlightColor != null) {
+                context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor.rgb)
+            }
         }
     }
 

@@ -22,13 +22,11 @@ class Features : Config() {
     // TODO: Make socials open directly in the browser
     private val discord = MyResourceLocation("skyfall", "social/discord.png")
     private val github = MyResourceLocation("skyfall", "social/github.png")
-    private val patreon = MyResourceLocation("skyfall", "social/patreon.png")
 
     override fun getSocials(): List<Social?>? {
         return listOf(
             Social.forLink("Discord", discord, "https://discord.gg/qZ885qTvkx"),
             Social.forLink("GitHub", github, "https://github.com/Frostzie/SkyFall"),
-            Social.forLink("Patreon", patreon, "https://www.patreon.com/Frostzie"),
         )
     }
 

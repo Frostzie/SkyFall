@@ -8,8 +8,8 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
 class InventoryConfig {
-    //TODO: add a way to change the color of the highlight and make the green glass not be rendered in favorite power stone
-    //TODO: change favorite only toggle to be a hud element instead of fake item in inventory
+    //TODO: add a way to change the color of the highlight
+    //TODO: remove green glass pane in Power Stone menu
     @Expose
     @Accordion
     @ConfigOption(name = "Favorite Power Stone", desc = "")

@@ -8,15 +8,17 @@ import io.github.frostzie.skyfall.utils.item.SlotHandler
 import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.frostzie.skyfall.utils.item.PetUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.screen.v1.Screens
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.util.InputUtil
 import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import java.io.File
@@ -29,8 +31,7 @@ object FavoritePet {
     private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
-    private var toggleSlotToRender: Slot? = null
-    private var fakeItemToRender: ItemStack? = null
+    private var currentScreen: HandledScreen<*>? = null
 
     private val validSlotRanges = setOf(
         10..16,
@@ -44,65 +45,16 @@ object FavoritePet {
 
     fun init() {
         loadConfig()
-        registerReplaceItemHandler()
-
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            val currentScreen = client.currentScreen
-            if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
-                val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
-                if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
-                    keyWasPressed = false
-                    return@register
-                }
-
-                val window = MinecraftClient.getInstance().window.handle
-
-                val isPressed = if (highlightKey >= GLFW.GLFW_MOUSE_BUTTON_1 && highlightKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-                    GLFW.glfwGetMouseButton(window, highlightKey) == GLFW.GLFW_PRESS
-                } else {
-                    InputUtil.isKeyPressed(window, highlightKey)
-                }
-
-                if (isPressed && !keyWasPressed) {
-                    handleKeyPress(currentScreen)
-                }
-                keyWasPressed = isPressed
-            } else {
-                keyWasPressed = false
-            }
-        }
+        registerSlotHandler()
+        registerTickHandler()
         registerSlotRenderEvent()
     }
 
-    private fun registerReplaceItemHandler() {
+    private fun registerSlotHandler() {
         SlotHandler.registerHandler { event ->
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
-                val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
-                if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
-                    return@registerHandler
-                }
-
-                val onFavoriteToggleSlot = event.slotNumber == 8 && isSlotInChestInventory(event.slot)
-                if (onFavoriteToggleSlot) {
-                    val fakeItem = if (favoredOnlyToggle) {
-                        ItemStack(Items.DIAMOND)
-                    } else {
-                        ItemStack(Items.EMERALD)
-                    }
-
-                    toggleSlotToRender = event.slot
-                    fakeItemToRender = fakeItem
-
-                    event.hideTooltip()
-                    event.hide()
-
-                    if (event.clickContext != null &&
-                        event.clickContext.actionType == SlotActionType.PICKUP &&
-                        event.clickContext.button == 0) {
-                        favoredOnlyToggle = !favoredOnlyToggle
-                    }
-                } else if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
+                if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
                     if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
                         if (PetUtils.isPet(event.slot.stack)) {
                             val itemUuid = ItemUtils.getUuid(event.slot.stack)
@@ -120,37 +72,136 @@ object FavoritePet {
         }
     }
 
-    private fun isPetMenu(screen: HandledScreen<*>): Boolean {
-        val title = screen.title.string
-        return title.contains("Pets") && !title.contains("Choose Pet") && !title.startsWith("Pets: ")
+    private fun registerTickHandler() {
+        ClientTickEvents.END_CLIENT_TICK.register { client ->
+            val screen = client.currentScreen
+            if (screen is HandledScreen<*> && isPetMenu(screen)) {
+                if (currentScreen != screen) {
+                    currentScreen = screen
+                    setupToggleButton(screen)
+                }
+                handleKeyPress(screen)
+            } else {
+                if (currentScreen != null) {
+                    currentScreen = null
+                    removeToggleButton()
+                }
+            }
+        }
     }
 
-    fun isSlotInChestInventory(slot: Slot): Boolean {
-        return slot.inventory !is PlayerInventory
+    private fun setupToggleButton(screen: HandledScreen<*>) {
+        removeToggleButton()
+
+        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
+        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN || !isPetMenu(screen)) {
+            return
+        }
+
+        val screenX = getScreenX(screen)
+        val screenY = getScreenY(screen)
+        val backgroundWidth = getBackgroundWidth(screen)
+
+        var buttonX = screenX + backgroundWidth - 16
+        val buttonY = screenY + 4
+
+        val existingButtons = Screens.getButtons(screen)
+        while (existingButtons.any { it is ButtonWidget && it.x == buttonX && it.y == buttonY }) {
+            buttonX -= 15
+        }
+
+        val toggleButton = ButtonWidget.builder(
+            Text.literal(if (favoredOnlyToggle) "F" else "A")
+        ) { _ ->
+            favoredOnlyToggle = !favoredOnlyToggle
+            setupToggleButton(screen)
+        }
+            .dimensions(buttonX, buttonY, 12, 12)
+            .tooltip(Tooltip.of(Text.literal(if (favoredOnlyToggle) "Click to Show All" else "Click for Favorites Only")))
+            .build()
+
+        Screens.getButtons(screen).add(toggleButton)
+    }
+
+    private fun removeToggleButton() {
+        currentScreen?.let { screen ->
+            Screens.getButtons(screen).removeIf { widget ->
+                widget is ButtonWidget &&
+                        (widget.message.string == "F" || widget.message.string == "A")
+            }
+        }
+    }
+
+    private fun getScreenX(screen: HandledScreen<*>): Int {
+        return try {
+            val field = HandledScreen::class.java.getDeclaredField("x")
+            field.isAccessible = true
+            field.getInt(screen)
+        } catch (e: Exception) {
+            (screen.width - getBackgroundWidth(screen)) / 2
+        }
+    }
+
+    private fun getScreenY(screen: HandledScreen<*>): Int {
+        return try {
+            val field = HandledScreen::class.java.getDeclaredField("y")
+            field.isAccessible = true
+            field.getInt(screen)
+        } catch (e: Exception) {
+            (screen.height - getBackgroundHeight(screen)) / 2
+        }
+    }
+
+    private fun getBackgroundWidth(screen: HandledScreen<*>): Int {
+        return try {
+            val field = HandledScreen::class.java.getDeclaredField("backgroundWidth")
+            field.isAccessible = true
+            field.getInt(screen)
+        } catch (e: Exception) {
+            176
+        }
+    }
+
+    private fun getBackgroundHeight(screen: HandledScreen<*>): Int {
+        return try {
+            val field = HandledScreen::class.java.getDeclaredField("backgroundHeight")
+            field.isAccessible = true
+            field.getInt(screen)
+        } catch (e: Exception) {
+            166
+        }
     }
 
     private fun handleKeyPress(screen: HandledScreen<*>) {
         val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
+            keyWasPressed = false
             return
         }
 
+        val window = MinecraftClient.getInstance().window.handle
+        val isPressed = if (highlightKey >= GLFW.GLFW_MOUSE_BUTTON_1 && highlightKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
+            GLFW.glfwGetMouseButton(window, highlightKey) == GLFW.GLFW_PRESS
+        } else {
+            InputUtil.isKeyPressed(window, highlightKey)
+        }
+
+        if (isPressed && !keyWasPressed) {
+            handleKeyPressAction(screen)
+        }
+        keyWasPressed = isPressed
+    }
+
+    private fun handleKeyPressAction(screen: HandledScreen<*>) {
         val hoveredSlot = getHoveredSlot(screen) ?: return
         val slotIndex = hoveredSlot.index
 
-        if (!isSlotInChestInventory(hoveredSlot)) {
+        if (!isSlotInChestInventory(hoveredSlot) ||
+            !validSlotRanges.any { slotIndex in it } ||
+            hoveredSlot.stack.isEmpty) {
             return
         }
 
-        if (!validSlotRanges.any { slotIndex in it }) {
-            return
-        }
-
-        if (hoveredSlot.stack.isEmpty) {
-            return
-        }
-
-        // Only allow favoriting pets
         if (!PetUtils.isPet(hoveredSlot.stack)) {
             return
         }
@@ -166,6 +217,15 @@ object FavoritePet {
             highlightedItems.add(itemUuid)
         }
         saveConfig()
+    }
+
+    private fun isPetMenu(screen: HandledScreen<*>): Boolean {
+        val title = screen.title.string
+        return title.contains("Pets") && !title.contains("Choose Pet") && !title.startsWith("Pets: ")
+    }
+
+    fun isSlotInChestInventory(slot: Slot): Boolean {
+        return slot.inventory !is PlayerInventory
     }
 
     private fun getHoveredSlot(screen: HandledScreen<*>): Slot? {
@@ -212,41 +272,24 @@ object FavoritePet {
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
         if (currentScreen !is HandledScreen<*> || !isPetMenu(currentScreen)) {
-            toggleSlotToRender = null
-            fakeItemToRender = null
-            return
-        }
-
-        val highlightKey = SkyFall.feature.inventory.petMenu.favoriteKey
-        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
 
         val slotIndex = slot.index
-
-        if (!isSlotInChestInventory(slot)) {
+        if (!isSlotInChestInventory(slot) || !validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
             return
         }
 
-        if (slot == toggleSlotToRender && fakeItemToRender != null) {
-            val client = MinecraftClient.getInstance()
-            val itemRenderer = client.itemRenderer
-
-            context.drawItem(fakeItemToRender, slot.x, slot.y)
+        if (!PetUtils.isPet(slot.stack)) {
+            return
         }
 
-        if (validSlotRanges.any { slotIndex in it } && !slot.stack.isEmpty) {
-            if (!PetUtils.isPet(slot.stack)) {
-                return
-            }
+        val itemUuid = ItemUtils.getUuid(slot.stack)
+        val isFavorite = itemUuid != null && highlightedItems.contains(itemUuid)
 
-            val itemUuid = ItemUtils.getUuid(slot.stack)
-            val isFavorite = itemUuid != null && highlightedItems.contains(itemUuid)
-
-            val highlightColor = getPetHighlightColor(slot.stack, isFavorite)
-            if (highlightColor != null) {
-                context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor.rgb)
-            }
+        val highlightColor = getPetHighlightColor(slot.stack, isFavorite)
+        if (highlightColor != null) {
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor.rgb)
         }
     }
 

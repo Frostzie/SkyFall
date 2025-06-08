@@ -24,7 +24,6 @@ repositories {
 
 dependencies {
     minecraft(libs.minecraft)
-    //"mappings"("net.fabricmc:yarn:${project.findProperty("yarn_mappings")}:v2")
     mappings(libs.yarn)
     modCompileOnly(libs.fabric.api)
     implementation(libs.gson)
@@ -35,6 +34,10 @@ dependencies {
     modImplementation(libs.fabric.api)
     modRuntimeOnly(libs.devauth)
     include(libs.moulconfig)
+}
+
+loom {
+    accessWidenerPath.set(file("src/main/resources/skyfall.accesswidener"))
 }
 
 tasks.named<ProcessResources>("processResources") {

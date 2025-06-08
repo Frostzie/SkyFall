@@ -83,12 +83,13 @@ object FavoritePowerStone {
 
         val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN || !isAccessoryBagThaumaturgy(screen)) {
+            favoredOnlyToggle = false
             return
         }
 
-        val screenX = getScreenX(screen)
-        val screenY = getScreenY(screen)
-        val backgroundWidth = getBackgroundWidth(screen)
+        val screenX = screen.x
+        val screenY = screen.y
+        val backgroundWidth = screen.backgroundWidth
 
         var buttonX = screenX + backgroundWidth - 16
         val buttonY = screenY + 4
@@ -102,6 +103,7 @@ object FavoritePowerStone {
             Text.literal(if (favoredOnlyToggle) "F" else "A")
         ) { _ ->
             favoredOnlyToggle = !favoredOnlyToggle
+            saveConfig()
             setupToggleButton(screen)
         }
             .dimensions(buttonX, buttonY, 12, 12)
@@ -117,46 +119,6 @@ object FavoritePowerStone {
                 widget is ButtonWidget &&
                         (widget.message.string == "F" || widget.message.string == "A")
             }
-        }
-    }
-
-    private fun getScreenX(screen: HandledScreen<*>): Int {
-        return try {
-            val field = HandledScreen::class.java.getDeclaredField("x")
-            field.isAccessible = true
-            field.getInt(screen)
-        } catch (e: Exception) {
-            (screen.width - getBackgroundWidth(screen)) / 2
-        }
-    }
-
-    private fun getScreenY(screen: HandledScreen<*>): Int {
-        return try {
-            val field = HandledScreen::class.java.getDeclaredField("y")
-            field.isAccessible = true
-            field.getInt(screen)
-        } catch (e: Exception) {
-            (screen.height - getBackgroundHeight(screen)) / 2
-        }
-    }
-
-    private fun getBackgroundWidth(screen: HandledScreen<*>): Int {
-        return try {
-            val field = HandledScreen::class.java.getDeclaredField("backgroundWidth")
-            field.isAccessible = true
-            field.getInt(screen)
-        } catch (e: Exception) {
-            176
-        }
-    }
-
-    private fun getBackgroundHeight(screen: HandledScreen<*>): Int {
-        return try {
-            val field = HandledScreen::class.java.getDeclaredField("backgroundHeight")
-            field.isAccessible = true
-            field.getInt(screen)
-        } catch (e: Exception) {
-            166
         }
     }
 
@@ -209,20 +171,16 @@ object FavoritePowerStone {
     }
 
     private fun getHoveredSlot(screen: HandledScreen<*>): Slot? {
-        try {
-            val focusedSlotField = HandledScreen::class.java.getDeclaredField("focusedSlot")
-            focusedSlotField.isAccessible = true
-            return focusedSlotField.get(screen) as? Slot
+        return try {
+            screen.focusedSlot
         } catch (e: Exception) {
             val mouseX = MinecraftClient.getInstance().mouse.x * screen.width / MinecraftClient.getInstance().window.width
             val mouseY = MinecraftClient.getInstance().mouse.y * screen.height / MinecraftClient.getInstance().window.height
 
             try {
-                val getSlotAtMethod = HandledScreen::class.java.getDeclaredMethod("getSlotAt", Double::class.javaPrimitiveType, Double::class.javaPrimitiveType)
-                getSlotAtMethod.isAccessible = true
-                return getSlotAtMethod.invoke(screen, mouseX, mouseY) as? Slot
+                screen.getSlotAt(mouseX, mouseY)
             } catch (e2: Exception) {
-                return null
+                null
             }
         }
     }
@@ -258,20 +216,27 @@ object FavoritePowerStone {
 
         try {
             FileReader(configFile).use { reader ->
-                val type = object : TypeToken<List<String>>() {}.type
-                highlightedItems = gson.fromJson(reader, type) ?: mutableListOf()
+                val type = object : TypeToken<Map<String, Any>>() {}.type
+                val configData: Map<String, Any> = gson.fromJson(reader, type) ?: emptyMap()
+                highlightedItems = (configData["highlightedItems"] as? List<String>)?.toMutableList() ?: mutableListOf()
+                favoredOnlyToggle = (configData["favoredOnlyToggle"] as? Boolean) ?: true
             }
         } catch (e: Exception) {
             e.printStackTrace()
             highlightedItems = mutableListOf()
+            favoredOnlyToggle = true
         }
     }
 
     private fun saveConfig() {
         try {
             configFile.parentFile.mkdirs()
+            val configData = mapOf(
+                "highlightedItems" to highlightedItems,
+                "favoredOnlyToggle" to favoredOnlyToggle
+            )
             FileWriter(configFile).use { writer ->
-                gson.toJson(highlightedItems, writer)
+                gson.toJson(configData, writer)
             }
         } catch (e: Exception) {
             e.printStackTrace()

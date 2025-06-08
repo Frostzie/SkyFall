@@ -5,14 +5,13 @@ import io.github.frostzie.skyfall.utils.events.IslandEvents.fireIslandChangeEven
 import io.github.frostzie.skyfall.utils.processors.ScoreboardProcessor
 import io.github.frostzie.skyfall.utils.processors.TabListProcessor
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import org.slf4j.LoggerFactory
 
 /**
  * Utility class for detecting the current island the player is on in Skyblock.
  * Combines information from both the scoreboard and tab list to provide accurate location information.
  */
 object IslandDetector {
-    private val logger = LoggerFactory.getLogger("skyfall:IslandDetector")
+    private val logger = LoggerProvider.getLogger("IslandDetector")
 
     private var currentIsland: IslandType = IslandType.UNKNOWN
     private var previousIsland: IslandType = IslandType.UNKNOWN

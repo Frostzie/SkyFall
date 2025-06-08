@@ -6,14 +6,13 @@ import io.github.frostzie.skyfall.utils.events.CurrentIslandListener
 import io.github.frostzie.skyfall.utils.events.IslandChangeEvent
 import io.github.frostzie.skyfall.utils.events.IslandChangeListener
 import io.github.frostzie.skyfall.utils.events.IslandEvents
-import org.slf4j.LoggerFactory
 
 /**
  * Manager class for island-related functionality.
  * Initializes the island detection system and provides high-level methods to interact with it.
  */
 object IslandManager {
-    private val logger = LoggerFactory.getLogger("skyfall:IslandManager")
+    private val logger = LoggerProvider.getLogger("IslandManager")
 
     /**
      * Initializes the Island Manager.

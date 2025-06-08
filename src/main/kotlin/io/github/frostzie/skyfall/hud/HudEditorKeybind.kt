@@ -12,7 +12,7 @@ object HudEditorKeybind {
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             if (client.currentScreen == null) {
-                val openKey = SkyFall.feature.gui.openHudEditorKey // Use the shared GuiConfig instance
+                val openKey = SkyFall.feature.gui.openHudEditorKey
                 val window = MinecraftClient.getInstance().window.handle
 
                 if (openKey != GLFW.GLFW_KEY_UNKNOWN) {

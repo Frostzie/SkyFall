@@ -21,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-//TODO: rework once MoulConfig adds KeyBinding wrapper
-
 object GardenKeybinds {
 
     private val keybinds get() = SkyFall.feature.garden.keybindConfig.customGardenKeybinds

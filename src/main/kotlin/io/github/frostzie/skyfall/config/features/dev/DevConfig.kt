@@ -11,7 +11,7 @@ class DevConfig {
     var enabledDevMode: Boolean = false
 
     @Expose
-    @ConfigOption(name = "Config Save", desc = "Show config save messages in console")
+    @ConfigOption(name = "Location Command", desc = "Enable the /sfDevIslandType command to show your current island name and area.")
     @ConfigEditorBoolean
-    var showSaveConfigMessages: Boolean = false
+    var locationCommand: Boolean = false
 }

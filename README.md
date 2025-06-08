@@ -3,9 +3,11 @@
 SkyFall is a hypixel skyblock QoL mod made for newest versions of Minecraft in Fabric. Currently, very much a wip so many features soon to come.
 
 ## Features
-- Garden Features
-- Inventory highlight options
-- And more!
+- Mouse Sensitivity Hotkey.
+- Custom Garden Keybinds when holding tools.
+- Favorite Power Stones and Abiphone Contact highlighter.
+- Pet Menu Features.
+- Chat Filters.
 
 # Guide
 - Requires [Fabric Kotlin Language](https://modrinth.com/mod/fabric-language-kotlin) to be installed.

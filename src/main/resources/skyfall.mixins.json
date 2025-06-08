@@ -2,7 +2,9 @@
   "required": true,
   "package": "io.github.frostzie.skyfall.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "CaseInsensitiveCommandMapMixin"
+  ],
   "client": [
     "InGameHudEffectsMixin",
     "KeyBindingMixin",

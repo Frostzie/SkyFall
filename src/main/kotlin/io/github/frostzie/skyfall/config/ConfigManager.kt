@@ -9,6 +9,7 @@ import io.github.notenoughupdates.moulconfig.processor.ConfigProcessorDriver
 import io.github.notenoughupdates.moulconfig.processor.MoulConfigProcessor
 
 import com.google.gson.GsonBuilder
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
@@ -23,6 +24,7 @@ import java.nio.file.StandardCopyOption
 import kotlin.concurrent.fixedRateTimer
 
 object ConfigManager {
+    private val logger = LoggerProvider.getLogger("configManager")
     val gson = GsonBuilder().setPrettyPrinting()
         .excludeFieldsWithoutExposeAnnotation()
         .serializeSpecialFloatingPointValues()
@@ -38,7 +40,7 @@ object ConfigManager {
 
     fun firstLoad() {
         if (ConfigManager::features.isInitialized) {
-            println("Loading config despite config alr being loaded?..")
+            println("SkyFall: Loading config despite config alr being loaded?..")
         }
 
         configDirectory.mkdirs()
@@ -50,17 +52,15 @@ object ConfigManager {
                 val inputStreamReader = InputStreamReader(FileInputStream(configFile!!), StandardCharsets.UTF_8)
                 val bufferedReader = BufferedReader(inputStreamReader)
                 features = gson.fromJson(bufferedReader.readText(), Features::class.java)
-                println("Loaded config file")
+                println("SkyFall: Loaded config file")
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.error("Exception while reading config file $configFile", e)
                 val backupFile = configFile!!.resolveSibling("config-${SimpleTimeMark.now().toMillis()}-backup.json")
-                println("Exception while reading $configFile. Will load fresh config and save backup to $backupFile")
-                println("Exception was $e")
+                logger.error("Exception while reading $configFile. Will load fresh config and save backup to $backupFile", e)
                 try {
                     configFile!!.copyTo(backupFile)
                 } catch (e: Exception) {
-                    println("Couldn't create a backup file for config")
-                    e.printStackTrace()
+                    logger.error("Couldn't create a backup file for config", e)
                 }
             }
         }
@@ -74,8 +74,8 @@ object ConfigManager {
         fixedRateTimer(name = "skyfall-config-auto-save", period = 60_000L, initialDelay = 60_000L) {
             try {
                 saveConfig("auto-save-60s")
-            } catch (_: Throwable) {
-                println("Error auto-saving config!")
+            } catch (e: Throwable) {
+                logger.error("Error auto-saving config!", e)
             }
         }
 
@@ -90,15 +90,8 @@ object ConfigManager {
     }
 
     fun saveConfig(reason: String) {
-        val showSaveMessage = features.dev.enabledDevMode && features.dev.showSaveConfigMessages
-        if (showSaveMessage) {
-            println("saveConfig: $reason")
-        }
         val file = configFile ?: throw Error("Can't save config, configFile is null")
         try {
-            if (showSaveMessage) {
-                println("Saving config file")
-            }
             file.parentFile.mkdirs()
             val unit = file.parentFile.resolve("config.json.write")
             unit.createNewFile()
@@ -113,8 +106,7 @@ object ConfigManager {
                 StandardCopyOption.ATOMIC_MOVE
             )
         } catch (e: IOException) {
-            println("Couldn't save config file to $file")
-            e.printStackTrace()
+            logger.error("Couldn't save config file to $file", e)
         }
     }
 }

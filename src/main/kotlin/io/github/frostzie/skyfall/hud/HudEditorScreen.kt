@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall.hud
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
@@ -27,6 +28,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
     private val infoBoxHeight = 20
 
     companion object {
+        private val logger = LoggerProvider.getLogger("hudEditor")
         private val tooltipShownFile = File(MinecraftClient.getInstance().runDirectory, "config/skyfall/tooltip_shown.flag")
 
         private fun hasTooltipBeenShown(): Boolean {
@@ -38,7 +40,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
                 tooltipShownFile.parentFile.mkdirs()
                 tooltipShownFile.createNewFile()
             } catch (e: Exception) {
-                println("Failed to create tooltip flag file: ${e.message}")
+                logger.error("Failed to mark tooltip as shown: ${e.message}", e)
             }
         }
     }

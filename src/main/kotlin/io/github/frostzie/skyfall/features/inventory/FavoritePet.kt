@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.item.SlotHandler
 import io.github.frostzie.skyfall.utils.item.ItemUtils
@@ -26,6 +27,7 @@ import java.io.FileReader
 import java.io.FileWriter
 
 object FavoritePet {
+    private val logger = LoggerProvider.getLogger("FavoritePet")
     private val configFile = File("config/skyfall/favorite-pets.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
@@ -194,12 +196,14 @@ object FavoritePet {
         return try {
             screen.focusedSlot
         } catch (e: Exception) {
+            logger.error("Failed to get hovered slot: ${e.message}", e)
             val mouseX = MinecraftClient.getInstance().mouse.x * screen.width / MinecraftClient.getInstance().window.width
             val mouseY = MinecraftClient.getInstance().mouse.y * screen.height / MinecraftClient.getInstance().window.height
 
             try {
                 screen.getSlotAt(mouseX, mouseY)
             } catch (e2: Exception) {
+                logger.error("Failed to get slot at mouse position: ${e2.message}", e2)
                 null
             }
         }
@@ -261,11 +265,11 @@ object FavoritePet {
             FileReader(configFile).use { reader ->
                 val type = object : TypeToken<Map<String, Any>>() {}.type
                 val configData: Map<String, Any> = gson.fromJson(reader, type) ?: emptyMap()
-                highlightedItems = (configData["highlightedItems"] as? List<String>)?.toMutableList() ?: mutableListOf()
-                favoredOnlyToggle = (configData["favoredOnlyToggle"] as? Boolean) ?: true
+                highlightedItems = (configData["highlightedItems"] as? List<*>)?.filterIsInstance<String>()?.toMutableList() ?: mutableListOf()
+                favoredOnlyToggle = configData["favoredOnlyToggle"] as? Boolean ?: true
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Failed to load favorite pets config: ${e.message}", e)
             highlightedItems = mutableListOf()
             favoredOnlyToggle = true
         }
@@ -282,7 +286,7 @@ object FavoritePet {
                 gson.toJson(configData, writer)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Failed to save favorite pets config: ${e.message}", e)
         }
     }
 }

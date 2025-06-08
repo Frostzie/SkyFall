@@ -2,7 +2,7 @@ package io.github.frostzie.skyfall.commands
 
 import io.github.frostzie.skyfall.config.ConfigGuiManager
 import io.github.frostzie.skyfall.utils.ChatUtils
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
+import io.github.frostzie.skyfall.utils.CommandUtils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 
 object AlwaysOnCommands {
@@ -11,11 +11,11 @@ object AlwaysOnCommands {
 
     fun openConfig() {
         Command.register { a, _ ->
-            a.register(literal("sf").executes {
+            a.register(CommandUtils.caseInsensitiveLiteral("sf").executes {
                 ConfigGuiManager.openConfigGui()
                 1
             })
-            a.register(literal("skyfall").executes {
+            a.register(CommandUtils.caseInsensitiveLiteral("skyfall").executes {
                 ConfigGuiManager.openConfigGui()
                 1
             })
@@ -24,7 +24,7 @@ object AlwaysOnCommands {
 
     fun sfColor() {
         Command.register { a, _ ->
-            a.register(literal("sfcolor").executes {
+            a.register(CommandUtils.caseInsensitiveLiteral("sfcolor").executes {
                 ChatUtils.messageToChat(
                     "§c===================================================\n" +
                             "§f&0 = §0Black             §f&1 = §1Dark Blue\n" +

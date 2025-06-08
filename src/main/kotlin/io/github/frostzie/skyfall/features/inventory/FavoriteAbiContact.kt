@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.item.SlotHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -23,6 +24,7 @@ import java.io.FileReader
 import java.io.FileWriter
 
 object FavoriteAbiContact {
+    private val logger = LoggerProvider.getLogger("FavoriteAbiContact")
     private val configFile = File("config/skyfall/favorite-contacts.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private var keyWasPressed = false
@@ -174,12 +176,14 @@ object FavoriteAbiContact {
         return try {
             screen.focusedSlot
         } catch (e: Exception) {
+            logger.error("Failed to get hovered slot: ${e.message}", e)
             val mouseX = MinecraftClient.getInstance().mouse.x * screen.width / MinecraftClient.getInstance().window.width
             val mouseY = MinecraftClient.getInstance().mouse.y * screen.height / MinecraftClient.getInstance().window.height
 
             try {
                 screen.getSlotAt(mouseX, mouseY)
             } catch (e2: Exception) {
+                logger.error("Failed to get slot at mouse position: ${e2.message}", e2)
                 null
             }
         }
@@ -218,11 +222,11 @@ object FavoriteAbiContact {
             FileReader(configFile).use { reader ->
                 val type = object : TypeToken<Map<String, Any>>() {}.type
                 val configData: Map<String, Any> = gson.fromJson(reader, type) ?: emptyMap()
-                highlightedItems = (configData["highlightedItems"] as? List<String>)?.toMutableList() ?: mutableListOf()
-                favoredOnlyToggle = (configData["favoredOnlyToggle"] as? Boolean) ?: true
+                highlightedItems = (configData["highlightedItems"] as? List<*>)?.filterIsInstance<String>()?.toMutableList() ?: mutableListOf()
+                favoredOnlyToggle = configData["favoredOnlyToggle"] as? Boolean ?: true
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Failed to load favorite contacts config: ${e.message}", e)
             highlightedItems = mutableListOf()
             favoredOnlyToggle = true
         }
@@ -239,7 +243,7 @@ object FavoriteAbiContact {
                 gson.toJson(configData, writer)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Failed to save favorite contacts config: ${e.message}", e)
         }
     }
 }

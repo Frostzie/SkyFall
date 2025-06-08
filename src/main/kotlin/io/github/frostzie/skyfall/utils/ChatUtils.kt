@@ -60,7 +60,6 @@ object ChatUtils {
             .setStyle(
                 Style.EMPTY.withColor(TextColor.fromRgb(0xFF5555)) // Light Red
                     .withClickEvent(ClickEvent.CopyToClipboard(copyableText))
-                    // Corrected HoverEvent instantiation
                     .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to copy error message")))
             )
         val fullMessage = Text.empty()
@@ -75,14 +74,12 @@ object ChatUtils {
 
         fun copyContent(copyText: String): MessageBuilder {
             style = style.withClickEvent(ClickEvent.CopyToClipboard(copyText))
-                // Corrected HoverEvent instantiation
                 .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to copy")))
             return this
         }
 
         fun clickToRun(command: String): MessageBuilder {
             style = style.withClickEvent(ClickEvent.RunCommand(command))
-                // Corrected HoverEvent instantiation
                 .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to run:§a\n$command")))
             return this
         }

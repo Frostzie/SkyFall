@@ -1,9 +1,9 @@
 package io.github.frostzie.skyfall.utils.processors
 
 import io.github.frostzie.skyfall.mixin.TabListAccessor
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.PlayerListEntry
-import org.slf4j.LoggerFactory
 import java.util.HashMap
 import java.util.concurrent.ConcurrentHashMap
 
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
  * This utility extracts area, profile, and other information from the tab list entries.
  */
 object TabListProcessor {
-    private val logger = LoggerFactory.getLogger("skyfall:TabListProcessor")
+    private val logger = LoggerProvider.getLogger("TabListProcessor")
     private val tabList = mutableListOf<String>()
     private val previousPlayers = mutableSetOf<String>()
     private val currentValues = HashMap<String, String?>()

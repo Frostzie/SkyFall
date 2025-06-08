@@ -1,5 +1,6 @@
 package io.github.frostzie.skyfall.commands
 
+import io.github.frostzie.skyfall.commands.dev.IslandTypeCommand
 import io.github.frostzie.skyfall.features.dungeon.ShortCommands
 
 object CommandManager {
@@ -10,5 +11,8 @@ object CommandManager {
 
         // Dungeon Commands
         ShortCommands.registerCommands()
+
+        // Dev Commands
+        IslandTypeCommand.register()
     }
 }

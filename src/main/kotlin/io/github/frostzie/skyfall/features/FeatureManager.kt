@@ -10,6 +10,8 @@ import io.github.frostzie.skyfall.features.garden.MouseSensitivity
 import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
 import io.github.frostzie.skyfall.features.inventory.FavoritePet
 import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
+import io.github.frostzie.skyfall.features.wip.ExampleElements
+import io.github.frostzie.skyfall.features.wip.Test
 import io.github.frostzie.skyfall.hud.HudEditorKeybind
 
 object FeatureManager {
@@ -37,5 +39,12 @@ object FeatureManager {
         GardenKeybinds.init()
         GardenKeybinds.homeHotkey()
         MouseSensitivity.init()
+
+        // Dev Features
+
+        //WIP Features
+        //ExampleElements.initialize()
+        //Test.init()
+
     }
 }

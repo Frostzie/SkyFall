@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall.hud
 
 import com.google.gson.GsonBuilder
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
 import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
@@ -15,6 +16,7 @@ data class HudConfigData(
 )
 
 object HudManager {
+    private val logger = LoggerProvider.getLogger("hudManager")
     private val elements = mutableMapOf<Identifier, HudElement>()
     private val configFile = File(MinecraftClient.getInstance().runDirectory, "config/skyfall/location.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -37,12 +39,13 @@ object HudManager {
     }
 
     fun registerElement(element: HudElement) {
-        elements[element.id] = element
-
         val savedConfig = loadedConfig?.elements?.get(element.id.toString())
         if (savedConfig != null) {
             element.updateConfig(savedConfig)
+        } else {
+            element.updateConfig(element.defaultConfig)
         }
+        elements[element.id] = element
     }
 
     fun getElements(): Collection<HudElement> = elements.values
@@ -69,9 +72,12 @@ object HudManager {
             if (configFile.exists()) {
                 val configText = configFile.readText()
                 loadedConfig = gson.fromJson(configText, HudConfigData::class.java)
+                loadedConfig?.elements?.forEach { (id, config) ->
+                    elements[Identifier.of(id)]?.updateConfig(config)
+                }
             }
         } catch (e: Exception) {
-            println("Failed to load HUD config: ${e.message}")
+            logger.error("Failed to load HUD config: ${e.message}", e)
             loadedConfig = HudConfigData()
         }
     }
@@ -79,16 +85,14 @@ object HudManager {
     fun saveConfig() {
         try {
             configFile.parentFile.mkdirs()
-
             val configData = HudConfigData(
                 elements = elements.mapKeys { it.key.toString() }
                     .mapValues { it.value.config }
             )
-
             val configText = gson.toJson(configData)
             configFile.writeText(configText)
         } catch (e: Exception) {
-            println("Failed to save HUD config: ${e.message}")
+            logger.error("Failed to save HUD config: ${e.message}", e)
         }
     }
 }

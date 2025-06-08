@@ -17,9 +17,7 @@ object MouseSensitivity {
 
     private var wasToggleKeyPressedLastTick: Boolean = false
     private var originalMouseSensitivityOptionValue: Double? = null
-
     private var mouseHookWasEffectiveLastTick: Boolean = false
-
     private val toggleKeyCode: Int
         get() = SkyFall.feature.garden.mouseSensitivity.mouseSensitivity
 

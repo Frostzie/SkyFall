@@ -11,6 +11,7 @@ import net.minecraft.client.util.InputUtil
  * Handles attack and use actions for both keyboard and mouse inputs
  */
 object MouseActionHandler {
+    private val logger = LoggerProvider.getLogger("MouseActionHandler")
     private val attackKey get() = MinecraftClient.getInstance().options.attackKey!!
     private val useKey get() = MinecraftClient.getInstance().options.useKey!!
 
@@ -84,6 +85,7 @@ object MouseActionHandler {
         return try {
             InputUtil.fromTranslationKey(keyBinding.boundKeyTranslationKey).code
         } catch (e: Exception) {
+            logger.error("Error getting key code for key binding: ${keyBinding.boundKeyTranslationKey}", e)
             KeyboardManager.KEY_NONE
         }
     }

@@ -16,6 +16,8 @@ import kotlin.math.abs
  */
 object KeyboardManager {
 
+    private val logger = LoggerProvider.getLogger("keyboardManager")
+
     const val LEFT_MOUSE = -100
     const val RIGHT_MOUSE = -99
     const val MIDDLE_MOUSE = -98
@@ -125,6 +127,7 @@ object KeyboardManager {
             val state = try {
                 GLFW.glfwGetMouseButton(window, button) == GLFW.GLFW_PRESS
             } catch (e: Exception) {
+                logger.error("Error checking mouse button state for button $button", e)
                 false
             }
 
@@ -176,8 +179,7 @@ object KeyboardManager {
             val keyCode = InputUtil.fromTranslationKey(this.boundKeyTranslationKey).code
             if (keyCode.isKeyHeld()) return true
         } catch (e: Exception) {
-            println("Error while checking if a key is pressed")
-            e.printStackTrace()
+            logger.error("Error while checking if KeyBinding is active: ${this.boundKeyTranslationKey}", e)
             return false
         }
         return this.isPressed
@@ -200,6 +202,7 @@ object KeyboardManager {
                 mouseButtonStates[button] ||
                         GLFW.glfwGetMouseButton(minecraft.window.handle, button) == GLFW.GLFW_PRESS
             } catch (e: Exception) {
+                logger.error("Error checking mouse button state for button $button", e)
                 false
             }
         }
@@ -207,6 +210,7 @@ object KeyboardManager {
             return try {
                 GLFW.glfwGetKey(minecraft.window.handle, this) == GLFW.GLFW_PRESS
             } catch (e: Exception) {
+                logger.error("Error checking key state for key code $this", e)
                 false
             }
         }
@@ -242,6 +246,7 @@ object KeyboardManager {
         else -> try {
             InputUtil.fromKeyCode(keyCode, 0).localizedText.string
         } catch (e: Exception) {
+            logger.error("Error getting key name for key code $keyCode", e)
             "Unknown Key ($keyCode)"
         }
     }

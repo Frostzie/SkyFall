@@ -1,6 +1,8 @@
 package io.github.frostzie.skyfall.features
 
+import io.github.frostzie.skyfall.features.foraging.TuneFrequency
 import io.github.frostzie.skyfall.features.chat.FilterManager
+import io.github.frostzie.skyfall.features.dev.SoundDetector
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
 import io.github.frostzie.skyfall.features.garden.GardenKeybinds
 import io.github.frostzie.skyfall.features.gui.ConfigOpen
@@ -40,11 +42,15 @@ object FeatureManager {
         GardenKeybinds.homeHotkey()
         MouseSensitivity.init()
 
+        // Foraging Features
+        TuneFrequency.init()
+
         // Dev Features
+        SoundDetector.initialize()
 
         //WIP Features
         //ExampleElements.initialize()
-        //Test.init()
+        //Test.init() //Garden Map
 
     }
 }

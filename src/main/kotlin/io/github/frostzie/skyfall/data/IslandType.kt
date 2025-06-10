@@ -12,6 +12,7 @@ enum class IslandType(val displayName: String) {
     CRYSTAL_HOLLOWS("Crystal Hollows"),
     FARMING_ISLANDS("The Farming Islands"),
     THE_PARK("The Park"),
+    GALATEA("Galatea"),
     CATACOMBS("Catacombs"),
     DUNGEON_HUB("Dungeon Hub"),
     HUB("Hub"),

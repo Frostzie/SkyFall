@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose
 import io.github.frostzie.skyfall.config.features.chat.ChatConfig
 import io.github.frostzie.skyfall.config.features.dev.DevConfig
 import io.github.frostzie.skyfall.config.features.dungeon.DungeonConfig
+import io.github.frostzie.skyfall.config.features.foraging.ForagingConfig
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.config.features.gui.GuiConfig
 import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig
@@ -42,6 +43,10 @@ class Features : Config() {
     @Expose
     @Category(name = "Dungeon", desc = "Dungeon related features")
     var dungeon: DungeonConfig = DungeonConfig()
+
+    @Expose
+    @Category(name = "Foraging", desc = "Foraging related features")
+    var foraging: ForagingConfig = ForagingConfig()
 
     @Expose
     @Category(name = "Garden", desc = "Garden related features")

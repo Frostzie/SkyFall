@@ -2,9 +2,7 @@
   "required": true,
   "package": "io.github.frostzie.skyfall.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "CaseInsensitiveCommandMapMixin"
-  ],
+  "mixins": [],
   "client": [
     "InGameHudEffectsMixin",
     "KeyBindingMixin",
@@ -14,6 +12,8 @@
     "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",
     "SlotRenderingMixin",
+    "CaseInsensitiveCommandMapMixin",
+    "SoundSystemMixin",
     "TabListAccessor",
     "TextureUnpackBase64PadPatch",
     "YggdrasilSignatureIgnorePatch",

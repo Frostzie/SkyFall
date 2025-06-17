@@ -1,4 +1,4 @@
-package io.github.frostzie.skyfall.mixin;
+package io.github.frostzie.skyfall.mixin.accessor;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.PlayerListEntry;

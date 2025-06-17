@@ -16,7 +16,7 @@ public class SoundSystemMixin {
     private void onSoundPlay(SoundInstance soundInstance, CallbackInfo ci) {
         try {
             SoundDetector.INSTANCE.onSoundPlay(soundInstance);
-            TuneFrequency.INSTANCE.onSoundPlay(soundInstance); // Added TuneFrequency integration
+            TuneFrequency.INSTANCE.onSoundPlay(soundInstance);
         } catch (Exception e) {
             // Silently catch exceptions to prevent crashes
         }
@@ -26,7 +26,7 @@ public class SoundSystemMixin {
     private void onSoundStop(SoundInstance soundInstance, CallbackInfo ci) {
         try {
             SoundDetector.INSTANCE.onSoundStop(soundInstance);
-            TuneFrequency.INSTANCE.onSoundStop(soundInstance); // Added TuneFrequency integration
+            TuneFrequency.INSTANCE.onSoundStop(soundInstance);
         } catch (Exception e) {
             // Silently catch exceptions to prevent crashes
         }

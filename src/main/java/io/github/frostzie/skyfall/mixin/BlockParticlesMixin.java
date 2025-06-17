@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
 @Mixin(ParticleManager.class)
-public abstract class MixinBlockParticles {
+public abstract class BlockParticlesMixin {
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockDestroyEffects(BlockPos pos, BlockState state, CallbackInfo ci) {
         if (ConfigAccessors.hideBlockBreakingParticles()) {

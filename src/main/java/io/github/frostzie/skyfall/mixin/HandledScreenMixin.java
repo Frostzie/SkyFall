@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(HandledScreen.class)
-public class MixinHandledScreen<T extends ScreenHandler> {
+public class HandledScreenMixin<T extends ScreenHandler> {
 
     @WrapOperation(method = "drawSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawSlot(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/screen/slot/Slot;)V"))
     public void onDrawSlots(HandledScreen<T> instance, DrawContext context, Slot slot, Operation<Void> original) {

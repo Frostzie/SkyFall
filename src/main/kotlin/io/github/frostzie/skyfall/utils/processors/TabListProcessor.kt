@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall.utils.processors
 
-import io.github.frostzie.skyfall.mixin.TabListAccessor
+import io.github.frostzie.skyfall.mixin.accessor.TabListAccessor
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.PlayerListEntry

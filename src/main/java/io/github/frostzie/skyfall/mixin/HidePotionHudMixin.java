@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(StatusEffectsDisplay.class)
-public abstract class MixinHidePotionHud {
-    private MixinHidePotionHud()
+public abstract class HidePotionHudMixin {
+    private HidePotionHudMixin()
     {
         super();
     }

@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
@@ -26,17 +25,17 @@ object SoundDetector {
         val soundId: String
     )
 
-    fun initialize() {
-        if (config.enabledDevMode && config.soundDetector) {
-            HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { d: LayeredDrawerWrapper? ->
-                d!!.attachLayerAfter(
-                    IdentifiedLayer.SUBTITLES,
-                    Identifier.of("skyfall", "sounds")
-                ) { context: DrawContext?, _ ->
+    fun init() {
+        HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { d: LayeredDrawerWrapper? ->
+            d!!.attachLayerAfter(
+                IdentifiedLayer.SUBTITLES,
+                Identifier.of("skyfall", "sounds")
+            ) { context: DrawContext?, _ ->
+                if (config.enabledDevMode && config.soundDetector) {
                     renderSoundOverlay(context!!)
                 }
-            })
-        }
+            }
+        })
     }
 
     fun onSoundPlay(soundInstance: SoundInstance) {
@@ -189,9 +188,9 @@ object SoundDetector {
             val age = currentTime - sound.timestamp
             val alpha = ((maxDisplayTime - age) / maxDisplayTime.toFloat()).coerceIn(0f, 1f)
 
-            if (alpha <= 0f) continue // Skip rendering if alpha is zero
+            if (alpha <= 0f) continue
 
-            val displayText = Text.literal(sound.displayName)
+            val displayText = sound.displayName
             val textWidth = textRenderer.getWidth(displayText)
             val xPos = screenWidth - textWidth - 15
 

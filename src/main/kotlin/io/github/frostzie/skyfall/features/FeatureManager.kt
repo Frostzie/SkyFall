@@ -12,7 +12,7 @@ import io.github.frostzie.skyfall.features.garden.MouseSensitivity
 import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
 import io.github.frostzie.skyfall.features.inventory.FavoritePet
 import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
-import io.github.frostzie.skyfall.hud.HudEditorKeybind
+import io.github.frostzie.skyfall.features.gui.HudEditorKeybind
 
 object FeatureManager {
     fun loadFeatures() {
@@ -24,7 +24,7 @@ object FeatureManager {
         FilterManager.loadFilters()
 
         // Dungeon Features
-        RequeueKey()
+        RequeueKey.init()
 
         // Inventory Features
         FavoritePowerStone.init()
@@ -32,7 +32,7 @@ object FeatureManager {
         FavoritePet.init()
 
         // Misc Features
-        MiscKeybindManager()
+        MiscKeybindManager.init()
         RealisticSpacemanHelmet.init()
 
         // Garden Features
@@ -41,10 +41,11 @@ object FeatureManager {
         MouseSensitivity.init()
 
         // Foraging Features
-        TuneFrequency.init()
+        TuneFrequency.init() //TODO: rework
 
         // Dev Features
-        SoundDetector.init()
+        SoundDetector.init() //TODO: Fix hud flickering after fading out
+        //CopyItemData.init()
 
         //WIP Features
         //WaypointFeature.init()

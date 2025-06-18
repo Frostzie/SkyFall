@@ -6,17 +6,19 @@ import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ConditionalUtils.onToggle
 import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.events.IslandChangeListener
+import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.KeyboardManager.KEY_NONE
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
+import io.github.frostzie.skyfall.utils.events.IslandChangeEvent
 import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.notenoughupdates.moulconfig.observer.Property
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.SignEditScreen
 import net.minecraft.client.option.KeyBinding
-import org.lwjgl.glfw.GLFW
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -30,19 +32,18 @@ object GardenKeybinds {
     private var lastWindowOpenTime = SimpleTimeMark.farPast()
     private var lastKeybindWarning = SimpleTimeMark.farPast()
     private var isDuplicated = false
-    private var alreadyWarnedMouseKeys = mutableSetOf<Property<Int?>>()
 
     private var wasInGarden = false
     private var wasHoldingTool = false
 
     /**
-     * Checks if the player is currently on the Garden island.
+     * Checks if the player is currently in the Garden.
      */
     private val inGarden: Boolean
         get() = IslandManager.isOnIsland(IslandType.GARDEN)
 
     /**
-     * Checks if the player is currently holding any farming tool.
+     * Checks if the player is currently holding a farming tool.
      */
     private val toolInHand: Boolean
         get() {
@@ -56,8 +57,8 @@ object GardenKeybinds {
         ClientTickEvents.END_CLIENT_TICK.register { onClientTick() }
         configLoad()
 
-        IslandManager.registerIslandChangeListener(object : io.github.frostzie.skyfall.utils.events.IslandChangeListener {
-            override fun onIslandChange(event: io.github.frostzie.skyfall.utils.events.IslandChangeEvent) {
+        IslandManager.registerIslandChangeListener(object : IslandChangeListener {
+            override fun onIslandChange(event: IslandChangeEvent) {
                 if (event.newIsland == IslandType.GARDEN) {
                     updateSettings()
                 }
@@ -82,12 +83,7 @@ object GardenKeybinds {
             return
         }
 
-        val window = MinecraftClient.getInstance().window.handle
-        cir.returnValue = if (override >= GLFW.GLFW_MOUSE_BUTTON_1 && override <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-            GLFW.glfwGetMouseButton(window, override) == GLFW.GLFW_PRESS
-        } else {
-            override.isKeyHeld()
-        }
+        cir.returnValue = override.isKeyHeld()
     }
 
     @JvmStatic
@@ -101,12 +97,7 @@ object GardenKeybinds {
             return
         }
 
-        val window = MinecraftClient.getInstance().window.handle
-        cir.returnValue = if (override >= GLFW.GLFW_MOUSE_BUTTON_1 && override <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-            GLFW.glfwGetMouseButton(window, override) == GLFW.GLFW_PRESS
-        } else {
-            override.isKeyClicked()
-        }
+        cir.returnValue = override.isKeyClicked()
     }
 
     private fun onClientTick() {
@@ -116,7 +107,7 @@ object GardenKeybinds {
         }
 
         if (isEnabled() && isDuplicated && lastKeybindWarning.passedSince() > 30.seconds) {
-            ChatUtils.messageToChat("§eYou aren't allowed having multiple keybinds with the same key!").send()
+            ChatUtils.warning("You aren't allowed having multiple keybinds with the same key!")
             lastKeybindWarning = SimpleTimeMark.now()
         }
         val currentlyInGarden = inGarden
@@ -131,7 +122,6 @@ object GardenKeybinds {
 
     fun configLoad() {
         with(keybinds) {
-            processAllKeybinds()
             onToggle(leftClick, rightClick, moveForwards, moveRight, moveLeft, moveBackwards, moveJump, moveSneak) {
                 updateSettings()
             }
@@ -139,34 +129,30 @@ object GardenKeybinds {
         }
     }
 
-    private fun processAllKeybinds() {
+    private fun calculateDuplicates(): List<Int> {
+        val keyValues = map.values.filter { it != KEY_NONE }
+        val duplicates = keyValues.groupBy { it }.filter { it.value.size > 1 }.keys.toList()
+        isDuplicated = duplicates.isNotEmpty()
+        return duplicates
+    }
+
+    private fun resetDuplicateKeybinds(duplicateKeys: List<Int>) {
         with(keybinds) {
             val allKeybinds = listOf(
                 leftClick, rightClick, moveForwards, moveLeft, moveRight, moveBackwards, moveJump, moveSneak
             )
+
             for (keybind in allKeybinds) {
-                processKeybind(keybind)
-            }
-            alreadyWarnedMouseKeys.clear()
-        }
-    }
-
-    private fun processKeybind(property: Property<Int?>) {
-        property.get()?.let { key ->
-            if (key >= GLFW.GLFW_MOUSE_BUTTON_1 && key <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-                if (!alreadyWarnedMouseKeys.contains(property)) {
-                    ChatUtils.messageToChat("§eMouse buttons are not allowed for keybinds!").send()
-                    alreadyWarnedMouseKeys.add(property)
+                if (keybind.get() in duplicateKeys) {
+                    keybind.set(KEY_NONE)
                 }
-                property.set(KEY_NONE)
             }
         }
-    }
 
-    private fun calculateDuplicates() {
-        isDuplicated = map.values
-            .filter { it != KEY_NONE }
-            .let { values -> values.size != values.toSet().size }
+        if (duplicateKeys.isNotEmpty()) {
+            val keyNames = duplicateKeys.joinToString(", ") { KeyboardManager.getKeyName(it) }
+            ChatUtils.warning("Detected duplicate keybinds for: $keyNames")
+        }
     }
 
     private fun updateSettings() {
@@ -176,7 +162,6 @@ object GardenKeybinds {
         if (options == null) {
             return
         }
-        processAllKeybinds()
 
         with(keybinds) {
             map = buildMap {
@@ -194,12 +179,32 @@ object GardenKeybinds {
             }
         }
 
-        calculateDuplicates()
+        val duplicateKeys = calculateDuplicates()
+        if (duplicateKeys.isNotEmpty()) {
+            resetDuplicateKeybinds(duplicateKeys)
+            with(keybinds) {
+                map = buildMap {
+                    fun add(keyBinding: KeyBinding, property: Property<Int?>) {
+                        put(keyBinding, property.get() ?: KEY_NONE)
+                    }
+                    add(options.attackKey, leftClick)
+                    add(options.useKey, rightClick)
+                    add(options.forwardKey, moveForwards)
+                    add(options.leftKey, moveLeft)
+                    add(options.rightKey, moveRight)
+                    add(options.backKey, moveBackwards)
+                    add(options.jumpKey, moveJump)
+                    add(options.sneakKey, moveSneak)
+                }
+            }
+            calculateDuplicates()
+        }
+
         lastKeybindWarning = SimpleTimeMark.farPast()
         KeyBinding.unpressAll()
     }
 
-    //TODO: add this with mouse button support
+    /* //TODO: implement with a button in config menu
     fun resetAll() {
         with(keybinds) {
             leftClick.set(KEY_NONE)
@@ -211,7 +216,7 @@ object GardenKeybinds {
             moveJump.set(KEY_NONE)
             moveSneak.set(KEY_NONE)
         }
-    }
+    } */
 
     private var lastHomeCommandTime = SimpleTimeMark.farPast()
 

@@ -1,228 +1,92 @@
 package io.github.frostzie.skyfall.utils
 
-import io.github.frostzie.skyfall.events.KeyDownEvent
-import io.github.frostzie.skyfall.events.KeyPressEvent
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.screen.ChatScreen
-import net.minecraft.client.option.KeyBinding
-import org.apache.commons.lang3.SystemUtils
-import org.lwjgl.glfw.GLFW
 import net.minecraft.client.util.InputUtil
-import kotlin.math.abs
+import org.lwjgl.glfw.GLFW
 
 /**
- * Manages keyboard and mouse input
+ * Manages keyboard and mouse input using Minecraft's InputUtil system
  */
 object KeyboardManager {
 
     private val logger = LoggerProvider.getLogger("keyboardManager")
 
-    const val LEFT_MOUSE = -100
-    const val RIGHT_MOUSE = -99
-    const val MIDDLE_MOUSE = -98
-    const val KEY_NONE = -1
+    val LEFT_MOUSE = InputUtil.Type.MOUSE.createFromCode(GLFW.GLFW_MOUSE_BUTTON_LEFT).code
+    val RIGHT_MOUSE = InputUtil.Type.MOUSE.createFromCode(GLFW.GLFW_MOUSE_BUTTON_RIGHT).code
+    val MIDDLE_MOUSE = InputUtil.Type.MOUSE.createFromCode(GLFW.GLFW_MOUSE_BUTTON_MIDDLE).code
+    val KEY_NONE = InputUtil.UNKNOWN_KEY.code
 
-    private const val MAX_MOUSE_BUTTON = 7
+    private val MOUSE_BUTTON_RANGE = GLFW.GLFW_MOUSE_BUTTON_1..GLFW.GLFW_MOUSE_BUTTON_LAST
+    private val pressedKeys = mutableMapOf<InputUtil.Key, Boolean>()
 
-    private var lastClickedMouseButton = -1
+    /**
+     * Enhanced key state checking using InputUtil.
+     * This is the key fix: It now uses the raw GLFW method for checking mouse buttons,
+     * which is more reliable inside GUIs where Minecraft might otherwise consume the input.
+     */
+    fun InputUtil.Key.isPressed(): Boolean {
+        return try {
+            val minecraft = MinecraftClient.getInstance()
+            val windowHandle = minecraft?.window?.handle ?: return false
 
-    private const val GLFW_KEY_LMETA = GLFW.GLFW_KEY_LEFT_SUPER
-    private const val GLFW_KEY_RMETA = GLFW.GLFW_KEY_RIGHT_SUPER
-    private const val GLFW_KEY_LMENU = GLFW.GLFW_KEY_LEFT_ALT
-    private const val GLFW_KEY_RMENU = GLFW.GLFW_KEY_RIGHT_ALT
-    private const val GLFW_KEY_LCONTROL = GLFW.GLFW_KEY_LEFT_CONTROL
-    private const val GLFW_KEY_RCONTROL = GLFW.GLFW_KEY_RIGHT_CONTROL
-    private const val GLFW_KEY_LSHIFT = GLFW.GLFW_KEY_LEFT_SHIFT
-    private const val GLFW_KEY_RSHIFT = GLFW.GLFW_KEY_RIGHT_SHIFT
-    private const val GLFW_KEY_BACK = GLFW.GLFW_KEY_BACKSPACE
-    private const val GLFW_KEY_V = GLFW.GLFW_KEY_V
-    private const val GLFW_KEY_C = GLFW.GLFW_KEY_C
-
-    private var lastEventKey = 0
-    private var lastEventChar = '\u0000'
-    private var lastEventKeyState = false
-
-    private val mouseButtonStates = BooleanArray(MAX_MOUSE_BUTTON)
-
-    fun init() {
-        ClientTickEvents.END_CLIENT_TICK.register { onTick() }
-    }
-
-    fun setupKeyboardCallbacks(window: Long) {
-        GLFW.glfwSetKeyCallback(window) { _, key, _, action, _ ->
-            lastEventKey = key
-            lastEventKeyState = (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_REPEAT)
-        }
-
-        GLFW.glfwSetCharCallback(window) { _, codepoint ->
-            lastEventChar = codepoint.toChar()
-        }
-
-        GLFW.glfwSetMouseButtonCallback(window) { _, button, action, _ ->
-            if (button >= 0 && button < MAX_MOUSE_BUTTON) {
-                mouseButtonStates[button] = (action == GLFW.GLFW_PRESS)
-
-                val keyCode = -(100 - button)
-
-                if (action == GLFW.GLFW_PRESS) {
-                    if (button == 0) {
-                        lastClickedMouseButton = keyCode
-                    }
-                    if (!clickedKeys.contains(keyCode)) {
-                        fireKeyDownEvent(keyCode)
-                        clickedKeys.add(keyCode)
-                    }
-                    fireKeyPressEvent(keyCode)
-                } else {
-                    clickedKeys.remove(keyCode)
-                    if (lastClickedMouseButton == keyCode) {
-                        lastClickedMouseButton = -1
-                    }
+            when (this.category) {
+                InputUtil.Type.MOUSE -> {
+                    GLFW.glfwGetMouseButton(windowHandle, this.code) == GLFW.GLFW_PRESS
                 }
+                InputUtil.Type.KEYSYM -> {
+                    InputUtil.isKeyPressed(windowHandle, this.code)
+                }
+                else -> false
             }
-        }
-    }
-
-    // A mac-only key, represents Windows key on windows (but different key code)
-    private fun isCommandKeyDown() = GLFW_KEY_LMETA.isKeyHeld() || GLFW_KEY_RMETA.isKeyHeld()
-
-    // Windows: Alt key Mac: Option key
-    fun isMenuKeyDown() = GLFW_KEY_LMENU.isKeyHeld() || GLFW_KEY_RMENU.isKeyHeld()
-
-    fun isControlKeyDown() = GLFW_KEY_LCONTROL.isKeyHeld() || GLFW_KEY_RCONTROL.isKeyHeld()
-
-    fun isDeleteWordDown() = GLFW_KEY_BACK.isKeyHeld() && if (SystemUtils.IS_OS_MAC) isMenuKeyDown() else isControlKeyDown()
-
-    fun isDeleteLineDown() = GLFW_KEY_BACK.isKeyHeld() && if (SystemUtils.IS_OS_MAC) isCommandKeyDown() else isControlKeyDown() && isShiftKeyDown()
-
-    fun isShiftKeyDown() = GLFW_KEY_LSHIFT.isKeyHeld() || GLFW_KEY_RSHIFT.isKeyHeld()
-
-    fun isPastingKeysDown() = isModifierKeyDown() && GLFW_KEY_V.isKeyHeld()
-
-    fun isCopyingKeysDown() = isModifierKeyDown() && GLFW_KEY_C.isKeyHeld()
-
-    fun isModifierKeyDown() = if (SystemUtils.IS_OS_MAC) isCommandKeyDown() else isControlKeyDown()
-
-    fun isRightMouseClicked() = RIGHT_MOUSE.isKeyClicked()
-
-    /**
-     * Returns the name of the modifier key based on the OS
-     */
-    fun getModifierKeyName(): String = if (SystemUtils.IS_OS_MAC) "Command" else "Control"
-
-    private data class EventKey(val key: Int, val pressed: Boolean)
-
-    private fun getEventKey(): EventKey {
-        val window = MinecraftClient.getInstance().window.handle
-
-        if (lastEventKey != 0) {
-            return when (lastEventKey) {
-                0 -> EventKey(lastEventChar.code + 256, lastEventKeyState)
-                else -> EventKey(lastEventKey, lastEventKeyState)
-            }
-        }
-
-        for (button in 0 until MAX_MOUSE_BUTTON) {
-            val state = try {
-                GLFW.glfwGetMouseButton(window, button) == GLFW.GLFW_PRESS
-            } catch (e: Exception) {
-                logger.error("Error checking mouse button state for button $button", e)
-                false
-            }
-
-            if (state) {
-                val key = -(100 - button)
-                return EventKey(key, true)
-            }
-        }
-
-        return EventKey(0, false)
-    }
-
-    private val clickedKeys = mutableSetOf<Int>()
-
-    /**
-     * Called every tick to process keyboard and mouse input
-     */
-    fun onTick() {
-        val minecraft = MinecraftClient.getInstance()
-        val currentScreen = minecraft.currentScreen
-
-        if (currentScreen is ChatScreen) return
-
-        val (key, pressed) = getEventKey()
-        if (pressed) {
-            fireKeyPressEvent(key)
-            if (!clickedKeys.contains(key)) {
-                fireKeyDownEvent(key)
-                clickedKeys.add(key)
-            }
-        } else {
-            clickedKeys.remove(key)
-        }
-    }
-
-    private fun fireKeyPressEvent(keyCode: Int) {
-        KeyPressEvent(keyCode).post()
-    }
-
-    private fun fireKeyDownEvent(keyCode: Int) {
-        KeyDownEvent(keyCode).post()
-    }
-
-    /**
-     * Checks if a KeyBinding is currently active
-     */
-    fun KeyBinding.isActive(): Boolean {
-        try {
-            val keyCode = InputUtil.fromTranslationKey(this.boundKeyTranslationKey).code
-            if (keyCode.isKeyHeld()) return true
         } catch (e: Exception) {
-            logger.error("Error while checking if KeyBinding is active: ${this.boundKeyTranslationKey}", e)
-            return false
+            logger.error("Error checking key state for key: $this", e)
+            false
         }
-        return this.isPressed
     }
 
     /**
-     * Checks if a key is currently held down
+     * Check if a value is a valid mouse button code.
+     */
+    private fun isMouseButtonCode(code: Int): Boolean {
+        return code in MOUSE_BUTTON_RANGE
+    }
+
+    /**
+     * Convert GLFW key code to InputUtil.Key
+     */
+    fun glfwKeyToInputUtil(glfwKey: Int): InputUtil.Key? {
+        return try {
+            when {
+                glfwKey == GLFW.GLFW_KEY_UNKNOWN -> null
+                isMouseButtonCode(glfwKey) -> InputUtil.Type.MOUSE.createFromCode(glfwKey)
+                else -> InputUtil.Type.KEYSYM.createFromCode(glfwKey)
+            }
+        } catch (e: Exception) {
+            logger.error("Error converting GLFW key $glfwKey to InputUtil.Key", e)
+            null
+        }
+    }
+
+    /**
+     * Check if a GLFW key code is currently pressed.
+     */
+    fun isGlfwKeyPressed(glfwKey: Int): Boolean {
+        val inputKey = glfwKeyToInputUtil(glfwKey) ?: return false
+        return inputKey.isPressed()
+    }
+
+    /**
+     * Extension for Int key codes to check if a key is held down.
      */
     fun Int.isKeyHeld(): Boolean {
-        if (this == 0 || this == KEY_NONE) return false
-
-        val minecraft = MinecraftClient.getInstance()
-        if (minecraft?.window == null) return false
-
-        if (this < 0) {
-            val button = abs(this + 100)
-            if (button >= MAX_MOUSE_BUTTON) return false
-
-            return try {
-                mouseButtonStates[button] ||
-                        GLFW.glfwGetMouseButton(minecraft.window.handle, button) == GLFW.GLFW_PRESS
-            } catch (e: Exception) {
-                logger.error("Error checking mouse button state for button $button", e)
-                false
-            }
-        }
-        else {
-            return try {
-                GLFW.glfwGetKey(minecraft.window.handle, this) == GLFW.GLFW_PRESS
-            } catch (e: Exception) {
-                logger.error("Error checking key state for key code $this", e)
-                false
-            }
-        }
+        return isGlfwKeyPressed(this)
     }
 
-    private val pressedKeys = mutableMapOf<Int, Boolean>()
-
     /**
-     * Can only be used once per click, since the function locks itself until the key is no longer held.
-     * Do not use in key press events, since it won't be unlocked again.
+     * Can only be used once per click, locks until the key is released.
+     * This tracks the key state to return true only on the initial press.
      */
-    fun Int.isKeyClicked(): Boolean = if (this.isKeyHeld()) {
+    fun InputUtil.Key.isKeyClicked(): Boolean = if (this.isPressed()) {
         if (pressedKeys[this] != true) {
             pressedKeys[this] = true
             true
@@ -235,65 +99,32 @@ object KeyboardManager {
     }
 
     /**
-     * Gets a readable name for a key code
+     * GLFW version of isKeyClicked. This is the primary method you should use.
      */
-    fun getKeyName(keyCode: Int): String = when {
-        keyCode == KEY_NONE -> "None"
-        keyCode == LEFT_MOUSE -> "Left Mouse"
-        keyCode == RIGHT_MOUSE -> "Right Mouse"
-        keyCode == MIDDLE_MOUSE -> "Middle Mouse"
-        keyCode < -100 -> "Mouse ${Math.abs(keyCode + 100)}"
-        else -> try {
-            InputUtil.fromKeyCode(keyCode, 0).localizedText.string
-        } catch (e: Exception) {
-            logger.error("Error getting key name for key code $keyCode", e)
-            "Unknown Key ($keyCode)"
-        }
+    fun Int.isKeyClicked(): Boolean {
+        if (this == GLFW.GLFW_KEY_UNKNOWN) return false
+        val inputKey = glfwKeyToInputUtil(this) ?: return false
+        return inputKey.isKeyClicked()
     }
 
     /**
-     * Utility for working with WASD + jump/sneak keys
+     * Gets a readable name for a GLFW key code.
      */
-    object WasdInputMatrix : Iterable<KeyBinding> {
-        operator fun contains(keyBinding: KeyBinding) = when (keyBinding) {
-            w, a, s, d, up, down -> true
-            else -> false
-        }
-
-        val w get() = MinecraftClient.getInstance().options.forwardKey!!
-        val a get() = MinecraftClient.getInstance().options.leftKey!!
-        val s get() = MinecraftClient.getInstance().options.backKey!!
-        val d get() = MinecraftClient.getInstance().options.rightKey!!
-
-        val up get() = MinecraftClient.getInstance().options.jumpKey!!
-        val down get() = MinecraftClient.getInstance().options.sneakKey!!
-
-        override fun iterator(): Iterator<KeyBinding> =
-            object : Iterator<KeyBinding> {
-
-                var current = w
-                var finished = false
-
-                override fun hasNext(): Boolean =
-                    !finished
-
-                override fun next(): KeyBinding {
-                    if (!hasNext()) throw NoSuchElementException()
-
-                    return current.also {
-                        current = when (it) {
-                            w -> a
-                            a -> s
-                            s -> d
-                            d -> up
-                            up -> down
-                            else -> {
-                                finished = true
-                                throw NoSuchElementException()
-                            }
-                        }
-                    }
-                }
+    fun getKeyName(glfwKey: Int): String = when {
+        glfwKey == GLFW.GLFW_KEY_UNKNOWN -> "None"
+        isMouseButtonCode(glfwKey) -> {
+            when (glfwKey) {
+                GLFW.GLFW_MOUSE_BUTTON_LEFT -> "Left Mouse"
+                GLFW.GLFW_MOUSE_BUTTON_RIGHT -> "Right Mouse"
+                GLFW.GLFW_MOUSE_BUTTON_MIDDLE -> "Middle Mouse"
+                else -> "Mouse ${glfwKey + 1}"
             }
+        }
+        else -> try {
+            InputUtil.Type.KEYSYM.createFromCode(glfwKey).localizedText.string
+        } catch (e: Exception) {
+            logger.error("Error getting key name for GLFW key $glfwKey", e)
+            "Unknown Key ($glfwKey)"
+        }
     }
 }

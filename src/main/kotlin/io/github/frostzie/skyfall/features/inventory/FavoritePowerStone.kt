@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.item.SlotHandler
@@ -13,7 +14,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.util.InputUtil
 import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
@@ -27,7 +27,6 @@ object FavoritePowerStone {
     private val logger = LoggerProvider.getLogger("FavoritePowerStone")
     private val configFile = File("config/skyfall/favorite-power-stones.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
-    private var keyWasPressed = false
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
     private var currentScreen: HandledScreen<*>? = null
@@ -127,21 +126,12 @@ object FavoritePowerStone {
     private fun handleKeyPress(screen: HandledScreen<*>) {
         val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
-            keyWasPressed = false
             return
         }
 
-        val window = MinecraftClient.getInstance().window.handle
-        val isPressed = if (highlightKey >= GLFW.GLFW_MOUSE_BUTTON_1 && highlightKey <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-            GLFW.glfwGetMouseButton(window, highlightKey) == GLFW.GLFW_PRESS
-        } else {
-            InputUtil.isKeyPressed(window, highlightKey)
-        }
-
-        if (isPressed && !keyWasPressed) {
+        if (KeyboardManager.run { highlightKey.isKeyClicked() }) {
             handleKeyPressAction(screen)
         }
-        keyWasPressed = isPressed
     }
 
     private fun handleKeyPressAction(screen: HandledScreen<*>) {
@@ -198,6 +188,11 @@ object FavoritePowerStone {
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
         if (currentScreen !is HandledScreen<*> || !isAccessoryBagThaumaturgy(currentScreen)) {
+            return
+        }
+
+        val highlightKey = SkyFall.feature.inventory.abiContact.favoriteKey
+        if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
 

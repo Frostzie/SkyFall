@@ -50,6 +50,4 @@ class InventoryConfig {
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
     }
-
-
 }

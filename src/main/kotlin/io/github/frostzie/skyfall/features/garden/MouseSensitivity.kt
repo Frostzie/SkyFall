@@ -5,9 +5,9 @@ import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.mixin.accessor.MouseAccessor
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.KeyboardManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
 object MouseSensitivity {
@@ -15,7 +15,6 @@ object MouseSensitivity {
     var isLockActive: Boolean = false
         private set
 
-    private var wasToggleKeyPressedLastTick: Boolean = false
     private var originalMouseSensitivityOptionValue: Double? = null
     private var mouseHookWasEffectiveLastTick: Boolean = false
     private val toggleKeyCode: Int
@@ -37,7 +36,6 @@ object MouseSensitivity {
                     restoreMouseSensitivityOption(client)
                 }
                 isLockActive = false
-                wasToggleKeyPressedLastTick = false
                 mouseHookWasEffectiveLastTick = false
                 return@EndTick
             }
@@ -45,9 +43,8 @@ object MouseSensitivity {
             val conditionsMet = isFeatureConditionallyActive()
 
             val currentKey = toggleKeyCode
-            if (currentKey != GLFW.GLFW_KEY_UNKNOWN && currentKey >= 0) {
-                val isToggleCurrentlyPressed = isKeyPressValid(client.window.handle, currentKey)
-                if (isToggleCurrentlyPressed && !wasToggleKeyPressedLastTick && client.currentScreen == null) {
+            if (currentKey != GLFW.GLFW_KEY_UNKNOWN) {
+                if (KeyboardManager.run { currentKey.isKeyClicked() } && client.currentScreen == null) {
                     if (isLockActive) {
                         isLockActive = false
                         ChatUtils.messageToChat("Mouse Lock §cDisabled").send()
@@ -58,13 +55,11 @@ object MouseSensitivity {
                         ChatUtils.messageToChat("§eMouse Lock can only be enabled on the Garden island.").send()
                     }
                 }
-                wasToggleKeyPressedLastTick = isToggleCurrentlyPressed
             } else {
                 if (isLockActive) {
                     isLockActive = false
                     ChatUtils.messageToChat("Mouse Lock §cDisabled §r(key unassigned)").send()
                 }
-                wasToggleKeyPressedLastTick = false
             }
 
             val mouseHookIsEffectiveThisTick = isLockActive && client.currentScreen == null && conditionsMet
@@ -81,14 +76,6 @@ object MouseSensitivity {
             }
             mouseHookWasEffectiveLastTick = mouseHookIsEffectiveThisTick
         })
-    }
-
-    private fun isKeyPressValid(windowHandle: Long, keyCode: Int): Boolean {
-        return if (keyCode >= GLFW.GLFW_MOUSE_BUTTON_1 && keyCode <= GLFW.GLFW_MOUSE_BUTTON_LAST) {
-            GLFW.glfwGetMouseButton(windowHandle, keyCode) == GLFW.GLFW_PRESS
-        } else {
-            InputUtil.isKeyPressed(windowHandle, keyCode)
-        }
     }
 
     private fun disableMouseMovementEffect(client: MinecraftClient) {

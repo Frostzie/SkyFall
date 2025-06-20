@@ -12,6 +12,23 @@ class InventoryConfig {
     //TODO: remove green glass pane in Power Stone menu
     @Expose
     @Accordion
+    @ConfigOption(name = "Attribute Menu", desc = "")
+    var attributeMenu: AttributeMenuConfig = AttributeMenuConfig()
+
+    class AttributeMenuConfig {
+        @Expose
+        @ConfigOption(name = "Highlight Disabled", desc = "Highlights attributes that are disabled in red.")
+        @ConfigEditorBoolean
+        var highlightDisabled: Boolean = true
+
+        @Expose
+        @ConfigOption(name = "Show Max Stat Boost", desc = "Shows the maximum stat boost under each attribute.")
+        @ConfigEditorBoolean
+        var showMaxStatBoost: Boolean = true
+    }
+
+    @Expose
+    @Accordion
     @ConfigOption(name = "Favorite Power Stone", desc = "")
     var powerStone: PowerStoneHighlight = PowerStoneHighlight()
 

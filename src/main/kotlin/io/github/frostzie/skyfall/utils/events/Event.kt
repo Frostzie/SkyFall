@@ -1,4 +1,4 @@
-package io.github.frostzie.skyfall.events
+package io.github.frostzie.skyfall.utils.events
 
 import java.util.concurrent.CopyOnWriteArrayList
 

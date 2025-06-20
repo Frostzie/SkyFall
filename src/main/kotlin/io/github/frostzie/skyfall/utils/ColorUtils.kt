@@ -1,5 +1,6 @@
 package io.github.frostzie.skyfall.utils
 
+import com.google.gson.JsonObject
 import io.github.frostzie.skyfall.waypoints.Renderer
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.util.math.Vec3d
@@ -45,5 +46,41 @@ object ColorUtils {
     ) {
         val (red, green, blue) = hexToRgb(color)
         this.renderArea(context, startPos, endPos, red, green, blue, alpha, throughWalls)
+    }
+
+    fun getColorCode(color: String?): String {
+        return when (color) {
+            "dark_red" -> "§4"
+            "red" -> "§c"
+            "gold" -> "§6"
+            "yellow" -> "§e"
+            "dark_green" -> "§2"
+            "green" -> "§a"
+            "aqua" -> "§b"
+            "dark_aqua" -> "§3"
+            "dark_blue" -> "§1"
+            "blue" -> "§9"
+            "light_purple" -> "§d"
+            "dark_purple" -> "§5"
+            "white" -> "§f"
+            "gray" -> "§7"
+            "dark_gray" -> "§8"
+            "black" -> "§0"
+            else -> ""
+        }
+    }
+
+    fun formatCodes(extraObj: JsonObject): String {
+        val sb = StringBuilder()
+        if (extraObj.get("bold")?.asBoolean == true) sb.append("§l")
+        if (extraObj.get("italic")?.asBoolean == true) sb.append("§o")
+        if (extraObj.get("underlined")?.asBoolean == true) sb.append("§n")
+        if (extraObj.get("strikethrough")?.asBoolean == true) sb.append("§m")
+        if (extraObj.get("obfuscated")?.asBoolean == true) sb.append("§k")
+        return sb.toString()
+    }
+
+    fun stripColorCodes(text: String): String {
+        return text.replace("§[0-9a-fk-or]".toRegex(), "").trim()
     }
 }

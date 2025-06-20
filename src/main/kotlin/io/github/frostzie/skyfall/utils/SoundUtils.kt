@@ -1,6 +1,11 @@
 package io.github.frostzie.skyfall.utils
 
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.SoundInstance
+import net.minecraft.client.sound.SoundSystem
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
+import net.minecraft.sound.SoundEvents
 import kotlin.math.log2
 
 object SoundUtils {
@@ -114,5 +119,28 @@ object SoundUtils {
             volume = soundInstance.volume,
             soundId = getSoundId(soundInstance)
         )
+    }
+
+    /**
+     * Plays a sound based on the given parameters.
+     *
+     * @param soundEvent the sound event to play.
+     * @param category the sound category.
+     * @param volume the volume of the sound.
+     * @param pitch the pitch of the sound.
+     */
+    fun playSound(soundEvent: SoundEvent, category: SoundCategory, volume: Float = 1.0f, pitch: Float = 1.0f) {
+        val client = MinecraftClient.getInstance()
+        client.world?.let { world ->
+            val player = client.player ?: return
+            world.playSound(
+                player,
+                player.blockPos,
+                soundEvent,
+                category,
+                volume,
+                pitch
+            )
+        }
     }
 }

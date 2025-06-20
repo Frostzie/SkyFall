@@ -2,6 +2,9 @@ package io.github.frostzie.skyfall.features
 
 import io.github.frostzie.skyfall.features.foraging.TuneFrequency
 import io.github.frostzie.skyfall.features.chat.FilterManager
+import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuInfoRepoBuilder
+import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuRepoBuilder
+import io.github.frostzie.skyfall.features.dev.ItemStackJsonCopier
 import io.github.frostzie.skyfall.features.dev.SoundDetector
 import io.github.frostzie.skyfall.features.dungeon.RequeueKey
 import io.github.frostzie.skyfall.features.garden.GardenKeybinds
@@ -45,7 +48,10 @@ object FeatureManager {
 
         // Dev Features
         SoundDetector.init() //TODO: Fix hud flickering after fading out
-        //CopyItemData.init()
+        ItemStackJsonCopier.init()
+        AttributeMenuRepoBuilder.init()
+        AttributeMenuInfoRepoBuilder.init()
+
 
         //WIP Features
         //WaypointFeature.init()

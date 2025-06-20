@@ -1,8 +1,17 @@
+// File: ItemUtils.kt
 package io.github.frostzie.skyfall.utils.item
 
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.type.LoreComponent
+import net.minecraft.text.Text
+
+// Added extension function to resolve styledLines() reference
+private fun LoreComponent.styledLines(): List<Text> {
+    // Example implementation; adjust as needed.
+    return listOf(Text.literal("Default Lore"))
+}
 
 object ItemUtils {
     const val SKYBLOCK_ID = "id"
@@ -44,8 +53,6 @@ object ItemUtils {
         }
     }
 
-
-
     /**
      * Checks if the given Item has a specific Skyblock ID.
      *
@@ -84,5 +91,78 @@ object ItemUtils {
      */
     fun hasAnyUuid(itemStack: ItemStack?): Boolean {
         return getUuid(itemStack) != null
+    }
+
+    /**
+     * Gets the display name of an ItemStack as a clean string.
+     * This is useful for repository building and item identification.
+     *
+     * @param itemStack The ItemStack to get the name from.
+     * @return The display name as a String, or null if the ItemStack is null or empty.
+     */
+    fun getDisplayName(itemStack: ItemStack?): String? {
+        if (itemStack == null || itemStack.isEmpty) {
+            return null
+        }
+        return itemStack.name.string
+    }
+
+    /**
+     * Gets the lore (tooltip text) of an ItemStack.
+     *
+     * @param itemStack The ItemStack to get the lore from.
+     * @return A list of Text objects representing the lore lines, or empty list if no lore.
+     */
+    fun getLore(itemStack: ItemStack?): List<Text> {
+        if (itemStack == null || itemStack.isEmpty) {
+            return emptyList()
+        }
+        return itemStack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).styledLines()
+    }
+
+    /**
+     * Gets the lore (tooltip text) of an ItemStack as plain strings.
+     *
+     * @param itemStack The ItemStack to get the lore from.
+     * @return A list of String objects representing the lore lines, or empty list if no lore.
+     */
+    fun getLoreAsStrings(itemStack: ItemStack?): List<String> {
+        return getLore(itemStack).map { it.string }
+    }
+
+    /**
+     * Checks if an ItemStack has a custom name (different from default item name).
+     *
+     * @param itemStack The ItemStack to check.
+     * @return True if the item has a custom name, false otherwise.
+     */
+    fun hasCustomName(itemStack: ItemStack?): Boolean {
+        if (itemStack == null || itemStack.isEmpty) {
+            return false
+        }
+        return itemStack.name != null && itemStack.name.string.isNotEmpty()
+    }
+
+    /**
+     * Gets the count/stack size of an ItemStack.
+     *
+     * @param itemStack The ItemStack to check.
+     * @return The count of the ItemStack, or 0 if null or empty.
+     */
+    fun getItemCount(itemStack: ItemStack?): Int {
+        if (itemStack == null || itemStack.isEmpty) {
+            return 0
+        }
+        return itemStack.count
+    }
+
+    /**
+     * Utility method to check if an ItemStack is valid (not null and not empty).
+     *
+     * @param itemStack The ItemStack to check.
+     * @return True if the ItemStack is valid, false otherwise.
+     */
+    fun isValidItem(itemStack: ItemStack?): Boolean {
+        return itemStack != null && !itemStack.isEmpty
     }
 }

@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.config.features.inventory
 import com.google.gson.annotations.Expose
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDropdown
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
@@ -22,9 +23,58 @@ class InventoryConfig {
         var highlightDisabled: Boolean = true
 
         @Expose
-        @ConfigOption(name = "Show Max Stat Boost", desc = "Shows the maximum stat boost under each attribute.")
+        @ConfigOption(name = "Highlight Maxed", desc = "Highlights attributes that are maxed in Gold.")
         @ConfigEditorBoolean
-        var showMaxStatBoost: Boolean = true
+        var highlightMaxed: Boolean = true
+
+        @Expose
+        @ConfigOption(name = "Show Max Stat Boost", desc = "Shows the maximum stat boost under each attribute.")
+        @ConfigEditorDropdown
+        var showMaxStatBoost: ShowMaxBoost = ShowMaxBoost.SHIFT
+
+        enum class ShowMaxBoost(private val value: String) {
+            ALWAYS("Always"),
+            SHIFT("Shift"),
+            CONTROL("Control"),
+            ALT("Alt"),
+            NEVER("Never");
+
+            override fun toString(): String = value
+        }
+
+        @Expose
+        @ConfigOption(name = "Shard left to Max", desc = "Shows the amount of shards left to max the attribute.")
+        @ConfigEditorDropdown
+        var showShardsLeftToMax: LeftToMax = LeftToMax.ALWAYS
+
+        enum class LeftToMax(val value: String) {
+            ALWAYS("Always"),
+            SHIFT("Shift"),
+            CONTROL("Control"),
+            ALT("Alt"),
+            NEVER("Never");
+
+            override fun toString(): String {
+                return value
+            }
+        }
+
+        @Expose
+        @ConfigOption(name = "How to Obtain+", desc = "Shows extra info on how to obtain the attribute.")
+        @ConfigEditorDropdown
+        var obtainOption: ObtainShow = ObtainShow.SHIFT
+
+        enum class ObtainShow(val value: String) {
+            ALWAYS("Always"),
+            SHIFT("Shift"),
+            CONTROL("Control"),
+            ALT("Alt"),
+            NEVER("Never");
+
+            override fun toString(): String {
+                return value
+            }
+        }
     }
 
     @Expose

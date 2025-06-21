@@ -80,6 +80,11 @@ object ColorUtils {
         return sb.toString()
     }
 
+    /**
+     * Strips Minecraft formatting codes from a given text.
+     * @param text The input text containing color codes.
+     * @return The text with all color codes removed.
+     */
     fun stripColorCodes(text: String): String {
         return text.replace("§[0-9a-fk-or]".toRegex(), "").trim()
     }

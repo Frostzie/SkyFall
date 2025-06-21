@@ -4,21 +4,22 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "CaseInsensitiveCommandMapMixin",
-    "InGameHudEffectsMixin",
-    "KeyBindingMixin",
     "BlockParticlesMixin",
+    "CaseInsensitiveCommandMapMixin",
     "HandledScreenMixin",
     "HidePotionHudMixin",
+    "InGameHudEffectsMixin",
+    "KeyBindingMixin",
     "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",
     "SlotRenderingMixin",
     "SoundSystemMixin",
     "TextureUnpackBase64PadPatch",
+    "TooltipMixin",
     "YggdrasilSignatureIgnorePatch",
-    "accessor.TabListAccessor",
+    "accessor.MouseAccessor",
     "accessor.RenderPipelinesAccessor",
-    "accessor.MouseAccessor"
+    "accessor.TabListAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

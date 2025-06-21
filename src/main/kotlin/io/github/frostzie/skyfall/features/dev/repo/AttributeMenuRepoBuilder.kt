@@ -38,7 +38,6 @@ object AttributeMenuRepoBuilder {
 
     fun init() {
         registerTickHandler()
-        logger.info("AttributeMenuRepoBuilder initialized – generates basic repository entries")
     }
 
     private fun registerTickHandler() {
@@ -82,7 +81,7 @@ object AttributeMenuRepoBuilder {
                         if (!existingData.containsKey(attributeName)) {
                             attributeData[attributeName] = JsonObject().apply {
                                 addProperty("maxShards", 0)
-                                addProperty("statBoostName", "")
+                                addProperty("maxStatBoost", "")
                                 add("wayToObtain", gson.toJsonTree(emptyList<String>()))
                                 addProperty("rarity", rarity)
                                 addProperty("type", type)

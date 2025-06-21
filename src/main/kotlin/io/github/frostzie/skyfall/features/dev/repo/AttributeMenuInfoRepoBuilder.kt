@@ -37,7 +37,6 @@ object AttributeMenuInfoRepoBuilder {
 
     fun init() {
         registerTickHandler()
-        logger.info("AttributeMenuInfoRepoBuilder initialized – updates repository info")
     }
 
     private fun registerTickHandler() {
@@ -112,10 +111,10 @@ object AttributeMenuInfoRepoBuilder {
         val howToHuntLore = getLoreFromItemStack(howToHuntSlot.stack)
         val attributeName = extractAttributeNameFromTitle(maxLevelDisplayName) ?: return null
         val maxShards = extractMaxShards(maxLevelLore)
-        val statBoostName = extractStatBoostName(maxLevelLore)
+        val maxStatBoost = extractStatBoostName(maxLevelLore)
         val wayToObtain = extractWaysToObtain(howToHuntLore)
-        logger.debug("Extracted info for \"$attributeName\": maxShards=$maxShards, statBoostName=\"$statBoostName\", ways=${wayToObtain.size}")
-        return AttributeInfo(attributeName, maxShards, statBoostName, wayToObtain)
+        logger.debug("Extracted info for \"$attributeName\": maxShards=$maxShards, statBoostName=\"$maxStatBoost\", ways=${wayToObtain.size}")
+        return AttributeInfo(attributeName, maxShards, maxStatBoost, wayToObtain)
     }
 
     private fun extractAttributeNameFromTitle(displayName: String): String? {

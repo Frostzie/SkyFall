@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "skyfall",
-	"version": "0.1.2",
+	"version": "${version}",
 	"name": "SkyFall",
 	"description": "QOL Hypixel Skyblock mod for newest versions of Minecraft",
 	"authors": [

@@ -1,6 +1,5 @@
 package io.github.frostzie.skyfall.features
 
-import io.github.frostzie.skyfall.features.foraging.TuneFrequency
 import io.github.frostzie.skyfall.features.chat.FilterManager
 import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuInfoRepoBuilder
 import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuRepoBuilder
@@ -45,9 +44,6 @@ object FeatureManager {
         GardenKeybinds.init()
         GardenKeybinds.homeHotkey()
         MouseSensitivity.init()
-
-        // Foraging Features
-        TuneFrequency.init() //TODO: rework
 
         // Dev Features
         SoundDetector.init() //TODO: Fix hud flickering after fading out

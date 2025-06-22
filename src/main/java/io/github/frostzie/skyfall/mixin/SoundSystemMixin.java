@@ -1,14 +1,13 @@
 package io.github.frostzie.skyfall.mixin;
 
 import io.github.frostzie.skyfall.features.dev.SoundDetector;
-import io.github.frostzie.skyfall.features.foraging.TuneFrequency;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundSystem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
+//TODO: add Foraging beacon solver
 @Mixin(SoundSystem.class)
 public class SoundSystemMixin {
 
@@ -16,7 +15,6 @@ public class SoundSystemMixin {
     private void onSoundPlay(SoundInstance soundInstance, CallbackInfo ci) {
         try {
             SoundDetector.INSTANCE.onSoundPlay(soundInstance);
-            TuneFrequency.INSTANCE.onSoundPlay(soundInstance);
         } catch (Exception e) {
             // Silently catch exceptions to prevent crashes
         }
@@ -26,7 +24,6 @@ public class SoundSystemMixin {
     private void onSoundStop(SoundInstance soundInstance, CallbackInfo ci) {
         try {
             SoundDetector.INSTANCE.onSoundStop(soundInstance);
-            TuneFrequency.INSTANCE.onSoundStop(soundInstance);
         } catch (Exception e) {
             // Silently catch exceptions to prevent crashes
         }

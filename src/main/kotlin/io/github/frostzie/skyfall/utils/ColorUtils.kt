@@ -1,9 +1,6 @@
 package io.github.frostzie.skyfall.utils
 
 import com.google.gson.JsonObject
-import io.github.frostzie.skyfall.waypoints.Renderer
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.util.math.Vec3d
 
 object ColorUtils {
     /**
@@ -16,36 +13,6 @@ object ColorUtils {
         val green = ((hexColor shr 8) and 0xFF).toFloat()
         val blue = (hexColor and 0xFF).toFloat()
         return Triple(red, green, blue)
-    }
-
-    /**
-     * Extension function for Renderer.renderBlock that accepts hexadecimal color
-     */
-    fun Renderer.renderBlock(
-        context: WorldRenderContext,
-        pos: Vec3d,
-        color: Int,
-        alpha: Float,
-        throughWalls: Boolean = true,
-        useBlockShape: Boolean = false
-    ) {
-        val (red, green, blue) = hexToRgb(color)
-        this.renderBlock(context, pos, red, green, blue, alpha, throughWalls, useBlockShape)
-    }
-
-    /**
-     * Extension function for Renderer.renderArea that accepts hexadecimal color
-     */
-    fun Renderer.renderArea(
-        context: WorldRenderContext,
-        startPos: Vec3d,
-        endPos: Vec3d,
-        color: Int,
-        alpha: Float,
-        throughWalls: Boolean = true
-    ) {
-        val (red, green, blue) = hexToRgb(color)
-        this.renderArea(context, startPos, endPos, red, green, blue, alpha, throughWalls)
     }
 
     fun getColorCode(color: String?): String {

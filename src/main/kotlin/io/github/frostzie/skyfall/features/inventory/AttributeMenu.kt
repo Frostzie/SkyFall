@@ -16,9 +16,9 @@ import io.github.frostzie.skyfall.utils.item.TooltipUtils
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.MutableText
 import net.minecraft.text.OrderedText
 import net.minecraft.text.Style
@@ -29,7 +29,7 @@ import java.awt.Color
 object AttributeMenu {
     private val logger = LoggerProvider.getLogger("AttributeMenu")
     private val config get() = SkyFall.feature.inventory.attributeMenu
-    private const val MAXLOREWIDTH = 190
+    private const val MAX_LORE_WIDTH = 190
 
     private val validSlotRanges = setOf(
         10..16,
@@ -50,7 +50,7 @@ object AttributeMenu {
     }
 
     private fun registerSlotRenderEvent() {
-        SlotRenderEvents.register { event ->
+        SlotRenderEvents.listen { event ->
             onRenderSlot(event.context, event.slot)
         }
     }
@@ -103,15 +103,11 @@ object AttributeMenu {
 
         if (hasLore(slot) && config.highlightDisabled) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 0, 0, 220).rgb)
-        }
-        else if (isMax(slot) && config.highlightMaxed) {
+        } else if (isMax(slot) && config.highlightMaxed) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
         }
     }
 
-    /**
-     * Called when tooltip is about to be rendered to add custom lore
-     */
     fun onTooltipRender(stack: ItemStack, lines: MutableList<Text>) {
         if (!isInAttributeMenu() || stack.isEmpty) {
             return
@@ -257,7 +253,7 @@ object AttributeMenu {
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val emptyLine = Text.literal("")
-            val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(maxStatBoost), MAXLOREWIDTH)
+            val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(maxStatBoost), MAX_LORE_WIDTH)
             val wrappedTextLines = wrappedOrderedLines.map { fromOrdered(it) }
             val newLines = mutableListOf(emptyLine)
             newLines.addAll(wrappedTextLines)
@@ -281,7 +277,7 @@ object AttributeMenu {
                 val textRenderer = MinecraftClient.getInstance().textRenderer
                 val additionalLines = wayToObtainArray.flatMap { element ->
                     val obtainText = "§7  • ${element.asString}"
-                    val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(obtainText), MAXLOREWIDTH)
+                    val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(obtainText), MAX_LORE_WIDTH)
                     wrappedOrderedLines.map { fromOrdered(it) }
                 }
 
@@ -289,7 +285,6 @@ object AttributeMenu {
                     lines.addAll(sourceLineIndex + 1, additionalLines)
                 }
             }
-
         } catch (e: Exception) {
             logger.error("Failed to add obtain info lore for item", e)
         }
@@ -460,8 +455,7 @@ object AttributeMenu {
     }
 
     private fun isAttributeMenu(screen: HandledScreen<*>): Boolean {
-        val title = screen.title.string
-        return title.equals("Attribute Menu", ignoreCase = true)
+        return screen.title.string.equals("Attribute Menu", ignoreCase = true)
     }
 
     private fun isSlotInChestInventory(slot: Slot): Boolean {
@@ -486,8 +480,7 @@ object AttributeMenu {
             return false
         }
         try {
-            val itemName = slot.stack.name.string
-            return itemName.contains(" X")
+            return slot.stack.name.string.contains(" X")
         } catch (e: Exception) {
             logger.error("Failed to check item name for slot: ${e.message}", e)
             return false

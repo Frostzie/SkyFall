@@ -15,10 +15,8 @@
     "SlotRenderingMixin",
     "SoundSystemMixin",
     "TextureUnpackBase64PadPatch",
-    "TooltipMixin",
     "YggdrasilSignatureIgnorePatch",
     "accessor.MouseAccessor",
-    "accessor.RenderPipelinesAccessor",
     "accessor.TabListAccessor"
   ],
   "injectors": {

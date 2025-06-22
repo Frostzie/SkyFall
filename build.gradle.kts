@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-version = project.findProperty("mod_version") as String
+version = (libs.versions.version.get()) + "-" + (libs.versions.minecraft.get())
 group = project.findProperty("maven_group") as String
 
 base {

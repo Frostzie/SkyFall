@@ -200,7 +200,7 @@ object FavoritePet {
     }
 
     private fun registerSlotRenderEvent() {
-        SlotRenderEvents.register { event ->
+        SlotRenderEvents.listen { event ->
             onRenderSlot(event.context, event.slot)
         }
     }

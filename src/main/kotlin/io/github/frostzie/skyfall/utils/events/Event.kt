@@ -1,5 +1,11 @@
 package io.github.frostzie.skyfall.utils.events
 
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
+import net.minecraft.item.tooltip.TooltipType
+import net.minecraft.screen.slot.Slot
+import net.minecraft.text.Text
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**

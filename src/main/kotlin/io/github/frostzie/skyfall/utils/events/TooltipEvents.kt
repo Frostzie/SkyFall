@@ -32,4 +32,14 @@ object TooltipEvents {
             }
         }
     }
+
+    /**
+     * Event fired just before a tooltip is rendered.
+     * Allows for modification of the tooltip lines.
+     * This is intended to be used with the central EventBus.
+     */
+    data class ItemTooltipEvent(
+        val stack: ItemStack,
+        val lines: MutableList<Text>
+    ) : Event()
 }

@@ -54,9 +54,7 @@ class InventoryConfig {
             ALT("Alt"),
             NEVER("Never");
 
-            override fun toString(): String {
-                return value
-            }
+            override fun toString(): String = value
         }
 
         @Expose
@@ -71,9 +69,7 @@ class InventoryConfig {
             ALT("Alt"),
             NEVER("Never");
 
-            override fun toString(): String {
-                return value
-            }
+            override fun toString(): String = value
         }
     }
 

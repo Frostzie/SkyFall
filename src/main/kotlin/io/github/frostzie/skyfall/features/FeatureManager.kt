@@ -16,7 +16,9 @@ import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
 import io.github.frostzie.skyfall.features.inventory.FavoritePet
 import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
 import io.github.frostzie.skyfall.features.gui.HudEditorKeybind
+import io.github.frostzie.skyfall.features.inventory.AttributeMenu
 
+//TODO: rework
 object FeatureManager {
     fun loadFeatures() {
         // GUI Features
@@ -33,6 +35,7 @@ object FeatureManager {
         FavoritePowerStone.init()
         FavoriteAbiContact.init()
         FavoritePet.init()
+        AttributeMenu.init()
 
         // Misc Features
         MiscKeybindManager.init()
@@ -51,13 +54,5 @@ object FeatureManager {
         ItemStackJsonCopier.init()
         AttributeMenuRepoBuilder.init()
         AttributeMenuInfoRepoBuilder.init()
-
-
-        //WIP Features
-        //WaypointFeature.init()
-        //BoxFeature.init()
-        //ExampleElements.initialize()
-        //Test.init() //Garden Map
-
     }
 }

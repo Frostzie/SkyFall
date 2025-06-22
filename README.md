@@ -6,6 +6,7 @@ SkyFall is a hypixel skyblock QoL mod made for newest versions of Minecraft in F
 - Mouse Sensitivity Hotkey.
 - Custom Garden Keybinds when holding tools.
 - Favorite Power Stones and Abiphone Contact highlighter.
+- Extra info on how to obtain, max stat boost and shard left in the Attribute Menu.
 - Pet Menu Features.
 - Chat Filters.
 

@@ -139,7 +139,7 @@ object AttributeMenuInfoRepoBuilder {
 
     private fun extractStatBoostName(lore: List<String>): String {
         val plusRegex = "\\+".toRegex()
-        val shardRegex = "\\(\\d+/[0-9]+\\)".toRegex()
+        val shardRegex = "\\(\\d+/([0-9]+)\\)".toRegex()
         val stopIndicator = "Max level reached!"
 
         val cleanLore = lore.map { ColorUtils.stripColorCodes(it) }
@@ -160,30 +160,63 @@ object AttributeMenuInfoRepoBuilder {
         }
 
         val sb = StringBuilder()
-        for (i in startIndex until cleanLore.size) {
-            val line = cleanLore[i]
-            if (line.contains(stopIndicator, ignoreCase = true) ||
-                shardRegex.containsMatchIn(line)
+        for (i in startIndex until lore.size) {
+            val originalLine = lore[i]
+            val cleanLine = cleanLore[i]
+            if (cleanLine.contains(stopIndicator, ignoreCase = true) ||
+                shardRegex.containsMatchIn(cleanLine)
             ) break
             if (sb.isNotEmpty()) sb.append(" ")
-            sb.append(line)
+            sb.append(originalLine.trim())
         }
         val statBoost = sb.toString()
-        val reqIndex = statBoost.indexOf("Requires")
-        return if (reqIndex != -1) statBoost.substring(0, reqIndex).trim() else statBoost
+        val cleanStatBoost = ColorUtils.stripColorCodes(statBoost)
+        val reqIndex = cleanStatBoost.indexOf("Requires")
+
+        if (reqIndex == -1) return statBoost
+
+        fun getColoredSubstring(fullString: String, cleanEndIndex: Int): String {
+            val builder = StringBuilder()
+            var cleanCharCount = 0
+            var i = 0
+            while (i < fullString.length) {
+                if (cleanCharCount >= cleanEndIndex) break
+
+                val char = fullString[i]
+                builder.append(char)
+
+                if (char == '§' && i + 1 < fullString.length) {
+                    builder.append(fullString[i + 1])
+                    i += 2
+                } else {
+                    cleanCharCount++
+                    i++
+                }
+            }
+            return builder.toString().trim()
+        }
+
+        return getColoredSubstring(statBoost, reqIndex)
     }
 
     private fun extractWaysToObtain(lore: List<String>): List<String> {
         val ways = mutableListOf<String>()
         var i = 0
         while (i < lore.size) {
-            val cleanLine = ColorUtils.stripColorCodes(lore[i]).trim()
+            val currentLine = lore[i]
+            val cleanLine = ColorUtils.stripColorCodes(currentLine).trim()
             if (cleanLine.startsWith("- ")) {
-                val sb = StringBuilder(cleanLine.substring(2).trim())
+                val dashIndex = currentLine.indexOf("- ")
+                if (dashIndex == -1) {
+                    i++
+                    continue
+                }
+
+                val sb = StringBuilder(currentLine.substring(dashIndex + 2).trim())
                 var j = i + 1
                 while (j < lore.size && !ColorUtils.stripColorCodes(lore[j]).trim().startsWith("- ")) {
-                    val nextLine = ColorUtils.stripColorCodes(lore[j]).trim()
-                    if (nextLine.isNotEmpty()) {
+                    val nextLine = lore[j].trim()
+                    if (ColorUtils.stripColorCodes(nextLine).isNotEmpty()) {
                         sb.append(" ").append(nextLine)
                     }
                     j++
@@ -206,8 +239,8 @@ object AttributeMenuInfoRepoBuilder {
                 existingData.addProperty("maxShards", attributeInfo.maxShards)
                 hasChanges = true
             }
-            if (attributeInfo.statBoostName.isNotEmpty()) {
-                existingData.addProperty("statBoostName", attributeInfo.statBoostName)
+            if (attributeInfo.maxStatBoost.isNotEmpty()) {
+                existingData.addProperty("maxStatBoost", attributeInfo.maxStatBoost)
                 hasChanges = true
             }
             if (attributeInfo.wayToObtain.isNotEmpty()) {
@@ -339,7 +372,7 @@ object AttributeMenuInfoRepoBuilder {
     private data class AttributeInfo(
         val name: String,
         val maxShards: Int,
-        val statBoostName: String,
+        val maxStatBoost: String,
         val wayToObtain: List<String>
     )
 }

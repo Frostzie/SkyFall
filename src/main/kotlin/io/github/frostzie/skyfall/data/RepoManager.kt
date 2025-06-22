@@ -185,7 +185,7 @@ object RepoManager {
     }
 
     private suspend fun downloadFile(url: String, destination: Path) = withContext(Dispatchers.IO) {
-        val connection = URL(url).openConnection() as HttpURLConnection
+        val connection = URI(url).toURL().openConnection() as HttpURLConnection
         connection.apply {
             connectTimeout = 15000
             readTimeout = 30000

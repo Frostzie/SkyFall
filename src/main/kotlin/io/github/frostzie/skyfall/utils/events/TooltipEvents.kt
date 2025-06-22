@@ -1,9 +1,11 @@
 package io.github.frostzie.skyfall.utils.events
 
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 
 object TooltipEvents {
+    private val logger = LoggerProvider.getLogger("TooltipEvents")
     private val handlers = mutableListOf<TooltipHandler>()
 
     fun interface TooltipHandler {
@@ -26,6 +28,7 @@ object TooltipEvents {
             try {
                 handler.onTooltip(stack, lines)
             } catch (e: Exception) {
+                logger.error("Tooltip handler threw an exception: ${e.message}")
             }
         }
     }

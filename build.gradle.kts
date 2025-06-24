@@ -1,3 +1,4 @@
+// Taken and modified from Firmament
 plugins {
     java
     `maven-publish`

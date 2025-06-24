@@ -11,7 +11,7 @@ SkyFall is a hypixel skyblock QoL mod made for newest versions of Minecraft in F
 - Chat Filters.
 
 # Guide
-- Requires [Fabric Kotlin Language](https://modrinth.com/mod/fabric-language-kotlin) to be installed.
+- Requires [Fabric Api](https://modrinth.com/mod/fabric-api) and [Fabric Kotlin Language](https://modrinth.com/mod/fabric-language-kotlin) to be installed.
 - Type `/sf` or `/skyfall` to open the config menu.
 
 
@@ -21,3 +21,8 @@ SkyFall is a hypixel skyblock QoL mod made for newest versions of Minecraft in F
 - Feature Suggestions: If you have any ideas of features or improvements feel free to suggest them in the `#suggestions` channel. (Don't suggest features that break Hypixel rules)
 - Bug Reports: Use the `#bug-reports` channel to report any bugs you find with the features.
 - Quick Help: If you have questions ask in the `#support` channel.
+
+
+## Credits:
+SkyFall mod could not be possible without other mods like [SkyHanni](https://github.com/hannibal002/SkyHanni), [Firmament](https://github.com/nea89o/Firmament) and [Skyblocker](https://github.com/SkyblockerMod/Skyblocker).
+Please do check them out and give them the proper support they deserve.

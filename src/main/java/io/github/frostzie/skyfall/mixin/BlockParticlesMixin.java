@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-
+// Taken and modified from Tweakeroo
 @Mixin(ParticleManager.class)
 public abstract class BlockParticlesMixin {
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)

@@ -17,7 +17,7 @@ import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
 import io.github.frostzie.skyfall.features.gui.HudEditorKeybind
 import io.github.frostzie.skyfall.features.inventory.AttributeMenu
 
-//TODO: rework
+//TODO: rework whole loading system so not all features are loaded on startup
 object FeatureManager {
     fun loadFeatures() {
         // GUI Features

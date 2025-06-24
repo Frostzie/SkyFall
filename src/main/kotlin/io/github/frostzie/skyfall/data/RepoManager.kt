@@ -9,7 +9,6 @@ import net.fabricmc.loader.api.FabricLoader
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,6 +18,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.io.path.*
 
+// Taken and modified from Skyhanni
 object RepoManager {
     private val logger = LoggerProvider.getLogger("RepoManager")
     private val gson = Gson()

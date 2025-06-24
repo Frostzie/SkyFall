@@ -7,6 +7,7 @@ import net.minecraft.client.network.PlayerListEntry
 import java.util.HashMap
 import java.util.concurrent.ConcurrentHashMap
 
+// Taken and modified from SkyHanni
 /**
  * Processes the tab list to extract useful information about the player's current state in Skyblock.
  * This utility extracts area, profile, and other information from the tab list entries.

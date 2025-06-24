@@ -337,6 +337,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         return super.mouseReleased(mouseX, mouseY, button)
     }
 
+    // Taken and modified from Skyhanni
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         val hoveredElement = findElementAt(mouseX.toInt(), mouseY.toInt())
 

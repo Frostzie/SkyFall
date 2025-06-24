@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.utils
 import io.github.notenoughupdates.moulconfig.observer.Observer
 import io.github.notenoughupdates.moulconfig.observer.Property
 
+// Taken from SkyHanni
 object ConditionalUtils {
     fun <T> T.transformIf(condition: T.() -> Boolean, transformation: T.() -> T) =
         if (condition()) transformation(this) else this

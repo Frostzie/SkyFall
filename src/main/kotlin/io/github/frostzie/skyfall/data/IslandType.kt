@@ -1,5 +1,6 @@
 package io.github.frostzie.skyfall.data
 
+// Taken from Skyhanni
 enum class IslandType(val displayName: String) {
     PRIVATE_ISLAND("Private Island"),
     GARDEN("Garden"),

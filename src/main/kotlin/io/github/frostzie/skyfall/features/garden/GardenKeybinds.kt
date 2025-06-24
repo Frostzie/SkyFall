@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+// Taken and modified from Skyhanni
 object GardenKeybinds {
 
     private val keybinds get() = SkyFall.feature.garden.keybindConfig.customGardenKeybinds

@@ -4,6 +4,7 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
+// Taken and modified from Skyhanni
 @JvmInline
 value class SimpleTimeMark(private val millis: Long) {
     operator fun minus(other: SimpleTimeMark) =
@@ -31,5 +32,4 @@ value class SimpleTimeMark(private val millis: Long) {
 
         fun Long.asTimeMark() = SimpleTimeMark(this)
     }
-
 }

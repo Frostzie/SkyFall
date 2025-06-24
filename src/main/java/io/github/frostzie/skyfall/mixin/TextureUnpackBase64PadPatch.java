@@ -6,6 +6,7 @@ import io.github.frostzie.skyfall.utils.Base64Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+// Taken from Firmament
 @Mixin(value = YggdrasilMinecraftSessionService.class, remap = false)
 public class TextureUnpackBase64PadPatch {
     @ModifyExpressionValue(method = "unpackTextures",

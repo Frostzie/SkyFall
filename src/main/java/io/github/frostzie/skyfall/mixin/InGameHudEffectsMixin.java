@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// Taken and modified from Tweakeroo
 @Mixin(InGameHud.class)
 public class InGameHudEffectsMixin {
 

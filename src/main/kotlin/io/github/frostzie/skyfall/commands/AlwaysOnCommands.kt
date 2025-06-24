@@ -22,6 +22,7 @@ object AlwaysOnCommands {
         }
     }
 
+    // Taken from Skyhanni
     fun sfColor() {
         Command.register { a, _ ->
             a.register(CommandUtils.caseInsensitiveLiteral("sfcolor").executes {

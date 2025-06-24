@@ -4,6 +4,7 @@ import io.github.frostzie.skyfall.SkyFall
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.util.Formatting
 
+// Taken and modified from Skyblocker
 object HideWatchdogMessage {
     private val config get() = SkyFall.feature.chat.chatFilters.hideWatchdog
 

@@ -4,6 +4,7 @@ import io.github.frostzie.skyfall.data.IslandType
 import net.minecraft.client.MinecraftClient
 import net.minecraft.scoreboard.ScoreboardDisplaySlot
 
+// Taken and modified from Skyhanni
 /**
  * Processes the scoreboard to extract useful information about the player's current state in Skyblock.
  * This utility processes the scoreboard data to determine location, game state, and other information.

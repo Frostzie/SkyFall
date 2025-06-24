@@ -11,6 +11,7 @@ import com.mojang.brigadier.tree.CommandNode
 import com.mojang.brigadier.tree.LiteralCommandNode
 import java.util.function.Predicate
 
+// Taken and modified from Firmament
 class CaseInsensitiveLiteralCommandNode<S>(
     literal: String, command: Command<S>?, requirement: Predicate<S>?,
     redirect: CommandNode<S>?, modifier: RedirectModifier<S>?, forks: Boolean

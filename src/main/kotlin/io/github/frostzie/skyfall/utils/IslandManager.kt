@@ -7,6 +7,7 @@ import io.github.frostzie.skyfall.utils.events.IslandChangeEvent
 import io.github.frostzie.skyfall.utils.events.IslandChangeListener
 import io.github.frostzie.skyfall.utils.events.IslandEvents
 
+// Taken from SkyHanni
 /**
  * Manager class for island-related functionality.
  * Initializes the island detection system and provides high-level methods to interact with it.

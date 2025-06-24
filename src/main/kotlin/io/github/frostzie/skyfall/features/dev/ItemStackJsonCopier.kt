@@ -16,6 +16,7 @@ import org.lwjgl.glfw.GLFW
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 
+// Taken and modified from Component Viewer
 object ItemStackJsonCopier {
     private val logger = LoggerProvider.getLogger("ItemStackJsonCopier")
 

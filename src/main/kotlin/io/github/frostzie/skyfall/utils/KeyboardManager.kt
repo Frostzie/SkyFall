@@ -4,6 +4,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
+// Taken and modified from SkyHanni
+
 /**
  * Manages keyboard and mouse input using Minecraft's InputUtil system
  */

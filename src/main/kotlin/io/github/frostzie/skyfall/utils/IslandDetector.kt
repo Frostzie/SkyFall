@@ -6,6 +6,7 @@ import io.github.frostzie.skyfall.utils.processors.ScoreboardProcessor
 import io.github.frostzie.skyfall.utils.processors.TabListProcessor
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 
+// Taken from SkyHanni
 /**
  * Utility class for detecting the current island the player is on in Skyblock.
  * Combines information from both the scoreboard and tab list to provide accurate location information.

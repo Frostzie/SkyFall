@@ -7,6 +7,7 @@ import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
 
+// Taken and modified from Component Viewer
 object TooltipUtils {
     private val logger = LoggerProvider.getLogger("TooltipUtils")
 

@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import org.lwjgl.glfw.GLFW
 import kotlin.time.Duration.Companion.milliseconds
 
+// Original idea by Odin
 object MiscKeybindManager {
     private val commandCooldowns = mutableMapOf<String, SimpleTimeMark>()
     private val config = SkyFall.feature.miscFeatures.keybinds

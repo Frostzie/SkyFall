@@ -1,5 +1,6 @@
 package io.github.frostzie.skyfall.data
 
+// Taken and modified from Skyhanni
 /**
  * Enum representing different types of Skyblock farming tools.
  *

@@ -23,6 +23,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
+// Credits for the original idea from NotEnoughUpdates
 object FavoriteAbiContact {
     private val logger = LoggerProvider.getLogger("FavoriteAbiContact")
     private val configFile = File("config/skyfall/favorite-contacts.json")

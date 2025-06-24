@@ -23,6 +23,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.concurrent.fixedRateTimer
 
+// Taken and modified from Skyhanni
 object ConfigManager {
     private val logger = LoggerProvider.getLogger("configManager")
     val gson = GsonBuilder().setPrettyPrinting()

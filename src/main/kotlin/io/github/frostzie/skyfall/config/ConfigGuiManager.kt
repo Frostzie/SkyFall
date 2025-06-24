@@ -5,6 +5,7 @@ import io.github.notenoughupdates.moulconfig.gui.GuiElementWrapper
 import io.github.notenoughupdates.moulconfig.gui.MoulConfigEditor
 import net.minecraft.client.gui.screen.Screen
 
+// Taken and modified from Skyhanni
 object ConfigGuiManager {
     var editor: MoulConfigEditor<Features>? = null
 

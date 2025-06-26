@@ -5,8 +5,9 @@ import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
+import io.github.frostzie.skyfall.utils.events.SlotClickEvent
+import io.github.frostzie.skyfall.utils.events.SlotRenderEvent
 import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
-import io.github.frostzie.skyfall.utils.item.SlotHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.screen.v1.Screens
 import net.minecraft.client.MinecraftClient
@@ -41,20 +42,37 @@ object FavoriteAbiContact {
 
     fun init() {
         loadConfig()
-        registerSlotHandler()
         registerTickHandler()
+        registerEventHandlers()
         registerSlotRenderEvent()
     }
 
-    private fun registerSlotHandler() {
-        SlotHandler.registerHandler { event ->
+    private fun registerEventHandlers() {
+        SlotClickEvent.subscribe { event ->
+            val slot = event.slot ?: return@subscribe
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
-                if (isSlotInChestInventory(event.slot) && validSlotRanges.any { event.slotNumber in it }) {
-                    if (favoredOnlyToggle && !event.slot.stack.isEmpty) {
-                        val itemName = event.slot.stack.name.string
+                if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
+                    if (favoredOnlyToggle && !slot.stack.isEmpty) {
+                        val itemName = slot.stack.name.string
                         if (!highlightedItems.contains(itemName)) {
-                            event.blockAndHide()
+                            event.cancel()
+                        }
+                    }
+                }
+            }
+        }
+
+        SlotRenderEvent.subscribe { event ->
+            val slot = event.slot
+            val currentScreen = MinecraftClient.getInstance().currentScreen
+            if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
+                if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
+                    if (favoredOnlyToggle && !slot.stack.isEmpty) {
+                        val itemName = slot.stack.name.string
+                        if (!highlightedItems.contains(itemName)) {
+                            event.hide()
+                            event.hideTooltip()
                         }
                     }
                 }

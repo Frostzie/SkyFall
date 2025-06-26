@@ -49,6 +49,11 @@ class DevConfig {
         @ConfigOption(name = "Enabled", desc = "Enable the Attribute Menu individual repo builder feature")
         @ConfigEditorBoolean
         var attributeMenuInfoRepoBuilder: Boolean = false
+
+        @Expose
+        @ConfigOption(name = "Enabled", desc = "Enable the Attribute data builder for bazaar info.")
+        @ConfigEditorBoolean
+        var attributeDataFromBazaar: Boolean = false
     }
 
 }

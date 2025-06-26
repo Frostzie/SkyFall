@@ -1,12 +1,10 @@
-package io.github.frostzie.skyfall.features.inventory
+package io.github.frostzie.skyfall.features.inventory.attribute
 
 import com.google.gson.JsonObject
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig.AttributeMenuConfig.LeftToMax
-import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig.AttributeMenuConfig.ObtainShow
-import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig.AttributeMenuConfig.ShowMaxBoost
-import io.github.frostzie.skyfall.data.RepoManager
+import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig
 import io.github.frostzie.skyfall.data.RarityType
+import io.github.frostzie.skyfall.data.RepoManager
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.LoggerProvider
@@ -28,7 +26,7 @@ import java.awt.Color
 
 object AttributeMenu {
     private val logger = LoggerProvider.getLogger("AttributeMenu")
-    private val config get() = SkyFall.feature.inventory.attributeMenu
+    private val config get() = SkyFall.Companion.feature.inventory.attributeMenu
     private const val MAX_LORE_WIDTH = 190
 
     private val validSlotRanges = setOf(
@@ -190,31 +188,31 @@ object AttributeMenu {
 
     private fun shouldShowMaxStatBoost(): Boolean {
         return when (config.showMaxStatBoost) {
-            ShowMaxBoost.ALWAYS -> true
-            ShowMaxBoost.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
-            ShowMaxBoost.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
-            ShowMaxBoost.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
-            ShowMaxBoost.NEVER -> false
+            InventoryConfig.AttributeMenuConfig.ShowMaxBoost.ALWAYS -> true
+            InventoryConfig.AttributeMenuConfig.ShowMaxBoost.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ShowMaxBoost.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ShowMaxBoost.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ShowMaxBoost.NEVER -> false
         }
     }
 
     private fun showShardsLeftToMax(): Boolean {
         return when (config.showShardsLeftToMax) {
-            LeftToMax.ALWAYS -> true
-            LeftToMax.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
-            LeftToMax.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
-            LeftToMax.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
-            LeftToMax.NEVER -> false
+            InventoryConfig.AttributeMenuConfig.LeftToMax.ALWAYS -> true
+            InventoryConfig.AttributeMenuConfig.LeftToMax.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.LeftToMax.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.LeftToMax.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.LeftToMax.NEVER -> false
         }
     }
 
     private fun shouldShowObtainInfo(): Boolean {
         return when (config.obtainOption) {
-            ObtainShow.ALWAYS -> true
-            ObtainShow.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
-            ObtainShow.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
-            ObtainShow.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
-            ObtainShow.NEVER -> false
+            InventoryConfig.AttributeMenuConfig.ObtainShow.ALWAYS -> true
+            InventoryConfig.AttributeMenuConfig.ObtainShow.SHIFT -> GLFW.GLFW_KEY_LEFT_SHIFT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ObtainShow.CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ObtainShow.ALT -> GLFW.GLFW_KEY_LEFT_ALT.isKeyHeld()
+            InventoryConfig.AttributeMenuConfig.ObtainShow.NEVER -> false
         }
     }
 

@@ -13,8 +13,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.client.gui.screen.Screen
 import io.github.frostzie.skyfall.utils.events.TooltipEvents
-
-// In your SkyFall.kt file
+import io.github.frostzie.skyfall.utils.item.StackCountRenderer
 
 class SkyFall : ModInitializer {
 	override fun onInitialize() {
@@ -25,6 +24,7 @@ class SkyFall : ModInitializer {
 		})
 		IslandManager.init()
 		CommandManager.loadCommands()
+		StackCountRenderer.initialize()
 		HudManager.init()
 		FeatureManager.loadFeatures()
 

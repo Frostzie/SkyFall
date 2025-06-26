@@ -23,7 +23,7 @@ import java.io.FileWriter
 
 object AttributeMenuRepoBuilder {
     private val logger = LoggerProvider.getLogger("AttributeMenuRepoBuilder")
-    private val repoFile = File("config/skyfall/attribute-menu-repo.json")
+    private val repoFile = File("config/skyfall/AttributeMenuData.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
     private val validSlotRanges = setOf(
@@ -80,34 +80,42 @@ object AttributeMenuRepoBuilder {
 
                         if (!existingData.containsKey(attributeName)) {
                             attributeData[attributeName] = JsonObject().apply {
+                                addProperty("bazaarName", "")
+                                addProperty("type", type)
+                                addProperty("rarity", rarity)
                                 addProperty("maxShards", 0)
                                 addProperty("maxStatBoost", "")
+                                addProperty("statBoost", "")
                                 add("wayToObtain", gson.toJsonTree(emptyList<String>()))
-                                addProperty("rarity", rarity)
-                                addProperty("type", type)
                             }
                             hasNewEntries = true
                             logger.debug("Found new attribute \"$attributeName\" in slot $slotIndex with type \"$type\" and rarity \"$rarity\"")
                         } else {
                             val existingEntry = existingData[attributeName]!!
-                            var updated = false
+                            var entryWasModified = false
 
-                            val existingType = existingEntry.get("type")?.asString ?: ""
-                            val existingRarity = existingEntry.get("rarity")?.asString ?: ""
-
-                            if (existingType.isEmpty() && type.isNotEmpty()) {
-                                existingEntry.addProperty("type", type)
-                                updated = true
-                                logger.debug("Updated type for \"$attributeName\": \"$type\"")
+                            fun updateStringIfEmpty(key: String, newValue: String) {
+                                if (newValue.isNotEmpty() && (existingEntry.get(key)?.asString ?: "").isEmpty()) {
+                                    existingEntry.addProperty(key, newValue)
+                                    logger.debug("Updated '$key' for \"$attributeName\": \"$newValue\"")
+                                    entryWasModified = true
+                                }
+                            }
+                            fun addPropertyIfMissing(key: String, value: String) {
+                                if (!existingEntry.has(key)) {
+                                    existingEntry.addProperty(key, value)
+                                    logger.debug("Added missing '$key' property for \"$attributeName\"")
+                                    entryWasModified = true
+                                }
                             }
 
-                            if (existingRarity.isEmpty() && rarity.isNotEmpty()) {
-                                existingEntry.addProperty("rarity", rarity)
-                                updated = true
-                                logger.debug("Updated rarity for \"$attributeName\": \"$rarity\"")
-                            }
+                            updateStringIfEmpty("type", type)
+                            updateStringIfEmpty("rarity", rarity)
 
-                            if (updated) {
+                            addPropertyIfMissing("bazaarName", "")
+                            addPropertyIfMissing("statBoost", "")
+
+                            if (entryWasModified) {
                                 hasUpdatedEntries = true
                             }
                         }
@@ -130,7 +138,7 @@ object AttributeMenuRepoBuilder {
             } else if (hasNewEntries) {
                 ChatUtils.messageToChat("§aGenerated repository with $newCount new attribute entries (Total: $totalCount)").send()
             } else {
-                ChatUtils.messageToChat("§aUpdated existing attribute entries with type/rarity info (Total: $totalCount)").send()
+                ChatUtils.messageToChat("§aUpdated existing attribute entries with new/missing info (Total: $totalCount)").send()
             }
         } else {
             logger.debug("No new attribute entries or updates found in the menu")
@@ -239,12 +247,31 @@ object AttributeMenuRepoBuilder {
     }
 
     private fun saveRepository(attributeData: Map<String, JsonObject>) {
+        val propertyOrder = listOf("bazaarName", "type", "rarity", "maxShards", "maxStatBoost", "statBoost", "wayToObtain")
+        val reorderedData = attributeData.mapValues { (_, originalJson) ->
+            val reorderedJson = JsonObject()
+
+            propertyOrder.forEach { key ->
+                if (originalJson.has(key)) {
+                    reorderedJson.add(key, originalJson.get(key))
+                }
+            }
+
+            originalJson.keySet().forEach { key ->
+                if (!propertyOrder.contains(key)) {
+                    reorderedJson.add(key, originalJson.get(key))
+                }
+            }
+
+            reorderedJson
+        }
+
         try {
             repoFile.parentFile.mkdirs()
             FileWriter(repoFile).use { writer ->
-                gson.toJson(attributeData, writer)
+                gson.toJson(reorderedData, writer)
             }
-            logger.info("Successfully saved attribute repository with ${attributeData.size} entries")
+            logger.info("Successfully saved attribute repository with ${reorderedData.size} entries")
         } catch (e: Exception) {
             logger.error("Failed to save attribute repository: ${e.message}")
             ChatUtils.messageToChat("§cFailed to save attribute repository!").send()

@@ -1,15 +1,11 @@
-// File: ItemUtils.kt
 package io.github.frostzie.skyfall.utils.item
 
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.text.Text
 
-// Added extension function to resolve styledLines() reference
 private fun LoreComponent.styledLines(): List<Text> {
-    // Example implementation; adjust as needed.
     return listOf(Text.literal("Default Lore"))
 }
 

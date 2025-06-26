@@ -13,6 +13,7 @@
     "MouseSensitivityMixin",
     "PropertySignatureIgnorePatchForSession",
     "SlotRenderingMixin",
+    "SlotClickObserverMixin",
     "SoundSystemMixin",
     "TextureUnpackBase64PadPatch",
     "YggdrasilSignatureIgnorePatch",

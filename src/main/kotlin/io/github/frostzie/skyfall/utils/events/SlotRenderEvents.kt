@@ -3,11 +3,6 @@ package io.github.frostzie.skyfall.utils.events
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.screen.slot.Slot
 
-/**
- * A dedicated, high-performance event hub for slot rendering.
- * This is used for high-frequency events where the overhead of a
- * general-purpose event bus is undesirable.
- */
 object SlotRenderEvents {
     /**
      * The data class for the event, containing the rendering context and the slot.

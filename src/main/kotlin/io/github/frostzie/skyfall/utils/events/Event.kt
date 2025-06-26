@@ -6,16 +6,22 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Base class for events
  */
 open class Event {
-    private var cancelled = false
+    var isCancelled: Boolean = false
+        private set
 
     fun post() {
         EventBus.post(this)
     }
 
-    fun isCancelled(): Boolean = cancelled
-
     fun setCancelled(cancelled: Boolean) {
-        this.cancelled = cancelled
+        this.isCancelled = cancelled
+    }
+
+    /**
+     * Marks this event as canceled.
+     */
+    fun cancel() {
+        this.isCancelled = true
     }
 }
 

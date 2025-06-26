@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall.config.features.inventory
 import com.google.gson.annotations.Expose
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDraggableList
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDropdown
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
@@ -71,6 +72,21 @@ class InventoryConfig {
 
             override fun toString(): String = value
         }
+
+        @Expose
+        @ConfigOption(name = "Level Number", desc = "Show what level the attribute is with a stack number.")
+        @ConfigEditorBoolean
+        var levelNumber: Boolean = true
+
+        @Expose
+        @ConfigOption(name = "Hide description", desc = "Hide the gray description inside Hunting Box inventory")
+        @ConfigEditorBoolean
+        var hideDescription: Boolean = false
+
+        @Expose
+        @ConfigOption(name = "Show in Bazaar", desc = "Show extra stats in bazaar under attributes")
+        @ConfigEditorBoolean
+        var showInBazaar: Boolean = true
     }
 
     @Expose

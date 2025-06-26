@@ -25,7 +25,7 @@ import java.io.FileWriter
 
 object AttributeMenuInfoRepoBuilder {
     private val logger = LoggerProvider.getLogger("AttributeMenuInfoRepoBuilder")
-    private val repoFile = File("config/skyfall/attribute-menu-repo.json")
+    private val repoFile = File("config/skyfall/AttributeMenuData.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
     private const val MAX_LEVEL_SLOT = 20

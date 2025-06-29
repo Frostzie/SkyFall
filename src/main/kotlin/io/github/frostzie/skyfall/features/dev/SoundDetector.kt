@@ -1,6 +1,8 @@
 package io.github.frostzie.skyfall.features.dev
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.SoundUtils
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
@@ -12,7 +14,10 @@ import net.minecraft.util.Identifier
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
-object SoundDetector {
+@Feature(name = "Sound Detector")
+object SoundDetector : IFeature {
+    override var isRunning = false
+
     private val activeSounds = ConcurrentHashMap<String, SoundInfo>()
     private val mc = MinecraftClient.getInstance()
     private val config get() = SkyFall.feature.dev
@@ -25,32 +30,44 @@ object SoundDetector {
         val soundId: String
     )
 
-    fun init() {
+    init {
         HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { d: LayeredDrawerWrapper? ->
             d!!.attachLayerAfter(
                 IdentifiedLayer.SUBTITLES,
                 Identifier.of("skyfall", "sounds")
             ) { context: DrawContext?, _ ->
-                if (config.enabledDevMode && config.soundDetector) {
-                    renderSoundOverlay(context!!)
-                }
+                if (!isRunning) return@attachLayerAfter
+                renderSoundOverlay(context!!)
             }
         })
     }
 
-    fun onSoundPlay(soundInstance: SoundInstance) {
-        if (config.enabledDevMode && config.soundDetector) {
-            val detailedName = createDetailedSoundName(soundInstance)
-            val uniqueKey = "${detailedName}_${System.nanoTime()}"
+    override fun shouldLoad(): Boolean {
+        return config.enabledDevMode && config.soundDetector
+    }
 
-            activeSounds[uniqueKey] = SoundInfo(
-                displayName = detailedName,
-                timestamp = System.currentTimeMillis(),
-                volume = soundInstance.volume,
-                pitch = soundInstance.pitch,
-                soundId = SoundUtils.getSoundId(soundInstance)
-            )
-        }
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+        clearAllSounds()
+    }
+
+    fun onSoundPlay(soundInstance: SoundInstance) {
+        if (!isRunning) return
+
+        val detailedName = createDetailedSoundName(soundInstance)
+        val uniqueKey = "${detailedName}_${System.nanoTime()}"
+
+        activeSounds[uniqueKey] = SoundInfo(
+            displayName = detailedName,
+            timestamp = System.currentTimeMillis(),
+            volume = soundInstance.volume,
+            pitch = soundInstance.pitch,
+            soundId = SoundUtils.getSoundId(soundInstance)
+        )
     }
 
     fun clearAllSounds() {

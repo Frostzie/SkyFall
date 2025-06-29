@@ -1,62 +1,86 @@
 package io.github.frostzie.skyfall.features
 
-import io.github.frostzie.skyfall.features.chat.FilterManager
-import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuInfoRepoBuilder
-import io.github.frostzie.skyfall.features.dev.repo.AttributeMenuRepoBuilder
-import io.github.frostzie.skyfall.features.dev.ItemStackJsonCopier
-import io.github.frostzie.skyfall.features.dev.SoundDetector
-import io.github.frostzie.skyfall.features.dev.repo.AttributeDataFromBazaar
-import io.github.frostzie.skyfall.features.dungeon.RequeueKey
-import io.github.frostzie.skyfall.features.garden.GardenKeybinds
-import io.github.frostzie.skyfall.features.gui.ConfigOpen
-import io.github.frostzie.skyfall.features.misc.funny.RealisticSpacemanHelmet
-import io.github.frostzie.skyfall.features.misc.keybind.MiscKeybindManager
-import io.github.frostzie.skyfall.features.garden.MouseSensitivity
-import io.github.frostzie.skyfall.features.inventory.FavoriteAbiContact
-import io.github.frostzie.skyfall.features.inventory.FavoritePet
-import io.github.frostzie.skyfall.features.inventory.FavoritePowerStone
-import io.github.frostzie.skyfall.features.gui.HudEditorKeybind
-import io.github.frostzie.skyfall.features.inventory.attribute.AttributeMenu
-import io.github.frostzie.skyfall.features.inventory.attribute.HideDescription
-import io.github.frostzie.skyfall.features.inventory.attribute.LevelNumber
-import io.github.frostzie.skyfall.features.inventory.attribute.ShowInBazaar
+import io.github.frostzie.skyfall.utils.LoggerProvider
+import org.reflections.Reflections
+import kotlin.system.measureTimeMillis
 
-//TODO: rework whole loading system so not all features are loaded on startup
+// Based on the system used by SkyHanni
+/**
+ * Manages the lifecycle of all features in the client.
+ *
+ * This manager uses reflection to discover all features annotated with `@Feature`.
+ * It can dynamically start and stop features based on the user's configuration,
+ * allowing for changes to be applied without restarting the game.
+ *
+ * The main entry point is `initialize()`, which should be called once on startup.
+ * `updateFeatureStates()` can be called anytime the configuration is saved to apply changes.
+ */
 object FeatureManager {
-    fun loadFeatures() {
-        // GUI Features
-        ConfigOpen.init()
-        HudEditorKeybind.init()
+    private val logger = LoggerProvider.getLogger("featureManager")
+    private val discoveredFeatures = mutableListOf<IFeature>()
 
-        // Chat Features
-        FilterManager.loadFilters()
+    fun initialize() {
+        logger.info("Starting feature scan...")
+        val timeInMillis = measureTimeMillis {
+            try {
+                val reflections = Reflections("io.github.frostzie.skyfall.features")
+                val featureClasses = reflections.getTypesAnnotatedWith(Feature::class.java)
+                logger.info("Found ${featureClasses.size} classes with @Feature annotation.")
 
-        // Dungeon Features
-        RequeueKey.init()
+                for (featureClass in featureClasses) {
+                    try {
+                        val featureInstance = featureClass.kotlin.objectInstance
+                        if (featureInstance is IFeature) {
+                            discoveredFeatures.add(featureInstance)
+                        } else {
+                            logger.warn("Class ${featureClass.simpleName} is annotated with @Feature but does not implement IFeature.")
+                        }
+                    } catch (e: Exception) {
+                        val annotation = featureClass.getAnnotation(Feature::class.java)
+                        logger.error("Failed to get instance of feature: '${annotation.name}' (${featureClass.simpleName})", e)
+                    }
+                }
 
-        // Inventory Features
-        FavoritePowerStone.init()
-        FavoriteAbiContact.init()
-        FavoritePet.init()
-        AttributeMenu.init()
-        HideDescription.init()
-        ShowInBazaar.init()
-        LevelNumber.init()
+                updateFeatureStates()
+            } catch (e: Exception) {
+                logger.error("A critical error occurred during feature scanning. No features will be loaded.", e)
+            }
+        }
+        logger.info("Feature initialization and first load completed in ${timeInMillis}ms.")
+    }
 
-        // Misc Features
-        MiscKeybindManager.init()
-        RealisticSpacemanHelmet.init()
+    /**
+     * Iterates over all discovered features and synchronizes their running state
+     * with the desired state from the configuration.
+     *
+     * This method handles starting newly enabled features and stopping newly disabled ones.
+     * It should be called after the configuration is changed/saved.
+     */
+    fun updateFeatureStates() {
+        logger.debug("Updating feature states...")
+        if (discoveredFeatures.isEmpty()) {
+            logger.warn("No features were discovered. Cannot update states. Was initialize() called?")
+            return
+        }
 
-        // Garden Features
-        GardenKeybinds.init()
-        GardenKeybinds.homeHotkey()
-        MouseSensitivity.init()
+        for (feature in discoveredFeatures) {
+            val featureName = feature.javaClass.getAnnotation(Feature::class.java)?.name ?: feature.javaClass.simpleName
 
-        // Dev Features
-        SoundDetector.init() //TODO: Fix hud flickering after fading out
-        ItemStackJsonCopier.init()
-        AttributeMenuRepoBuilder.init()
-        AttributeMenuInfoRepoBuilder.init()
-        AttributeDataFromBazaar.init()
+            try {
+                val shouldBeRunning = feature.shouldLoad()
+                val isActuallyRunning = feature.isRunning
+
+                if (shouldBeRunning && !isActuallyRunning) {
+                    logger.debug("-> Starting feature: '$featureName'")
+                    feature.init()
+                } else if (!shouldBeRunning && isActuallyRunning) {
+                    logger.debug("-> Stopping feature: '$featureName'")
+                    feature.terminate()
+                }
+            } catch (e: Exception) {
+                logger.error("Failed to change state for feature '$featureName'", e)
+            }
+        }
+        logger.debug("Finished updating feature states.")
     }
 }

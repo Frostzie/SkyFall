@@ -1,23 +1,15 @@
 package io.github.frostzie.skyfall.config
 
+import com.google.gson.GsonBuilder
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.FeatureManager
+import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
-
 import io.github.notenoughupdates.moulconfig.observer.PropertyTypeAdapterFactory
 import io.github.notenoughupdates.moulconfig.processor.BuiltinMoulConfigGuis
 import io.github.notenoughupdates.moulconfig.processor.ConfigProcessorDriver
 import io.github.notenoughupdates.moulconfig.processor.MoulConfigProcessor
-
-import com.google.gson.GsonBuilder
-import io.github.frostzie.skyfall.utils.LoggerProvider
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
+import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -35,25 +27,22 @@ object ConfigManager {
 
     lateinit var features: Features
 
-    var configDirectory = File("config/skyfall")
+    private var configDirectory = File("config/skyfall")
     private var configFile: File? = null
     lateinit var processor: MoulConfigProcessor<Features>
 
     fun firstLoad() {
-        if (ConfigManager::features.isInitialized) {
-            println("SkyFall: Loading config despite config alr being loaded?..")
-        }
-
         configDirectory.mkdirs()
         configFile = File(configDirectory, "config.json")
-        println("Trying to load config from $configFile")
+        logger.info("Trying to load config from $configFile")
+
         if (configFile!!.exists()) {
             try {
-                println("load-config-now")
+                logger.info("load-config-now")
                 val inputStreamReader = InputStreamReader(FileInputStream(configFile!!), StandardCharsets.UTF_8)
                 val bufferedReader = BufferedReader(inputStreamReader)
                 features = gson.fromJson(bufferedReader.readText(), Features::class.java)
-                println("SkyFall: Loaded config file")
+                logger.info("Loaded config File")
             } catch (e: Exception) {
                 logger.error("Exception while reading config file $configFile", e)
                 val backupFile = configFile!!.resolveSibling("config-${SimpleTimeMark.now().toMillis()}-backup.json")
@@ -66,28 +55,27 @@ object ConfigManager {
             }
         }
 
-        if (!ConfigManager::features.isInitialized) {
-            println("Creating a new config file and saving it")
+        if (!this::features.isInitialized) {
+            logger.info("Creating a new config file and saving it")
             features = Features()
             saveConfig("blank config")
         }
 
+        logger.info("Initializing MoulConfig with the loaded configuration.")
+        processor = MoulConfigProcessor(SkyFall.feature)
+        BuiltinMoulConfigGuis.addProcessors(processor)
+        val driver = ConfigProcessorDriver(processor)
+        driver.warnForPrivateFields = false
+        driver.processConfig(SkyFall.feature)
+
         fixedRateTimer(name = "skyfall-config-auto-save", period = 60_000L, initialDelay = 60_000L) {
             try {
                 saveConfig("auto-save-60s")
+                logger.debug("60s Config Save.")
             } catch (e: Throwable) {
                 logger.error("Error auto-saving config!", e)
             }
         }
-
-        //TODO: Add UpdateManager
-        val features = SkyFall.feature
-        processor = MoulConfigProcessor(SkyFall.feature)
-        BuiltinMoulConfigGuis.addProcessors(processor)
-        //UpdateManager.injectConfigProcessor(processor)
-        val driver = ConfigProcessorDriver(processor)
-        driver.warnForPrivateFields = false
-        driver.processConfig(features)
     }
 
     fun saveConfig(reason: String) {
@@ -106,6 +94,7 @@ object ConfigManager {
                 StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.ATOMIC_MOVE
             )
+            FeatureManager.updateFeatureStates()
         } catch (e: IOException) {
             logger.error("Couldn't save config file to $file", e)
         }

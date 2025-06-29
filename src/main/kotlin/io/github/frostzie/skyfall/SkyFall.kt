@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall
 
 import io.github.frostzie.skyfall.commands.CommandManager
+import io.github.frostzie.skyfall.config.ConfigGuiManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.data.RepoManager
@@ -21,20 +22,25 @@ class SkyFall : ModInitializer {
 		configManager.firstLoad()
 		Runtime.getRuntime().addShutdownHook(Thread {
 			configManager.saveConfig("shutdown-hook")
+			FeatureManager.updateFeatureStates()
 		})
 		IslandManager.init()
 		CommandManager.loadCommands()
 		StackCountRenderer.initialize()
 		HudManager.init()
-		FeatureManager.loadFeatures()
+		FeatureManager.initialize()
 
 		ClientTickEvents.END_CLIENT_TICK.register { client ->
 			if (screenToOpen != null) {
 				client.setScreen(screenToOpen)
 				screenToOpen = null
 			}
-		}
 
+			if (ConfigGuiManager.currentScreenInstance != null && client.currentScreen != ConfigGuiManager.currentScreenInstance) {
+				feature.saveNow()
+				ConfigGuiManager.currentScreenInstance = null
+			}
+		}
 
 		ItemTooltipCallback.EVENT.register { stack, _, _, lines ->
 			if (!stack.isEmpty) {

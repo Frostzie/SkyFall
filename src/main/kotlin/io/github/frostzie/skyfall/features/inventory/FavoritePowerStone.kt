@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -24,30 +26,44 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-object FavoritePowerStone {
+@Feature(name = "Favorite Power Stones")
+object FavoritePowerStone : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("FavoritePowerStone")
     private val configFile = File("config/skyfall/favorite-power-stones.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
     private var currentScreen: HandledScreen<*>? = null
-
     private val validSlotRanges = setOf(
-        10..16,
-        19..25,
-        28..34,
-        37..43
+        10..16, 19..25, 28..34, 37..43
     )
 
-    fun init() {
+    init {
         loadConfig()
         registerTickHandler()
         registerSlotRenderEvent()
         registerEventHandlers()
     }
 
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.inventory.powerStone.favoriteKey != GLFW.GLFW_KEY_UNKNOWN
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+        removeToggleButton()
+        currentScreen = null
+    }
+
     private fun registerEventHandlers() {
         SlotClickEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot ?: return@subscribe
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isAccessoryBagThaumaturgy(currentScreen)) {
@@ -63,6 +79,8 @@ object FavoritePowerStone {
         }
 
         SlotRenderEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isAccessoryBagThaumaturgy(currentScreen)) {
@@ -81,6 +99,14 @@ object FavoritePowerStone {
 
     private fun registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (!isRunning) {
+                if (currentScreen != null) {
+                    removeToggleButton()
+                    currentScreen = null
+                }
+                return@register
+            }
+
             val screen = client.currentScreen
             if (screen is HandledScreen<*> && isAccessoryBagThaumaturgy(screen)) {
                 if (currentScreen != screen) {
@@ -97,27 +123,29 @@ object FavoritePowerStone {
         }
     }
 
+    private fun registerSlotRenderEvent() {
+        SlotRenderEvents.listen { event ->
+            if (!isRunning) return@listen
+            onRenderSlot(event.context, event.slot)
+        }
+    }
+
     private fun setupToggleButton(screen: HandledScreen<*>) {
         removeToggleButton()
-
         val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN || !isAccessoryBagThaumaturgy(screen)) {
             favoredOnlyToggle = false
             return
         }
-
         val screenX = screen.x
         val screenY = screen.y
         val backgroundWidth = screen.backgroundWidth
-
         var buttonX = screenX + backgroundWidth - 16
         val buttonY = screenY + 4
-
         val existingButtons = Screens.getButtons(screen)
         while (existingButtons.any { it is ButtonWidget && it.x == buttonX && it.y == buttonY }) {
             buttonX -= 15
         }
-
         val toggleButton = ButtonWidget.builder(
             Text.literal(if (favoredOnlyToggle) "F" else "A")
         ) { _ ->
@@ -128,7 +156,6 @@ object FavoritePowerStone {
             .dimensions(buttonX, buttonY, 12, 12)
             .tooltip(Tooltip.of(Text.literal(if (favoredOnlyToggle) "Click to Show All" else "Click for Favorites Only")))
             .build()
-
         Screens.getButtons(screen).add(toggleButton)
     }
 
@@ -146,7 +173,6 @@ object FavoritePowerStone {
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
-
         if (KeyboardManager.run { highlightKey.isKeyClicked() }) {
             handleKeyPressAction(screen)
         }
@@ -155,13 +181,11 @@ object FavoritePowerStone {
     private fun handleKeyPressAction(screen: HandledScreen<*>) {
         val hoveredSlot = getHoveredSlot(screen) ?: return
         val slotIndex = hoveredSlot.index
-
         if (!isSlotInChestInventory(hoveredSlot) ||
             !validSlotRanges.any { slotIndex in it } ||
             hoveredSlot.stack.isEmpty) {
             return
         }
-
         val itemName = hoveredSlot.stack.name.string
         if (highlightedItems.contains(itemName)) {
             highlightedItems.remove(itemName)
@@ -187,7 +211,6 @@ object FavoritePowerStone {
             logger.error("Failed to get hovered slot: ${e.message}", e)
             val mouseX = MinecraftClient.getInstance().mouse.x * screen.width / MinecraftClient.getInstance().window.width
             val mouseY = MinecraftClient.getInstance().mouse.y * screen.height / MinecraftClient.getInstance().window.height
-
             try {
                 screen.getSlotAt(mouseX, mouseY)
             } catch (e2: Exception) {
@@ -197,28 +220,19 @@ object FavoritePowerStone {
         }
     }
 
-    private fun registerSlotRenderEvent() {
-        SlotRenderEvents.listen { event ->
-            onRenderSlot(event.context, event.slot)
-        }
-    }
-
     fun onRenderSlot(context: DrawContext, slot: Slot) {
         val currentScreen = MinecraftClient.getInstance().currentScreen
         if (currentScreen !is HandledScreen<*> || !isAccessoryBagThaumaturgy(currentScreen)) {
             return
         }
-
         val highlightKey = SkyFall.feature.inventory.powerStone.favoriteKey
         if (highlightKey == GLFW.GLFW_KEY_UNKNOWN) {
             return
         }
-
         val slotIndex = slot.index
         if (!isSlotInChestInventory(slot) || !validSlotRanges.any { slotIndex in it } || slot.stack.isEmpty) {
             return
         }
-
         val itemName = slot.stack.name.string
         if (highlightedItems.contains(itemName)) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
@@ -230,7 +244,6 @@ object FavoritePowerStone {
             configFile.parentFile.mkdirs()
             return
         }
-
         try {
             FileReader(configFile).use { reader ->
                 val type = object : TypeToken<Map<String, Any>>() {}.type

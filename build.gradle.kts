@@ -34,6 +34,8 @@ dependencies {
     modImplementation(libs.fabric.kotlin)
     modImplementation(libs.fabric.api)
     modRuntimeOnly(libs.devauth)
+    implementation("org.reflections:reflections:0.10.2") // Might switch to something like ClassGraph
+    include("org.reflections:reflections:0.10.2")
     include(libs.moulconfig)
 }
 

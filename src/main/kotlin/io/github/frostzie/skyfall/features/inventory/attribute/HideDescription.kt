@@ -1,6 +1,8 @@
 package io.github.frostzie.skyfall.features.inventory.attribute
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.TooltipEvents
 import io.github.frostzie.skyfall.utils.item.CustomLoreUtils
@@ -9,22 +11,37 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 
-object HideDescription {
+@Feature(name = "Hide Hunting Box Description")
+object HideDescription : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("HideDescription")
-    private val config get() = SkyFall.Companion.feature.inventory.attributeMenu
+    private val config get() = SkyFall.feature.inventory.attributeMenu
 
-    fun init() {
+    init {
         registerTooltipEvent()
+    }
+
+    override fun shouldLoad(): Boolean {
+        return config.hideDescription
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
     }
 
     private fun registerTooltipEvent() {
         TooltipEvents.register { stack, lines ->
+            if (!isRunning) return@register
             onTooltipRender(stack, lines)
         }
     }
 
     fun onTooltipRender(stack: ItemStack, lines: MutableList<Text>) {
-        if (!config.hideDescription || stack.isEmpty) {
+        if (stack.isEmpty) {
             return
         }
 
@@ -33,7 +50,7 @@ object HideDescription {
             return
         }
         val screenTitle = currentScreen.title.string
-        if (!screenTitle.equals("Hunting Box", ignoreCase = true)) { // Changed to ignoreCase = true for robustness
+        if (!screenTitle.equals("Hunting Box", ignoreCase = true)) {
             return
         }
 

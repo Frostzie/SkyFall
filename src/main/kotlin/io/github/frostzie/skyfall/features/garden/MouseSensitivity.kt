@@ -2,6 +2,8 @@ package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.IslandType
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.mixin.accessor.MouseAccessor
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.IslandManager
@@ -10,8 +12,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import org.lwjgl.glfw.GLFW
 
-object MouseSensitivity {
+@Feature(name = "Mouse Sensitivity Lock")
+object MouseSensitivity : IFeature {
 
+    override var isRunning = false
     var isLockActive: Boolean = false
         private set
 
@@ -19,6 +23,10 @@ object MouseSensitivity {
     private var mouseHookWasEffectiveLastTick: Boolean = false
     private val toggleKeyCode: Int
         get() = SkyFall.feature.garden.mouseSensitivity.mouseSensitivity
+
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.garden.mouseSensitivity.mouseSensitivity != GLFW.GLFW_KEY_UNKNOWN
+    }
 
     private fun isFeatureConditionallyActive(): Boolean {
         val onGardenConfig = SkyFall.feature.garden.mouseSensitivity.onGarden
@@ -29,7 +37,9 @@ object MouseSensitivity {
         }
     }
 
-    fun init() {
+    override fun init() {
+        if (isRunning) return
+        isRunning = true
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client ->
             if (client.player == null) {
                 if (isLockActive) {
@@ -76,6 +86,12 @@ object MouseSensitivity {
             }
             mouseHookWasEffectiveLastTick = mouseHookIsEffectiveThisTick
         })
+    }
+
+    override fun terminate() {
+        isRunning = false
+        isLockActive = false
+        restoreMouseSensitivityOption(MinecraftClient.getInstance())
     }
 
     private fun disableMouseMovementEffect(client: MinecraftClient) {

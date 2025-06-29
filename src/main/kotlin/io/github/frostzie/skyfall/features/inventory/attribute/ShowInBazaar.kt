@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.inventory.attribute
 import com.google.gson.JsonObject
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.RepoManager
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.TooltipEvents
@@ -11,21 +13,36 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 
-object ShowInBazaar {
+@Feature(name = "Show Attribute Info in Bazaar")
+object ShowInBazaar : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("ShowInBazaar")
-    private val config get() = SkyFall.Companion.feature.inventory.attributeMenu
+    private val config get() = SkyFall.feature.inventory.attributeMenu
 
     private var attributeData: JsonObject? = null
     private var lastDataLoadTime = 0L
     private const val DATA_REFRESH_INTERVAL = 60000L
 
-    fun init() {
+    init {
         registerTooltipEvent()
         loadAttributeData()
     }
 
+    override fun shouldLoad(): Boolean {
+        return config.showInBazaar
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+    }
+
     private fun registerTooltipEvent() {
         TooltipEvents.register { stack, lines ->
+            if (!isRunning) return@register
             onTooltipRender(stack, lines)
         }
     }
@@ -50,7 +67,7 @@ object ShowInBazaar {
     }
 
     fun onTooltipRender(stack: ItemStack, lines: MutableList<Text>) {
-        if (!config.showInBazaar || stack.isEmpty) {
+        if (stack.isEmpty) {
             return
         }
 

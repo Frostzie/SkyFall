@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -27,7 +29,10 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-object FavoritePet {
+@Feature(name = "Favorite Pets")
+object FavoritePet : IFeature {
+
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("FavoritePet")
     private val configFile = File("config/skyfall/favorite-pets.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -45,22 +50,39 @@ object FavoritePet {
     private val FAVORITE_COLOR = Color(255, 170, 0, 220)
     private val ACTIVE_PET_COLOR = Color(0, 255, 0, 220)
 
-    fun init() {
+    init {
         loadConfig()
         registerTickHandler()
         registerSlotRenderEvent()
         registerEventHandlers()
     }
 
+    override fun shouldLoad(): Boolean {
+        val config = SkyFall.feature.inventory.petMenu
+        return config.favoriteKey != GLFW.GLFW_KEY_UNKNOWN || config.activePet
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+        removeToggleButton()
+        currentScreen = null
+    }
+
     private fun registerEventHandlers() {
         SlotClickEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot ?: return@subscribe
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
                 if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
                     if (favoredOnlyToggle && !slot.stack.isEmpty) {
-                        val itemName = slot.stack.name.string
-                        if (!highlightedItems.contains(itemName)) {
+                        val itemUuid = ItemUtils.getUuid(slot.stack)
+                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
                             event.cancel()
                         }
                     }
@@ -69,13 +91,15 @@ object FavoritePet {
         }
 
         SlotRenderEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
                 if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
                     if (favoredOnlyToggle && !slot.stack.isEmpty) {
-                        val itemName = slot.stack.name.string
-                        if (!highlightedItems.contains(itemName)) {
+                        val itemUuid = ItemUtils.getUuid(slot.stack)
+                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
                             event.hide()
                             event.hideTooltip()
                         }
@@ -87,6 +111,14 @@ object FavoritePet {
 
     private fun registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (!isRunning) {
+                if (currentScreen != null) {
+                    removeToggleButton()
+                    currentScreen = null
+                }
+                return@register
+            }
+
             val screen = client.currentScreen
             if (screen is HandledScreen<*> && isPetMenu(screen)) {
                 if (currentScreen != screen) {
@@ -100,6 +132,13 @@ object FavoritePet {
                     removeToggleButton()
                 }
             }
+        }
+    }
+
+    private fun registerSlotRenderEvent() {
+        SlotRenderEvents.listen { event ->
+            if (!isRunning) return@listen
+            onRenderSlot(event.context, event.slot)
         }
     }
 
@@ -187,7 +226,7 @@ object FavoritePet {
 
     private fun isPetMenu(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        return title.contains("Pets") && !title.contains("Choose Pet") && !title.startsWith("Pets: ")
+        return title.contains("Pets") && !title.contains("Choose Pet") && !title.startsWith("Pets: ") && !title.equals("Offer Pets")
     }
 
     fun isSlotInChestInventory(slot: Slot): Boolean {
@@ -208,12 +247,6 @@ object FavoritePet {
                 logger.error("Failed to get slot at mouse position: ${e2.message}", e2)
                 null
             }
-        }
-    }
-
-    private fun registerSlotRenderEvent() {
-        SlotRenderEvents.listen { event ->
-            onRenderSlot(event.context, event.slot)
         }
     }
 

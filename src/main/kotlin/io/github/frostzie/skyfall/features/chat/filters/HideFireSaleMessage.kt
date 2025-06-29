@@ -1,27 +1,42 @@
 package io.github.frostzie.skyfall.features.chat.filters
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.util.Formatting
 
-object HideFireSaleMessage {
-    private val config get() = SkyFall.feature.chat.chatFilters.hideFireSale
+@Feature(name = "Hide Fire Sale Messages")
+object HideFireSaleMessage : IFeature {
 
-    fun init() {
+    override var isRunning = false
+
+    init {
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
-            if (overlay) {
+            if (!isRunning || overlay) {
                 return@register true
             }
 
-            if (config) {
-                val messageString = Formatting.strip(message.string)
-                if (isFireSaleMessage(messageString)) {
-                    return@register false
-                }
+
+            val messageString = Formatting.strip(message.string)
+            if (isFireSaleMessage(messageString)) {
+                return@register false
             }
 
             return@register true
         }
+    }
+
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.chat.chatFilters.hideFireSale
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
     }
 
     private fun isFireSaleMessage(message: String?): Boolean {

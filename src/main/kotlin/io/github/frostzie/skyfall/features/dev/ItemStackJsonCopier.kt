@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.dev
 import com.google.gson.*
 import com.mojang.serialization.JsonOps
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
@@ -17,15 +19,31 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 
 // Taken and modified from Component Viewer
-object ItemStackJsonCopier {
+@Feature(name = "Item Stack JSON Copier")
+object ItemStackJsonCopier : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("ItemStackJsonCopier")
 
-    fun init() {
+    init {
         registerTickHandler()
+    }
+
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.dev.copyItemDataKey != GLFW.GLFW_KEY_UNKNOWN
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
     }
 
     private fun registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (!isRunning) return@register
+
             val screen = client.currentScreen
             if (screen is HandledScreen<*>) {
                 handleKeyPress(screen)

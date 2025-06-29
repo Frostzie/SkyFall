@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.inventory.attribute
 import com.google.gson.JsonObject
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.data.RarityType
 import io.github.frostzie.skyfall.data.RepoManager
 import io.github.frostzie.skyfall.utils.ColorUtils
@@ -24,9 +26,11 @@ import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
 
-object AttributeMenu {
+@Feature(name = "Attribute Menu")
+object AttributeMenu : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("AttributeMenu")
-    private val config get() = SkyFall.Companion.feature.inventory.attributeMenu
+    private val config get() = SkyFall.feature.inventory.attributeMenu
     private const val MAX_LORE_WIDTH = 190
 
     private val validSlotRanges = setOf(
@@ -41,20 +45,38 @@ object AttributeMenu {
     private var lastDataLoadTime = 0L
     private const val DATA_REFRESH_INTERVAL = 60000L
 
-    fun init() {
+    init {
         registerSlotRenderEvent()
         registerTooltipEvent()
         loadAttributeData()
     }
 
+    override fun shouldLoad(): Boolean {
+        return config.highlightDisabled ||
+                config.highlightMaxed ||
+                config.showMaxStatBoost != InventoryConfig.AttributeMenuConfig.ShowMaxBoost.NEVER ||
+                config.showShardsLeftToMax != InventoryConfig.AttributeMenuConfig.LeftToMax.NEVER ||
+                config.obtainOption != InventoryConfig.AttributeMenuConfig.ObtainShow.NEVER
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+    }
+
     private fun registerSlotRenderEvent() {
         SlotRenderEvents.listen { event ->
+            if (!isRunning) return@listen
             onRenderSlot(event.context, event.slot)
         }
     }
 
     private fun registerTooltipEvent() {
         TooltipEvents.register { stack, lines ->
+            if (!isRunning) return@register
             onTooltipRender(stack, lines)
         }
     }
@@ -168,8 +190,6 @@ object AttributeMenu {
 
     private fun cleanItemNameForMatching(itemName: String): String {
         return itemName
-            .replace(Regex("^(✦\\s*)?"), "") // Remove ✦ prefix
-            .replace(Regex("\\s*\\(.*\\)$"), "") // Remove parentheses at end
             .replace(Regex("\\s+X$"), "") // Remove " X" suffix for maxed items
             .trim()
     }
@@ -297,8 +317,9 @@ object AttributeMenu {
 
             val rarity = getRarityFromLore(stack) ?: return
             val levelInfo = parseLevelInfo(stack) ?: return
-
-            val shardsNeeded = calculateShardsToMax(rarity, levelInfo.currentLevel, levelInfo.isUnlocked)
+            val loreLines = TooltipUtils.getLoreAsStrings(stack)
+            val shardsRemainingForNextLevel = extractSyphonProgress(loreLines)
+            val shardsNeeded = calculateShardsToMax(rarity, levelInfo.currentLevel, levelInfo.isUnlocked, shardsRemainingForNextLevel)
             if (shardsNeeded <= 0) {
                 return
             }
@@ -397,7 +418,19 @@ object AttributeMenu {
         }
     }
 
-    private fun calculateShardsToMax(rarity: RarityType, currentLevel: Int, isUnlocked: Boolean): Int {
+    private fun extractSyphonProgress(loreLines: List<String>): Int {
+        val pattern = Regex("Syphon (\\d+) more to level up!")
+        for (line in loreLines) {
+            val cleanLine = ColorUtils.stripColorCodes(line)
+            val match = pattern.find(cleanLine)
+            if (match != null) {
+                return match.groupValues[1].toIntOrNull() ?: 0
+            }
+        }
+        return 0
+    }
+
+    private fun calculateShardsToMax(rarity: RarityType, currentLevel: Int, isUnlocked: Boolean, shardsRemainingForNextLevel: Int): Int {
         val rarityName = rarity.name.lowercase()
         try {
             val rarityData = attributeLevelData?.getAsJsonObject("rarities")?.getAsJsonObject(rarityName)
@@ -425,6 +458,16 @@ object AttributeMenu {
                 }
                 shardsSpent += shardsForLevel
             }
+
+            val nextLevel = currentLevel + 1
+            val costForNextLevel = rarityData.get("level_$nextLevel")?.asInt
+            if (costForNextLevel != null && shardsRemainingForNextLevel > 0) {
+                val spentTowardsNext = costForNextLevel - shardsRemainingForNextLevel
+                if (spentTowardsNext > 0) {
+                    shardsSpent += spentTowardsNext
+                }
+            }
+
             return totalShardsToMax - shardsSpent
         } catch (e: Exception) {
             logger.error("[$rarityName] Failed to calculate shards to max", e)

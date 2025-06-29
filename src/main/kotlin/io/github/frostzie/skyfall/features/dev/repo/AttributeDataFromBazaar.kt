@@ -8,6 +8,8 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
 import com.mojang.serialization.JsonOps
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
@@ -23,7 +25,9 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-object AttributeDataFromBazaar {
+@Feature(name = "Attribute Data From Bazaar")
+object AttributeDataFromBazaar : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("AttributeDataFromBazaar")
     private val repoFile = File("config/skyfall/AttributeMenuData.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -34,13 +38,25 @@ object AttributeDataFromBazaar {
     private var processingDelayTicks = 0
     private const val PROCESSING_DELAY = 20
 
-    fun init() {
+    init {
         registerTickHandler()
+    }
+
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.dev.repo.attributeDataFromBazaar
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
     }
 
     private fun registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
-            if (!SkyFall.feature.dev.repo.attributeDataFromBazaar) {
+            if (!isRunning) {
                 return@register
             }
             val screen = client.currentScreen

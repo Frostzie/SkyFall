@@ -5,8 +5,7 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
-//TODO: Move all the keybinds to one class
-//TODO: Add mouse button support
+//TODO: Remove this and either recommend skytils or add new overall system for hotkeys
 
 class KeyBinds {
 

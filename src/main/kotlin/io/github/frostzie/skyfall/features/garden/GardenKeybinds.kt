@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.garden
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.FarmingToolTypes
 import io.github.frostzie.skyfall.data.IslandType
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ConditionalUtils.onToggle
 import io.github.frostzie.skyfall.utils.IslandManager
@@ -24,7 +26,11 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 // Taken and modified from Skyhanni
-object GardenKeybinds {
+// Might remove sooner or later, only was added since skyhanni wasn't on 1.21.5 yet
+@Feature(name = "Garden Keybinds")
+object GardenKeybinds : IFeature {
+
+    override var isRunning = false
 
     private val keybinds get() = SkyFall.feature.garden.keybindConfig.customGardenKeybinds
     private val config get() = SkyFall.feature.garden.keybindConfig
@@ -36,16 +42,11 @@ object GardenKeybinds {
 
     private var wasInGarden = false
     private var wasHoldingTool = false
+    private var lastHomeCommandTime = SimpleTimeMark.farPast()
 
-    /**
-     * Checks if the player is currently in the Garden.
-     */
     private val inGarden: Boolean
         get() = IslandManager.isOnIsland(IslandType.GARDEN)
 
-    /**
-     * Checks if the player is currently holding a farming tool.
-     */
     private val toolInHand: Boolean
         get() {
             val player = MinecraftClient.getInstance().player ?: return false
@@ -54,8 +55,10 @@ object GardenKeybinds {
             return FarmingToolTypes.getToolType(skyblockId) != null
         }
 
-    fun init() {
+    init {
         ClientTickEvents.END_CLIENT_TICK.register { onClientTick() }
+        ClientTickEvents.END_CLIENT_TICK.register { client -> onHomeKeyTick(client) }
+
         configLoad()
 
         IslandManager.registerIslandChangeListener(object : IslandChangeListener {
@@ -67,8 +70,23 @@ object GardenKeybinds {
         })
     }
 
+    override fun shouldLoad(): Boolean {
+        return config.enabled
+    }
+
+    override fun init() {
+        isRunning = true
+        updateSettings()
+    }
+
+    override fun terminate() {
+        isRunning = false
+        KeyBinding.unpressAll()
+    }
+
     private fun isEnabled() = config.enabled && inGarden && toolInHand
-    private fun isActive() = isEnabled() && !isDuplicated && !hasGuiOpen() &&
+
+    private fun isActive() = isRunning && isEnabled() && !isDuplicated && !hasGuiOpen() &&
             lastWindowOpenTime.passedSince() > 300.milliseconds
 
     private fun hasGuiOpen() = MinecraftClient.getInstance().currentScreen != null
@@ -102,6 +120,8 @@ object GardenKeybinds {
     }
 
     private fun onClientTick() {
+        if (!isRunning) return
+
         val screen = MinecraftClient.getInstance().currentScreen
         if (screen is SignEditScreen) {
             lastWindowOpenTime = SimpleTimeMark.now()
@@ -119,6 +139,19 @@ object GardenKeybinds {
         }
         wasInGarden = currentlyInGarden
         wasHoldingTool = currentlyHoldingTool
+    }
+
+    private fun onHomeKeyTick(client: MinecraftClient) {
+        if (!isRunning || !isEnabled()) return
+
+        val homeKey = config.homeHotkey.get()
+        if (homeKey != KEY_NONE && homeKey?.isKeyClicked() == true && lastHomeCommandTime.passedSince() >= 500.milliseconds) {
+            val player = client.player
+            if (player != null && inGarden) {
+                player.networkHandler.sendChatCommand("warp garden")
+                lastHomeCommandTime = SimpleTimeMark.now()
+            }
+        }
     }
 
     fun configLoad() {
@@ -203,36 +236,5 @@ object GardenKeybinds {
 
         lastKeybindWarning = SimpleTimeMark.farPast()
         KeyBinding.unpressAll()
-    }
-
-    /* //TODO: implement with a button in config menu
-    fun resetAll() {
-        with(keybinds) {
-            leftClick.set(KEY_NONE)
-            rightClick.set(KEY_NONE)
-            moveForwards.set(KEY_NONE)
-            moveLeft.set(KEY_NONE)
-            moveRight.set(KEY_NONE)
-            moveBackwards.set(KEY_NONE)
-            moveJump.set(KEY_NONE)
-            moveSneak.set(KEY_NONE)
-        }
-    } */
-
-    private var lastHomeCommandTime = SimpleTimeMark.farPast()
-
-    fun homeHotkey() {
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            if (isEnabled()) {
-                val homeKey = config.homeHotkey.get()
-                if (homeKey != KEY_NONE && homeKey?.isKeyClicked() == true && lastHomeCommandTime.passedSince() >= 500.milliseconds) {
-                    val player = client.player
-                    if (player != null && inGarden) {
-                        player.networkHandler.sendChatCommand("warp garden")
-                        lastHomeCommandTime = SimpleTimeMark.now()
-                    }
-                }
-            }
-        }
     }
 }

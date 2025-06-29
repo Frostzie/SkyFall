@@ -3,6 +3,8 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -25,7 +27,10 @@ import java.io.FileReader
 import java.io.FileWriter
 
 // Credits for the original idea from NotEnoughUpdates
-object FavoriteAbiContact {
+@Feature(name = "Favorite Abiphone Contacts")
+object FavoriteAbiContact : IFeature {
+
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("FavoriteAbiContact")
     private val configFile = File("config/skyfall/favorite-contacts.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -40,15 +45,31 @@ object FavoriteAbiContact {
         37..43
     )
 
-    fun init() {
+    init {
         loadConfig()
         registerTickHandler()
         registerEventHandlers()
         registerSlotRenderEvent()
     }
 
+    override fun shouldLoad(): Boolean {
+        return SkyFall.feature.inventory.abiContact.favoriteKey != GLFW.GLFW_KEY_UNKNOWN
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
+        removeToggleButton()
+        currentScreen = null
+    }
+
     private fun registerEventHandlers() {
         SlotClickEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot ?: return@subscribe
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
@@ -64,6 +85,8 @@ object FavoriteAbiContact {
         }
 
         SlotRenderEvent.subscribe { event ->
+            if (!isRunning) return@subscribe
+
             val slot = event.slot
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isAbiPhoneContacts(currentScreen)) {
@@ -82,6 +105,14 @@ object FavoriteAbiContact {
 
     private fun registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (!isRunning) {
+                if (currentScreen != null) {
+                    removeToggleButton()
+                    currentScreen = null
+                }
+                return@register
+            }
+
             val screen = client.currentScreen
             if (screen is HandledScreen<*> && isAbiPhoneContacts(screen)) {
                 if (currentScreen != screen) {
@@ -95,6 +126,13 @@ object FavoriteAbiContact {
                     removeToggleButton()
                 }
             }
+        }
+    }
+
+    private fun registerSlotRenderEvent() {
+        SlotRenderEvents.listen { event ->
+            if (!isRunning) return@listen
+            onRenderSlot(event.context, event.slot)
         }
     }
 
@@ -195,12 +233,6 @@ object FavoriteAbiContact {
                 logger.error("Failed to get slot at mouse position: ${e2.message}", e2)
                 null
             }
-        }
-    }
-
-    private fun registerSlotRenderEvent() {
-        SlotRenderEvents.listen { event ->
-            onRenderSlot(event.context, event.slot)
         }
     }
 

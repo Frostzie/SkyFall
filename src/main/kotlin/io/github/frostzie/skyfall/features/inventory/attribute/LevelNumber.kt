@@ -1,6 +1,8 @@
 package io.github.frostzie.skyfall.features.inventory.attribute
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.features.Feature
+import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.item.StackCountRenderer
@@ -9,7 +11,9 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.slot.Slot
 
-object LevelNumber {
+@Feature(name = "Attribute Level Number")
+object LevelNumber : IFeature {
+    override var isRunning = false
     private val logger = LoggerProvider.getLogger("LevelNumber")
     private val config get() = SkyFall.feature.inventory.attributeMenu
 
@@ -22,9 +26,9 @@ object LevelNumber {
         "VI" to 6, "VII" to 7, "VIII" to 8, "IX" to 9, "X" to 10
     )
 
-    fun init() {
+    init {
         StackCountRenderer.registerProvider { slot ->
-            if (!config.levelNumber) {
+            if (!isRunning) {
                 return@registerProvider null
             }
 
@@ -39,6 +43,18 @@ object LevelNumber {
 
             extractRomanNumeral(slot.stack.name.string)
         }
+    }
+
+    override fun shouldLoad(): Boolean {
+        return config.levelNumber
+    }
+
+    override fun init() {
+        isRunning = true
+    }
+
+    override fun terminate() {
+        isRunning = false
     }
 
     private fun extractRomanNumeral(itemName: String): Int? {

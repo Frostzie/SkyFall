@@ -11,6 +11,9 @@ import io.github.frostzie.skyfall.utils.events.TooltipEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.item.ItemStack
+import net.minecraft.text.MutableText
+import net.minecraft.text.OrderedText
+import net.minecraft.text.Style
 import net.minecraft.text.Text
 
 @Feature(name = "Show Attribute Info in Bazaar")
@@ -22,6 +25,7 @@ object ShowInBazaar : IFeature {
     private var attributeData: JsonObject? = null
     private var lastDataLoadTime = 0L
     private const val DATA_REFRESH_INTERVAL = 60000L
+    private const val MAX_LORE_WIDTH = 190
 
     init {
         registerTooltipEvent()
@@ -103,11 +107,17 @@ object ShowInBazaar : IFeature {
             }
 
             if (commodityLineIndex != -1) {
+                val textRenderer = MinecraftClient.getInstance().textRenderer
                 val emptyLine = Text.literal("")
                 val maxShardsLine = Text.literal("§7Max Shards: §b$maxShards")
-                val statBoostLine = Text.literal(statBoost)
 
-                lines.addAll(commodityLineIndex + 1, listOf(emptyLine, maxShardsLine, statBoostLine))
+                val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(statBoost), MAX_LORE_WIDTH)
+                val wrappedStatBoostLines = wrappedOrderedLines.map { fromOrdered(it) }
+
+                val linesToAdd = mutableListOf(emptyLine, maxShardsLine)
+                linesToAdd.addAll(wrappedStatBoostLines)
+
+                lines.addAll(commodityLineIndex + 1, linesToAdd)
             }
         } catch (e: Exception) {
             logger.error("Failed to add bazaar info", e)
@@ -132,5 +142,29 @@ object ShowInBazaar : IFeature {
     private fun getCleanItemName(stack: ItemStack): String {
         val rawName = stack.name.string
         return ColorUtils.stripColorCodes(rawName).trim()
+    }
+
+    private fun fromOrdered(orderedText: OrderedText): MutableText {
+        val fullText = Text.empty()
+        val buffer = StringBuilder()
+        var lastStyle: Style? = null
+        val flushBuffer = {
+            if (buffer.isNotEmpty()) {
+                fullText.append(Text.literal(buffer.toString()).setStyle(lastStyle))
+                buffer.setLength(0)
+            }
+        }
+
+        orderedText.accept { _, style, codePoint ->
+            if (style != lastStyle && buffer.isNotEmpty()) {
+                flushBuffer()
+            }
+            lastStyle = style
+            buffer.append(Character.toChars(codePoint))
+            true
+        }
+        flushBuffer()
+
+        return fullText
     }
 }

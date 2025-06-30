@@ -1,8 +1,33 @@
 package io.github.frostzie.skyfall.utils
 
 import com.google.gson.JsonObject
+import net.minecraft.text.MutableText
+import net.minecraft.text.Style
+import net.minecraft.text.Text
+import net.minecraft.text.TextColor
 
 object ColorUtils {
+    fun skyFallPrefixChat(): MutableText {
+        val text = "SkyFall"
+        val colors = listOf(
+            0x00D0DD, // S
+            0x00BFD8, // k
+            0x00AED2, // y
+            0x009DCD, // F
+            0x008CC7, // a
+            0x007BC2, // l
+            0x006ABC  // l
+        )
+        val result = Text.empty()
+        for (i in text.indices) {
+            result.append(
+                Text.literal(text[i].toString())
+                    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(colors[i])))
+            )
+        }
+        return result
+    }
+
     /**
      * Converts a hexadecimal integer color code to RGB float values (0-255 range)
      * @param hexColor The hexadecimal color as an integer (e.g., 0x8000FF for purple)

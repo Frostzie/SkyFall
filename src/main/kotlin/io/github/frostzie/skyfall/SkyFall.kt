@@ -8,13 +8,14 @@ import io.github.frostzie.skyfall.data.RepoManager
 import io.github.frostzie.skyfall.features.FeatureManager
 import io.github.frostzie.skyfall.hud.HudManager
 import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.UpdateChecker
+import io.github.frostzie.skyfall.utils.events.TooltipEvents
+import io.github.frostzie.skyfall.utils.item.StackCountRenderer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.client.gui.screen.Screen
-import io.github.frostzie.skyfall.utils.events.TooltipEvents
-import io.github.frostzie.skyfall.utils.item.StackCountRenderer
 
 class SkyFall : ModInitializer {
 	override fun onInitialize() {
@@ -50,6 +51,7 @@ class SkyFall : ModInitializer {
 
 		ClientLifecycleEvents.CLIENT_STARTED.register { _ ->
 			RepoManager.initializeRepo()
+			UpdateChecker.initialize()
 		}
 	}
 

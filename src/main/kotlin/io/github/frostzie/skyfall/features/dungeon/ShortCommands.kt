@@ -8,9 +8,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.MinecraftClient
 
-private val config get() = SkyFall.feature.dungeon
-
 object ShortCommands {
+    private val config get() = SkyFall.feature.dungeon
     val clientCommand = ClientCommandRegistrationCallback.EVENT!!
 
     fun registerCommands() {

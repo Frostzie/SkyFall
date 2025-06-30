@@ -19,11 +19,7 @@ object HideFireSaleMessage : IFeature {
 
 
             val messageString = Formatting.strip(message.string)
-            if (isFireSaleMessage(messageString)) {
-                return@register false
-            }
-
-            return@register true
+            return@register !isFireSaleMessage(messageString)
         }
     }
 

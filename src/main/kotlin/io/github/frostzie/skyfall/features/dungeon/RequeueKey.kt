@@ -12,10 +12,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Feature(name = "Requeue Key")
 object RequeueKey : IFeature {
-
     override var isRunning = false
     private var lastCommandTime = SimpleTimeMark.farPast()
-    private val requeueKey = SkyFall.feature.dungeon.requeueKey
+    private val requeueKey get() = SkyFall.feature.dungeon.requeueKey
 
     override fun shouldLoad(): Boolean {
         return requeueKey != GLFW.GLFW_KEY_UNKNOWN

@@ -1,37 +1,16 @@
 package io.github.frostzie.skyfall.utils
 
+import io.github.frostzie.skyfall.utils.ColorUtils.skyFallPrefixChat
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent // Ensure this is the correct import
+import net.minecraft.text.HoverEvent
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextColor
 
 object ChatUtils {
-
-    private fun skyFallPrefix(): MutableText {
-        val text = "SkyFall"
-        val colors = listOf(
-            0x00D0DD, // S
-            0x00BFD8, // k
-            0x00AED2, // y
-            0x009DCD, // F
-            0x008CC7, // a
-            0x007BC2, // l
-            0x006ABC  // l
-        )
-        val result = Text.empty()
-        for (i in text.indices) {
-            result.append(
-                Text.literal(text[i].toString())
-                    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(colors[i])))
-            )
-        }
-        return result
-    }
-
-    private val CHAT_PREFIX_STRING: MutableText = skyFallPrefix()
+    private val CHAT_PREFIX_STRING: MutableText = skyFallPrefixChat()
         .append(Text.literal(" §l§8» ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF))))
 
     fun messageToChat(message: String, style: Style = Style.EMPTY) {
@@ -75,6 +54,12 @@ object ChatUtils {
         fun copyContent(copyText: String): MessageBuilder {
             style = style.withClickEvent(ClickEvent.CopyToClipboard(copyText))
                 .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to copy")))
+            return this
+        }
+
+        fun openLink(url: String): MessageBuilder {
+            style = style.withClickEvent(ClickEvent.OpenUrl(java.net.URI.create(url)))
+                .withHoverEvent(HoverEvent.ShowText(Text.literal("§eClick to open:§a\n$url")))
             return this
         }
 

@@ -5,6 +5,7 @@ import org.reflections.Reflections
 import kotlin.system.measureTimeMillis
 
 // Based on the system used by SkyHanni
+//TODO: Possibly add a hybrid system to allow faster startup times.
 /**
  * Manages the lifecycle of all features in the client.
  *
@@ -16,8 +17,8 @@ import kotlin.system.measureTimeMillis
  * `updateFeatureStates()` can be called anytime the configuration is saved to apply changes.
  */
 object FeatureManager {
-    private val logger = LoggerProvider.getLogger("featureManager")
-    private val discoveredFeatures = mutableListOf<IFeature>()
+    private val logger = LoggerProvider.getLogger("FeatureManager")
+    private val discoveredFeatures = mutableListOf<Pair<IFeature, String>>()
 
     fun initialize() {
         logger.info("Starting feature scan...")
@@ -25,18 +26,22 @@ object FeatureManager {
             try {
                 val reflections = Reflections("io.github.frostzie.skyfall.features")
                 val featureClasses = reflections.getTypesAnnotatedWith(Feature::class.java)
-                logger.info("Found ${featureClasses.size} classes with @Feature annotation.")
+                logger.debug("Found ${featureClasses.size} potential features.")
+                if (featureClasses.isNotEmpty()) {
+                    val classNames = featureClasses.joinToString(separator = ", ") { it.simpleName }
+                    logger.debug("Discovered features: [$classNames]")
+                }
 
                 for (featureClass in featureClasses) {
+                    val annotation = featureClass.getAnnotation(Feature::class.java)
                     try {
                         val featureInstance = featureClass.kotlin.objectInstance
                         if (featureInstance is IFeature) {
-                            discoveredFeatures.add(featureInstance)
+                            discoveredFeatures.add(featureInstance to annotation.name)
                         } else {
                             logger.warn("Class ${featureClass.simpleName} is annotated with @Feature but does not implement IFeature.")
                         }
                     } catch (e: Exception) {
-                        val annotation = featureClass.getAnnotation(Feature::class.java)
                         logger.error("Failed to get instance of feature: '${annotation.name}' (${featureClass.simpleName})", e)
                     }
                 }
@@ -46,7 +51,7 @@ object FeatureManager {
                 logger.error("A critical error occurred during feature scanning. No features will be loaded.", e)
             }
         }
-        logger.info("Feature initialization and first load completed in ${timeInMillis}ms.")
+        logger.info("Feature initialization completed in ${timeInMillis}ms.")
     }
 
     /**
@@ -63,9 +68,7 @@ object FeatureManager {
             return
         }
 
-        for (feature in discoveredFeatures) {
-            val featureName = feature.javaClass.getAnnotation(Feature::class.java)?.name ?: feature.javaClass.simpleName
-
+        for ((feature, featureName) in discoveredFeatures) {
             try {
                 val shouldBeRunning = feature.shouldLoad()
                 val isActuallyRunning = feature.isRunning
@@ -80,6 +83,16 @@ object FeatureManager {
             } catch (e: Exception) {
                 logger.error("Failed to change state for feature '$featureName'", e)
             }
+        }
+
+        val activeFeatureNames = discoveredFeatures
+            .filter { (feature, _) -> feature.isRunning }
+            .joinToString(separator = ", ") { (_, name) -> name }
+
+        if (activeFeatureNames.isNotBlank()) {
+            logger.debug("Enabled features: [$activeFeatureNames]")
+        } else {
+            logger.debug("No features are currently enabled.")
         }
         logger.debug("Finished updating feature states.")
     }

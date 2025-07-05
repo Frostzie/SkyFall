@@ -1,7 +1,6 @@
 package io.github.frostzie.skyfall.config.features.dev
 
 import com.google.gson.annotations.Expose
-import io.github.frostzie.skyfall.config.features.garden.keybind.KeybindConfig
 import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorInfoText

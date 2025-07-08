@@ -4,9 +4,8 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.SoundUtils
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
-import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.sound.SoundInstance
@@ -31,15 +30,13 @@ object SoundDetector : IFeature {
     )
 
     init {
-        HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { d: LayeredDrawerWrapper? ->
-            d!!.attachLayerAfter(
-                IdentifiedLayer.SUBTITLES,
-                Identifier.of("skyfall", "sounds")
-            ) { context: DrawContext?, _ ->
-                if (!isRunning) return@attachLayerAfter
-                renderSoundOverlay(context!!)
-            }
-        })
+        HudElementRegistry.attachElementAfter(
+            VanillaHudElements.SUBTITLES,
+            Identifier.of("skyfall", "sounds")
+        ) { context, _ ->
+            if (!isRunning) return@attachElementAfter
+            renderSoundOverlay(context)
+        }
     }
 
     override fun shouldLoad(): Boolean {

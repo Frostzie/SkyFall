@@ -1,16 +1,19 @@
 package io.github.frostzie.skyfall.features.misc.funny
 
+import com.mojang.blaze3d.systems.RenderSystem
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.frostzie.skyfall.utils.item.SkyBlockItemData
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.*
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.util.Identifier
 
@@ -36,28 +39,32 @@ object RealisticSpacemanHelmet : IFeature {
 
     private var lastUpdateTime = SimpleTimeMark.now()
     private var currentColorIndex = 0
-
-    init {
-        HudLayerRegistrationCallback.EVENT.register { d ->
-            d!!.attachLayerAfter(
-                IdentifiedLayer.MISC_OVERLAYS,
-                COLORS[0]
-            ) { context, _ ->
-                renderOverlay(context!!)
-            }
-        }
-    }
+    private val HUD_ELEMENT_ID = Identifier.of("skyfall", "spaceman_helmet_overlay")
 
     override fun shouldLoad(): Boolean {
         return config.realisticSpacemanHelmet
     }
 
     override fun init() {
+        if (isRunning) return
         isRunning = true
+
+        val hudElement = HudElement { context, _ ->
+            renderOverlay(context)
+        }
+
+        HudElementRegistry.attachElementAfter(
+            VanillaHudElements.MISC_OVERLAYS,
+            HUD_ELEMENT_ID,
+            hudElement
+        )
     }
 
     override fun terminate() {
+        if (!isRunning) return
         isRunning = false
+
+        HudElementRegistry.removeElement(HUD_ELEMENT_ID)
     }
 
     private fun isWearing(): Identifier? {
@@ -105,18 +112,24 @@ object RealisticSpacemanHelmet : IFeature {
             COLORS[currentColorIndex]
         }
 
-        currentColor?.let {
+        currentColor?.let { textureId ->
+            val width = context.scaledWindowWidth
+            val height = context.scaledWindowHeight
+
+            // The old drawTexture method is gone. The new API requires you to pass
+            // a RenderPipeline to tell the game how to draw the texture.
+            // For a transparent overlay, ENTITY_TRANSLUCENT is the correct pipeline.
             context.drawTexture(
-                { texture: Identifier? -> RenderLayer.getGuiTexturedOverlay(texture) },
-                it,
-                0,
-                0,
-                0.0f,
-                0.0f,
-                context.scaledWindowWidth,
-                context.scaledWindowHeight,
-                context.scaledWindowWidth,
-                context.scaledWindowHeight,
+                RenderPipelines.GUI_TEXTURED,
+                textureId,
+                0,      // x
+                0,      // y
+                0.0f,   // u
+                0.0f,   // v
+                width,  // width
+                height, // height
+                width,  // textureWidth
+                height  // textureHeight
             )
         }
     }

@@ -17,10 +17,9 @@ import io.github.frostzie.skyfall.utils.garden.SprayUtils
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.RotationAxis
 import kotlin.math.min
 
 @Feature(name = "Garden Map")
@@ -96,7 +95,7 @@ object GardenMap : IFeature {
         val pestData = PestDetector.getPestData()
         val visitorData = VisitorUtils.getVisitorData()
         val backgroundColor = 0xFF0d0d0d.toInt()
-        val headerTextColor = 0xffffff
+        val headerTextColor = 0xFFFFFFFF.toInt()
 
         drawContext.fill(x, y, x + width, y + height, backgroundColor)
 
@@ -192,7 +191,7 @@ object GardenMap : IFeature {
     ) {
         if (smallBoxSize < 12) return
         val numberText = "$plotNumber"
-        val textColor = 0x000000.toInt()
+        val textColor = 0xFF000000.toInt()
         val textWidth = textRenderer.getWidth(numberText)
         val textX = x + smallBoxSize - textWidth - 2
         val textY = y + smallBoxSize - textRenderer.fontHeight - 2
@@ -220,12 +219,12 @@ object GardenMap : IFeature {
 
         if (config.playerIconType == GardenConfig.GardenMapConfig.PlayerIcon.ARROW) {
             val texture = Identifier.ofVanilla("textures/map/decorations/player.png")
-            drawContext.matrices.push()
-            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat(), 0f)
-            drawContext.matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(client.player!!.yaw - 360))
-            drawContext.matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat(), 0f)
+            drawContext.matrices.pushMatrix()
+            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat())
+            drawContext.matrices.rotate(kotlin.math.PI.toFloat() * (client.player!!.yaw - 360) / 180.0f)
+            drawContext.matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat())
             drawContext.drawTexture(
-                { tex: Identifier? -> RenderLayer.getGuiTexturedOverlay(tex) },
+                RenderPipelines.GUI_TEXTURED,
                 texture,
                 (pixelX - dotSize / 2),
                 (pixelZ - dotSize / 2),
@@ -236,7 +235,7 @@ object GardenMap : IFeature {
                 dotSize,
                 -dotSize
             )
-            drawContext.matrices.pop()
+            drawContext.matrices.popMatrix()
         } else {
             val playerColor = 0xFFff000c.toInt()
             drawContext.fill(

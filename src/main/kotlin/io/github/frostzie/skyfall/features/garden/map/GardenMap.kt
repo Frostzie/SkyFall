@@ -113,7 +113,6 @@ object GardenMap : IFeature {
         val gridAvailableWidth = width - (padding + 2)
         val gridAvailableHeight = height - headerHeight - padding
         val gridContentSize = min(gridAvailableWidth, gridAvailableHeight)
-
         if (gridContentSize < 20) return
 
         val gridStartX = x + padding + (gridAvailableWidth - gridContentSize) / 2
@@ -192,10 +191,8 @@ object GardenMap : IFeature {
         plotNumber: Int
     ) {
         if (smallBoxSize < 12) return
-
         val numberText = "$plotNumber"
         val textColor = 0x000000.toInt()
-
         val textWidth = textRenderer.getWidth(numberText)
         val textX = x + smallBoxSize - textWidth - 2
         val textY = y + smallBoxSize - textRenderer.fontHeight - 2

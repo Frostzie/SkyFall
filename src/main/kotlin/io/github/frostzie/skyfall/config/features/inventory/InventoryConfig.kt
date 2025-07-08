@@ -82,11 +82,6 @@ class InventoryConfig {
         @ConfigOption(name = "Hide description", desc = "Hide the gray description inside Hunting Box inventory")
         @ConfigEditorBoolean
         var hideDescription: Boolean = false
-
-        @Expose
-        @ConfigOption(name = "Show in Bazaar", desc = "Show extra stats in bazaar under attributes")
-        @ConfigEditorBoolean
-        var showInBazaar: Boolean = true
     }
 
     @Expose

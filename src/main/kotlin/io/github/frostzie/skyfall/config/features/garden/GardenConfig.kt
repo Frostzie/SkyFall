@@ -30,6 +30,11 @@ class GardenConfig {
     }
 
     @Expose
+    @ConfigOption(name = "Spawn Keybind", desc = "Keybind to teleport to the garden spawn")
+    @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
+    var warpToSpawn = GLFW.GLFW_KEY_UNKNOWN
+
+    @Expose
     @Accordion
     @ConfigOption(name = "Garden Map", desc = "")
     var gardenMap: GardenMapConfig = GardenMapConfig()

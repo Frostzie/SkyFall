@@ -1,6 +1,4 @@
 package io.github.frostzie.skyfall.features.misc.funny
-
-import com.mojang.blaze3d.systems.RenderSystem
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
@@ -13,7 +11,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.*
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.util.Identifier
 

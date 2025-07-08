@@ -181,29 +181,30 @@ object AttributeMenu : IFeature {
             itemData = attributeData?.getAsJsonObject(cleanedName)
 
             if (itemData == null) {
-                itemData = findItemDataByPartialMatch(itemName)
+                itemData = findItemDataByCaseInsensitiveMatch(itemName)
             }
         }
 
         return itemData
     }
 
+    private fun findItemDataByCaseInsensitiveMatch(itemName: String): JsonObject? {
+        val cleanedInput = cleanItemNameForMatching(itemName).lowercase()
+        val matchingKey = attributeData?.keySet()?.firstOrNull { key ->
+            cleanItemNameForMatching(key).lowercase() == cleanedInput
+        }
+
+        return if (matchingKey != null) {
+            attributeData?.getAsJsonObject(matchingKey)
+        } else {
+            null
+        }
+    }
+
     private fun cleanItemNameForMatching(itemName: String): String {
         return itemName
             .replace(Regex("\\s+X$"), "") // Remove " X" suffix for maxed items
             .trim()
-    }
-
-    private fun findItemDataByPartialMatch(itemName: String): JsonObject? {
-        val cleanedInput = cleanItemNameForMatching(itemName).lowercase()
-
-        for (key in attributeData!!.keySet()) {
-            val cleanedKey = cleanItemNameForMatching(key).lowercase()
-            if (cleanedInput.contains(cleanedKey) || cleanedKey.contains(cleanedInput)) {
-                return attributeData!!.getAsJsonObject(key)
-            }
-        }
-        return null
     }
 
     private fun shouldShowMaxStatBoost(): Boolean {

@@ -6,19 +6,23 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Base class for events
  */
 open class Event {
+    /**
+     * The cancellation state of the event.
+     * The setter is `internal` to enforce safer coding practices.
+     */
     var isCancelled: Boolean = false
-        private set
+        internal set
 
+    /**
+     * Posts this event to the EventBus.
+     */
     fun post() {
         EventBus.post(this)
     }
 
-    fun setCancelled(cancelled: Boolean) {
-        this.isCancelled = cancelled
-    }
-
     /**
-     * Marks this event as canceled.
+     * Marks this event as canceled. This is the only intended way to cancel an event.
+     * A debug stack trace has been added to find the source of the movement bug.
      */
     fun cancel() {
         this.isCancelled = true
@@ -28,12 +32,12 @@ open class Event {
 /**
  * Event fired when a key is initially pressed down
  */
-class KeyDownEvent(val keyCode: Int) : Event()
+class KeyDownEvent(val keyCode: Int) : Event() //TODO: Remove?
 
 /**
  * Event fired each tick that a key is held
  */
-class KeyPressEvent(val keyCode: Int) : Event()
+class KeyPressEvent(val keyCode: Int) : Event() //TODO: Remove?
 
 /**
  * Simple event bus implementation with functional listeners
@@ -50,7 +54,7 @@ object EventBus {
         listeners.computeIfAbsent(eventClass) { CopyOnWriteArrayList() }
             .add(listener as EventListener<*>)
 
-        listeners[eventClass]?.sortBy { it.priority }
+        listeners[eventClass]?.sortByDescending { it.priority }
     }
 
     /**
@@ -61,6 +65,8 @@ object EventBus {
         val eventClass = event.javaClass
         listeners[eventClass]?.forEach { listener ->
             try {
+                if (event.isCancelled) return
+
                 (listener as EventListener<Event>).handler(event)
             } catch (e: Exception) {
                 println("Error invoking event handler for ${eventClass.simpleName}")

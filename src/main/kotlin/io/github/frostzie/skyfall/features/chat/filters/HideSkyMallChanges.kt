@@ -4,7 +4,7 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
-import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.IslandDetector
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
@@ -63,6 +63,6 @@ object HideSkyMallChanges : IFeature {
     }
 
     private fun inMiningIsland(): Boolean {
-        return miningIslands.any { IslandManager.isOnIsland(it) }
+        return miningIslands.any { IslandDetector.isOnIsland(it) }
     }
 }

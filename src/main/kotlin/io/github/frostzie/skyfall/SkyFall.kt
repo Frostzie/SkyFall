@@ -7,10 +7,12 @@ import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.data.RepoManager
 import io.github.frostzie.skyfall.features.FeatureManager
 import io.github.frostzie.skyfall.hud.HudManager
-import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.UpdateChecker
 import io.github.frostzie.skyfall.utils.events.TooltipEvents
 import io.github.frostzie.skyfall.utils.item.StackCountRenderer
+import io.github.frostzie.skyfall.utils.processors.ScoreboardProcessor
+import io.github.frostzie.skyfall.utils.processors.TabListProcessor
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -21,17 +23,22 @@ class SkyFall : ModInitializer {
 	override fun onInitialize() {
 		configManager = ConfigManager
 		configManager.firstLoad()
+
+		CommandManager.loadCommands()
+		StackCountRenderer.initialize()
+		HudManager.init()
+		IslandDetector.init()
+		FeatureManager.initialize()
+
 		Runtime.getRuntime().addShutdownHook(Thread {
 			configManager.saveConfig("shutdown-hook")
 			FeatureManager.updateFeatureStates()
 		})
-		IslandManager.init()
-		CommandManager.loadCommands()
-		StackCountRenderer.initialize()
-		HudManager.init()
-		FeatureManager.initialize()
 
 		ClientTickEvents.END_CLIENT_TICK.register { client ->
+			ScoreboardProcessor.processScoreboard()
+			TabListProcessor.processTabList()
+
 			if (screenToOpen != null) {
 				client.setScreen(screenToOpen)
 				screenToOpen = null

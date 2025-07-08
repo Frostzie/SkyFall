@@ -6,7 +6,7 @@ import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.mixin.accessor.MouseAccessor
 import io.github.frostzie.skyfall.utils.ChatUtils
-import io.github.frostzie.skyfall.utils.IslandManager
+import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
@@ -31,7 +31,7 @@ object MouseSensitivity : IFeature {
     private fun isFeatureConditionallyActive(): Boolean {
         val onGardenConfig = SkyFall.feature.garden.mouseSensitivity.onGarden
         return if (onGardenConfig) {
-            IslandManager.isOnIsland(IslandType.GARDEN)
+            IslandDetector.isOnIsland(IslandType.GARDEN)
         } else {
             true
         }

@@ -5,32 +5,44 @@ import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.util.Identifier
 
 data class HudElementConfig(
-    val x: Int = 0,
-    val y: Int = 0,
-    val width: Int = 50,
-    val height: Int = 20,
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
     val enabled: Boolean = true
 )
 
 abstract class HudElement(
-    val id: Identifier,
+    val id: String,
     val name: String,
     val defaultConfig: HudElementConfig
 ) {
-    var config: HudElementConfig = defaultConfig.copy()
+    var config: HudElementConfig = defaultConfig
         private set
 
+    /**
+     * Determines if this element supports advanced, free-form resizing (using Ctrl).
+     * This is the toggle you wanted. Subclasses override this.
+     */
+    open val advancedSizing: Boolean = false
+
+    /**
+     * The only correct way to update an element's configuration.
+     * This replaces the old config with a new, updated instance.
+     */
     fun updateConfig(newConfig: HudElementConfig) {
-        config = newConfig
+        this.config = newConfig
     }
 
     fun resetToDefault() {
-        config = defaultConfig.copy()
+        updateConfig(defaultConfig)
     }
 
     abstract fun render(drawContext: DrawContext, tickCounter: RenderTickCounter)
+
     open fun getMinWidth(): Int = 20
-    open fun getMinHeight(): Int = 15
+
+    open fun getMinHeight(): Int = 20
 
     open fun getTextScale(): Float {
         val baseWidth = defaultConfig.width

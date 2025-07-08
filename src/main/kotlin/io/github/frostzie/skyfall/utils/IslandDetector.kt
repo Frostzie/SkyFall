@@ -1,138 +1,110 @@
 package io.github.frostzie.skyfall.utils
 
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.utils.events.IslandEvents.fireIslandChangeEvent
-import io.github.frostzie.skyfall.utils.processors.ScoreboardProcessor
-import io.github.frostzie.skyfall.utils.processors.TabListProcessor
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import io.github.frostzie.skyfall.utils.events.*
 
-// Taken from SkyHanni
+// Taken from SkyHanni and modified
 /**
- * Utility class for detecting the current island the player is on in Skyblock.
- * Combines information from both the scoreboard and tab list to provide accurate location information.
+ * The single source of truth for the player's current location in SkyBlock.
+ * It listens to both Scoreboard and TabList events to make the most accurate
+ * determination possible, prioritizing the tab list for island type.
  */
 object IslandDetector {
-    private val logger = LoggerProvider.getLogger("IslandDetector")
+    private val RIFT_SCOREBOARD_PATTERN = "ф (.+)".toRegex()
+    private val NORMAL_SCOREBOARD_PATTERN = "⏣ (.+)".toRegex()
+    private val TAB_AREA_PATTERN = "(?:Area|Dungeon):\\s*(.+)".toRegex()
+
+    private var lastScoreboardRegion: String? = null
+    private var lastTabListArea: String? = null
+    private var lastIsInRift: Boolean = false
 
     private var currentIsland: IslandType = IslandType.UNKNOWN
-    private var previousIsland: IslandType = IslandType.UNKNOWN
     private var isOnSkyblock: Boolean = false
     private var isInRift: Boolean = false
-    private var islandChangeListeners = mutableListOf<(IslandType, IslandType) -> Unit>()
 
     /**
-     * Initializes the Island Detector.
-     * Sets up the tick event to process scoreboard and tab list data.
+     * Initializes the detector by listening for processor events.
      */
     fun init() {
-        logger.info("Initializing Island Detector")
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            if (client.player == null) return@register
+        EventBus.listen(ScoreboardUpdateEvent::class.java) { event ->
+            lastScoreboardRegion = event.region
+            lastIsInRift = event.isInRift
+            updateIslandState()
+        }
 
-            ScoreboardProcessor.processScoreboard()
-            TabListProcessor.processTabList()
-
-            updateIslandInfo()
+        EventBus.listen(TabListUpdateEvent::class.java) { event ->
+            lastTabListArea = event.area
+            updateIslandState()
         }
     }
 
     /**
-     * Updates the current island information based on scoreboard and tab list data.
-     * Fires island change events if the island has changed.
+     * This is the core logic. It's called whenever new data is available from
+     * either the scoreboard or tab list. It determines the new island state
+     * and fires an event if it has changed.
      */
-    private fun updateIslandInfo() {
-        isOnSkyblock = ScoreboardProcessor.isOnSkyblock()
-        isInRift = ScoreboardProcessor.isInRift()
+    private fun updateIslandState() {
+        val newIsOnSkyblock = lastScoreboardRegion != null || lastTabListArea != null
+        val newIsInRift = lastIsInRift // Rift is only detectable from the scoreboard symbol
 
-        currentIsland = if (!isOnSkyblock) {
-            IslandType.UNKNOWN
-        } else {
-            val scoreboardIsland = ScoreboardProcessor.getCurrentIsland()
-            if (scoreboardIsland == IslandType.UNKNOWN) {
-                determineIslandFromTabList()
-            } else {
-                scoreboardIsland
-            }
+        val tabListLocation = parseLocationFromTabList(lastTabListArea)
+        val scoreboardLocation = parseLocationFromScoreboard(lastScoreboardRegion, newIsInRift)
+
+        val finalLocationName = tabListLocation ?: scoreboardLocation
+        val newIsland = IslandType.fromDisplayName(finalLocationName ?: "")
+
+        fireStateChangeEvents(newIsland, newIsOnSkyblock, newIsInRift)
+    }
+
+    /**
+     * Compares the new state with the old state and fires events if anything has changed.
+     * This keeps the main update logic cleaner.
+     */
+    private fun fireStateChangeEvents(newIsland: IslandType, newIsOnSkyblock: Boolean, newIsInRift: Boolean) {
+        if (newIsland == currentIsland && newIsOnSkyblock == isOnSkyblock && newIsInRift == isInRift) {
+            return
         }
 
-        if (currentIsland != previousIsland) {
-            val oldIsland = previousIsland
-            previousIsland = currentIsland
+        val oldIsland = currentIsland
+        val oldIsOnSkyblock = isOnSkyblock
+        val oldIsInRift = isInRift
 
-            islandChangeListeners.forEach { it(oldIsland, currentIsland) }
+        currentIsland = newIsland
+        isOnSkyblock = newIsOnSkyblock
+        isInRift = newIsInRift
 
-            fireIslandChangeEvent(oldIsland, currentIsland)
-
-            logger.debug("Island changed from ${oldIsland.displayName} to ${currentIsland.displayName}")
+        if (newIsland != oldIsland) {
+            IslandChangeEvent(oldIsland, newIsland).post()
+        }
+        if (newIsOnSkyblock != oldIsOnSkyblock) {
+            SkyblockStateEvent(newIsOnSkyblock, oldIsOnSkyblock).post()
+        }
+        if (newIsInRift != oldIsInRift) {
+            RiftStateEvent(newIsInRift, oldIsInRift).post()
         }
     }
 
     /**
-     * Attempts to determine the island from the tab list area information.
-     *
-     * @return The determined island type, or UNKNOWN if it couldn't be determined
+     * Helper function to parse the location name from the scoreboard's region line.
      */
-    private fun determineIslandFromTabList(): IslandType {
-        val areaText = TabListProcessor.getArea()
-        val areaPattern = "Area:\\s*(.+)".toRegex()
-        val matchResult = areaPattern.find(areaText)
-        val areaName = matchResult?.groupValues?.getOrNull(1)?.trim() ?: return IslandType.UNKNOWN
-
-        return IslandType.fromDisplayName(areaName)
+    private fun parseLocationFromScoreboard(regionText: String?, isInRift: Boolean): String? {
+        if (regionText == null) return null
+        val cleanRegionText = ColorUtils.stripColorCodes(regionText)
+        val locationPattern = if (isInRift) RIFT_SCOREBOARD_PATTERN else NORMAL_SCOREBOARD_PATTERN
+        return locationPattern.find(cleanRegionText)?.groupValues?.getOrNull(1)?.trim()
     }
 
     /**
-     * Gets the current island the player is on.
-     *
-     * @return The current Island as an IslandType
+     * Helper function to parse the location name from the tab list's area line.
      */
+    private fun parseLocationFromTabList(areaText: String?): String? {
+        if (areaText == null || areaText.contains("§cNo Area Found!")) return null
+        val cleanAreaText = ColorUtils.stripColorCodes(areaText)
+        return TAB_AREA_PATTERN.find(cleanAreaText)?.groupValues?.getOrNull(1)?.trim()
+    }
+
     fun getCurrentIsland(): IslandType = currentIsland
-
-    /**
-     * Checks if the player is currently on Skyblock.
-     *
-     * @return True if the player is on Skyblock, false otherwise
-     */
+    fun isOnIsland(island: IslandType): Boolean = currentIsland == island
     fun isOnSkyblock(): Boolean = isOnSkyblock
-
-    /**
-     * Checks if the player is currently in the Rift.
-     *
-     * @return True if the player is in the Rift, false otherwise
-     */
     fun isInRift(): Boolean = isInRift
-
-    /**
-     * Checks if the player is on a specific island.
-     *
-     * @param islandType The island type to check for
-     * @return True if the player is on the specified island, false otherwise
-     */
-    fun isOnIsland(islandType: IslandType): Boolean = currentIsland == islandType
-
-    /**
-     * Checks if the player is on one of the specified islands.
-     *
-     * @param islandTypes The island types to check for
-     * @return True if the player is on one of the specified islands, false otherwise
-     */
-    fun isOnOneOf(vararg islandTypes: IslandType): Boolean = currentIsland.isOneOf(*islandTypes)
-
-    /**
-     * Adds a listener to be notified when the island changes.
-     *
-     * @param listener A function that takes the old and new island as parameters
-     */
-    fun addIslandChangeListener(listener: (IslandType, IslandType) -> Unit) {
-        islandChangeListeners.add(listener)
-    }
-
-    /**
-     * Removes an island change listener.
-     *
-     * @param listener The listener to remove
-     */
-    fun removeIslandChangeListener(listener: (IslandType, IslandType) -> Unit) {
-        islandChangeListeners.remove(listener)
-    }
 }

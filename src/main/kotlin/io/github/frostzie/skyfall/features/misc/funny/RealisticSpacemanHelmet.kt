@@ -33,6 +33,7 @@ object RealisticSpacemanHelmet : IFeature {
         Identifier.ofVanilla("textures/block/magenta_stained_glass.png"),
         Identifier.ofVanilla("textures/block/pink_stained_glass.png")
     )
+
     private var lastUpdateTime = SimpleTimeMark.now()
     private var currentColorIndex = 0
 

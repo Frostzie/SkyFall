@@ -2,9 +2,8 @@ package io.github.frostzie.skyfall.hud
 
 import com.google.gson.GsonBuilder
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
-import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderTickCounter
@@ -23,18 +22,21 @@ object HudManager {
 
     private val HUD_LAYER_ID = Identifier.of("skyfall", "hud_elements")
     private var loadedConfig: HudConfigData? = null
+    private var isInitialized = false
 
     fun init() {
+        if (isInitialized) return
+        isInitialized = true
+
         loadConfigFromFile()
 
-        HudLayerRegistrationCallback.EVENT.register { drawer: LayeredDrawerWrapper ->
-            drawer.attachLayerAfter(
-                IdentifiedLayer.MISC_OVERLAYS,
-                HUD_LAYER_ID
-            ) { context: DrawContext, tickCounter: RenderTickCounter ->
+        HudElementRegistry.attachElementAfter(
+            VanillaHudElements.MISC_OVERLAYS,
+            HUD_LAYER_ID,
+            { context: DrawContext, tickCounter: RenderTickCounter ->
                 renderAllElements(context, tickCounter)
             }
-        }
+        )
     }
 
     /**

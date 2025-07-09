@@ -51,8 +51,10 @@ object GardenMap : IFeature {
         PestDetector.init()
         VisitorUtils.init()
 
-        ClientReceiveMessageEvents.ALLOW_GAME.register { message, _ ->
-            SprayUtils.processChatMessage(message.string)
+        ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
+            if (!overlay && IslandDetector.isOnIsland(IslandType.GARDEN)) {
+                SprayUtils.processChatMessage(message.string)
+            }
             true
         }
 

@@ -203,7 +203,7 @@ object AttributeMenu : IFeature {
 
     private fun cleanItemNameForMatching(itemName: String): String {
         return itemName
-            .replace(Regex("\\s+X$"), "") // Remove " X" suffix for maxed items
+            .replace(Regex("\\s+([IVXL]+)?$"), "")
             .trim()
     }
 
@@ -294,10 +294,23 @@ object AttributeMenu : IFeature {
 
             if (sourceLineIndex != -1) {
                 val textRenderer = MinecraftClient.getInstance().textRenderer
+                val prefix = "  • "
+                val indent = "    "
+                val indentWidth = textRenderer.getWidth(indent)
+                val availableWidth = MAX_LORE_WIDTH - indentWidth
+
                 val additionalLines = wayToObtainArray.flatMap { element ->
-                    val obtainText = "§7  • ${element.asString}"
-                    val wrappedOrderedLines = textRenderer.wrapLines(Text.literal(obtainText), MAX_LORE_WIDTH)
-                    wrappedOrderedLines.map { fromOrdered(it) }
+                    val obtainText = element.asString
+                    val wrappedText = textRenderer.wrapLines(Text.literal(obtainText), availableWidth)
+                        .map { fromOrdered(it) }
+
+                    if (wrappedText.isEmpty()) {
+                        emptyList()
+                    } else {
+                        val firstLine = Text.literal("§7$prefix").append(wrappedText.first())
+                        val otherLines = wrappedText.drop(1).map { Text.literal("§7$indent").append(it) }
+                        listOf(firstLine) + otherLines
+                    }
                 }
 
                 if (additionalLines.isNotEmpty()) {

@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -37,6 +38,7 @@ object FavoriteAbiContact : IFeature {
     private var highlightedItems = mutableListOf<String>()
     private var favoredOnlyToggle = true
     private var currentScreen: HandledScreen<*>? = null
+    private val configColor get() = SkyFall.feature.inventory.abiContact.abiContactColor
 
     private val validSlotRanges = setOf(
         10..16,
@@ -254,7 +256,7 @@ object FavoriteAbiContact : IFeature {
 
         val itemName = slot.stack.name.string
         if (highlightedItems.contains(itemName)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, ColorUtils.parseColorString(configColor))
         }
     }
 

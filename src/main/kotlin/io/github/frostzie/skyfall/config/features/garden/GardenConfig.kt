@@ -1,7 +1,6 @@
 package io.github.frostzie.skyfall.config.features.garden
 
 import com.google.gson.annotations.Expose
-import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
@@ -50,39 +49,42 @@ class GardenConfig {
         @ConfigEditorInfoText
         var infoText: String = ""
 
-        //TODO: Figure out how color system works since ChromaColour is saving hue to 0.0 constantly
-        /*
         @Expose
         @ConfigOption(name = "Background Color", desc = "The background color.")
         @ConfigEditorColour
-        var backgroundColor: String = "20:20:20:250:100"
+        var backgroundColor: String = "0:250:13:13:13"
 
         @Expose
         @ConfigOption(name = "Plot Color", desc = "The default color of plots.")
         @ConfigEditorColour
-        var defaultPlotColor: String = "150:150:150:255:98"
+        var defaultPlotColor: String = "0:255:211:211:211"
 
         //TODO: add locked plot detection
         //@Expose
         //@ConfigOption(name = "Locked Plot Color", desc = "The color of the plot if it hasn't been unlocked.")
         //@ConfigEditorColour
-        //var lockedPlotColor: String = "70:70:70:250:100"
+        //var lockedPlotColor: String = "0:70:70:70:255"
 
         @Expose
-        @ConfigOption(name = "Text Color", desc = "Text, number and icon color")
+        @ConfigOption(name = "Text Color", desc = "Visitor and total pest text color.")
         @ConfigEditorColour
-        var textColor: String = "255:255:255:255:100"
+        var textColor: String = "0:255:255:255:255"
+
+        @Expose
+        @ConfigOption(name = "Plot Text", desc = "Plot Number color.")
+        @ConfigEditorColour
+        var plotTextColor: String = "0:255:0:0:0"
 
         @Expose
         @ConfigOption(name = "Pest Plot Color", desc = "The color of the plot if it has a pest.")
         @ConfigEditorColour
-        var pestColor: String = "253:220:92:255:100"
+        var pestColor: String = "0:255:255:179:0"
 
         @Expose
         @ConfigOption(name = "Sprayed Plot Color", desc = "The color of the plot if it has been sprayed.")
         @ConfigEditorColour
-        var sprayColor: String = "178:255:255:255:100"
-        */
+        var sprayColor: String = "0:255:0:249:255"
+
 
         @Expose
         @ConfigOption(name = "Player Icon", desc = "The type of icon that should be used for the player.")
@@ -96,11 +98,9 @@ class GardenConfig {
             override fun toString(): String = value
         }
 
-        /*
         @Expose
         @ConfigOption(name = "Player Icon Color", desc = "The color of the player icon if the cube is chosen.")
         @ConfigEditorColour
-        var playerIconColor: String = "255:255:255:255:100"
-         */
+        var playerIconColor: String = "0:150:255:0:112"
     }
 }

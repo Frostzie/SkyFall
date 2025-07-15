@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -38,6 +39,7 @@ object FavoritePowerStone : IFeature {
     private val validSlotRanges = setOf(
         10..16, 19..25, 28..34, 37..43
     )
+    private val configColor get() = SkyFall.feature.inventory.powerStone.powerStoneColor
 
     init {
         loadConfig()
@@ -235,7 +237,7 @@ object FavoritePowerStone : IFeature {
         }
         val itemName = slot.stack.name.string
         if (highlightedItems.contains(itemName)) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, Color(255, 170, 0, 220).rgb)
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, ColorUtils.parseColorString(configColor))
         }
     }
 

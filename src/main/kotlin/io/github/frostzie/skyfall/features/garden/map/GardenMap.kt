@@ -9,6 +9,7 @@ import io.github.frostzie.skyfall.features.IFeature
 import io.github.frostzie.skyfall.hud.FeatureHudElement
 import io.github.frostzie.skyfall.hud.HudElementConfig
 import io.github.frostzie.skyfall.hud.HudManager
+import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.garden.PestData
 import io.github.frostzie.skyfall.utils.garden.PestDetector
@@ -97,8 +98,8 @@ object GardenMap : IFeature {
 
         val pestData = PestDetector.getPestData()
         val visitorData = VisitorUtils.getVisitorData()
-        val backgroundColor = 0xFF0d0d0d.toInt()
-        val headerTextColor = 0xffffff
+        val backgroundColor = ColorUtils.parseColorString(config.backgroundColor)
+        val headerTextColor = ColorUtils.parseColorString(config.textColor)
 
         drawContext.fill(x, y, x + width, y + height, backgroundColor)
 
@@ -152,9 +153,9 @@ object GardenMap : IFeature {
         sprayedPlots: List<GardenPlot>,
         textRenderer: TextRenderer
     ) {
-        val sprayedColor = 0xFF00f9ff.toInt()
-        val pestColor = 0xFFffb300.toInt()
-        val defaultColor = 0xD3D3D3BF.toInt()
+        val sprayedColor = ColorUtils.parseColorString(config.sprayColor)
+        val pestColor = ColorUtils.parseColorString(config.pestColor)
+        val defaultColor = ColorUtils.parseColorString(config.defaultPlotColor)
 
         for (row in 0 until gridCount) {
             for (col in 0 until gridCount) {
@@ -194,11 +195,11 @@ object GardenMap : IFeature {
     ) {
         if (smallBoxSize < 12) return
         val numberText = "$plotNumber"
-        val textColor = 0x000000.toInt()
+        val plotTextColor = ColorUtils.parseColorString(config.plotTextColor)
         val textWidth = textRenderer.getWidth(numberText)
         val textX = x + smallBoxSize - textWidth - 2
         val textY = y + smallBoxSize - textRenderer.fontHeight - 2
-        drawContext.drawText(textRenderer, numberText, textX, textY, textColor, false)
+        drawContext.drawText(textRenderer, numberText, textX, textY, plotTextColor, false)
     }
 
     private fun drawPlayerLocation(
@@ -240,7 +241,7 @@ object GardenMap : IFeature {
             )
             drawContext.matrices.pop()
         } else {
-            val playerColor = 0xFFff000c.toInt()
+            val playerColor = ColorUtils.parseColorString(config.playerIconColor)
             drawContext.fill(
                 (pixelX - dotSize / 4),
                 (pixelZ - dotSize / 4),

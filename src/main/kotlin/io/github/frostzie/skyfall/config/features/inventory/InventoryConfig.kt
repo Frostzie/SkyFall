@@ -3,14 +3,13 @@ package io.github.frostzie.skyfall.config.features.inventory
 import com.google.gson.annotations.Expose
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDraggableList
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDropdown
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
 class InventoryConfig {
-    //TODO: add a way to change the color of the highlight
     //TODO: remove green glass pane in Power Stone menu
     @Expose
     @Accordion
@@ -94,6 +93,11 @@ class InventoryConfig {
         @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over the power stone will highlight it. Adds a toggle item in the top right corner to only show favorites.")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
+
+        @Expose
+        @ConfigOption(name = "Color", desc = "The color of the favorite power stone.")
+        @ConfigEditorColour
+        var powerStoneColor: String = "0:220:255:170:0"
     }
 
     @Expose
@@ -106,6 +110,11 @@ class InventoryConfig {
         @ConfigOption(name = "Hotkey", desc = "Pressing the keybind over a contact will highlight it. Adds a toggle item in the top right corner to only show favorites.")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
+
+        @Expose
+        @ConfigOption(name = "Color", desc = "The color of the favorite abi contact.")
+        @ConfigEditorColour
+        var abiContactColor: String = "0:220:255:170:0"
     }
 
     @Expose
@@ -123,5 +132,15 @@ class InventoryConfig {
         @ConfigOption(name = "Favorite Hotkey", desc = "Pressing the keybind over a pet will highlight it. Adds a toggle item in the top right corner to only show favorites.")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
+
+        @Expose
+        @ConfigOption(name = "Color", desc = "The color of the favorite pets.")
+        @ConfigEditorColour
+        var petHighlightColor: String = "0:220:255:170:0"
+
+        @Expose
+        @ConfigOption(name = "Color", desc = "The color of the active pet.")
+        @ConfigEditorColour
+        var petActiveColor: String = "0:220:0:255:0" //0, 255, 0, 220
     }
 }

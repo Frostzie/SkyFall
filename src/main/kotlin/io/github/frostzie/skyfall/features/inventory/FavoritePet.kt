@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.features.Feature
 import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.events.SlotClickEvent
@@ -47,8 +48,8 @@ object FavoritePet : IFeature {
         37..43
     )
 
-    private val FAVORITE_COLOR = Color(255, 170, 0, 220)
-    private val ACTIVE_PET_COLOR = Color(0, 255, 0, 220)
+    private val FAVORITE_COLOR get() = ColorUtils.parseColorString(SkyFall.feature.inventory.petMenu.petHighlightColor)
+    private val ACTIVE_PET_COLOR get() = ColorUtils.parseColorString(SkyFall.feature.inventory.petMenu.petActiveColor)
 
     init {
         loadConfig()
@@ -250,7 +251,7 @@ object FavoritePet : IFeature {
         }
     }
 
-    private fun getPetHighlightColor(itemStack: ItemStack, isFavorite: Boolean): Color? {
+    private fun getPetHighlightColor(itemStack: ItemStack, isFavorite: Boolean): Int? {
         if (!PetUtils.isPet(itemStack)) {
             return null
         }
@@ -289,7 +290,7 @@ object FavoritePet : IFeature {
 
         val highlightColor = getPetHighlightColor(slot.stack, isFavorite)
         if (highlightColor != null) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor.rgb)
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor)
         }
     }
 

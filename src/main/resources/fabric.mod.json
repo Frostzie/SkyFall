@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "skyfall",
-	"version": "0.2.0",
+	"version": "0.2.2",
 	"name": "SkyFall",
 	"description": "QOL Hypixel Skyblock mod for newest versions of Minecraft",
 	"authors": [
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/Frostzie/SkyFall",
 		"issues": "https://github.com/Frostzie/SkyFall/issues"
 	},
-	"license": "LGPL-3.0",
+	"license": "LGPL-2.1",
 	"icon": "assets/skyfall/icon.png",
 	"environment": "client",
 	"accessWidener": "skyfall.accesswidener",

@@ -5,8 +5,11 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextColor
+import java.awt.Color
 
 object ColorUtils {
+    private val logger = LoggerProvider.getLogger("ColorUtils")
+
     fun skyFallPrefixChat(): MutableText {
         val text = "SkyFall"
         val colors = listOf(
@@ -79,5 +82,42 @@ object ColorUtils {
      */
     fun stripColorCodes(text: String): String {
         return text.replace("§[0-9a-fk-or]".toRegex(), "").trim()
+    }
+
+    /**
+     * Parses a color string from the config to an ARGB integer.
+     * The format is assumed to be "chroma:alpha:red:green:blue".
+     */
+    fun parseColorString(colorString: String): Int {
+        try {
+            val parts = colorString.split(":")
+            if (parts.size < 5) return 0xFFFFFFFF.toInt()
+
+            val chroma = parts[0].toInt()
+            val a = parts[1].toInt().coerceIn(0, 255)
+            val r = parts[2].toInt().coerceIn(0, 255)
+            val g = parts[3].toInt().coerceIn(0, 255)
+            val b = parts[4].toInt().coerceIn(0, 255)
+
+            return if (chroma != 0) {
+                val invertedChroma = (256 - chroma).coerceIn(1, 255)
+
+                val periodInMillis = (invertedChroma / 255.0) * 60000.0
+                if (periodInMillis <= 0) {
+                    return (a shl 24) or (r shl 16) or (g shl 8) or b
+                }
+
+                val hue = (System.currentTimeMillis() % periodInMillis.toLong()) / periodInMillis.toFloat()
+
+                val rainbowRgb = Color.HSBtoRGB(hue, 1.0f, 1.0f)
+                (a shl 24) or (rainbowRgb and 0x00FFFFFF)
+            } else {
+                (a shl 24) or (r shl 16) or (g shl 8) or b
+            }
+        } catch (e: NumberFormatException) {
+            logger.error("Failed to parse color string: $colorString", e)
+            ChatUtils.error("Failed to parse color string: $colorString, report in the discord!")
+            return 0xFFFFFFFF.toInt()
+        }
     }
 }

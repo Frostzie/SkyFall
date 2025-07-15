@@ -50,17 +50,15 @@ class GardenConfig {
         @ConfigEditorInfoText
         var infoText: String = ""
 
-        //TODO: Figure out how color system works since ChromaColour is saving hue to 0.0 constantly
-
         @Expose
         @ConfigOption(name = "Background Color", desc = "The background color.")
         @ConfigEditorColour
-        var backgroundColor: String = "0:20:20:20:255"
+        var backgroundColor: String = "0:250:13:13:13"
 
         @Expose
         @ConfigOption(name = "Plot Color", desc = "The default color of plots.")
         @ConfigEditorColour
-        var defaultPlotColor: String = "0:150:150:150:255"
+        var defaultPlotColor: String = "0:255:211:211:211"
 
         //TODO: add locked plot detection
         //@Expose
@@ -76,17 +74,17 @@ class GardenConfig {
         @Expose
         @ConfigOption(name = "Plot Text", desc = "Plot Number color.")
         @ConfigEditorColour
-        var plotTextColor: String = "0:255:255:255:255"
+        var plotTextColor: String = "0:255:0:0:0"
 
         @Expose
         @ConfigOption(name = "Pest Plot Color", desc = "The color of the plot if it has a pest.")
         @ConfigEditorColour
-        var pestColor: String = "0:253:220:92:255"
+        var pestColor: String = "0:255:255:179:0"
 
         @Expose
         @ConfigOption(name = "Sprayed Plot Color", desc = "The color of the plot if it has been sprayed.")
         @ConfigEditorColour
-        var sprayColor: String = "0:178:255:255:255"
+        var sprayColor: String = "0:255:0:249:255"
 
 
         @Expose
@@ -104,6 +102,6 @@ class GardenConfig {
         @Expose
         @ConfigOption(name = "Player Icon Color", desc = "The color of the player icon if the cube is chosen.")
         @ConfigEditorColour
-        var playerIconColor: String = "0:255:255:255:255"
+        var playerIconColor: String = "0:150:255:0:112"
     }
 }

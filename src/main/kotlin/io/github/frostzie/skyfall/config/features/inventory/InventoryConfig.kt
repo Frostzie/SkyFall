@@ -97,7 +97,7 @@ class InventoryConfig {
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the highlighted slot.")
+        @ConfigOption(name = "Color", desc = "The color of the favorite power stone.")
         @ConfigEditorColour
         var powerStoneColor: String = "0:220:255:170:0"
     }
@@ -114,7 +114,7 @@ class InventoryConfig {
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the highlighted slot.")
+        @ConfigOption(name = "Color", desc = "The color of the favorite abi contact.")
         @ConfigEditorColour
         var abiContactColor: String = "0:220:255:170:0"
     }
@@ -136,12 +136,12 @@ class InventoryConfig {
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the highlighted slot.")
+        @ConfigOption(name = "Color", desc = "The color of the favorite pets.")
         @ConfigEditorColour
         var petHighlightColor: String = "0:220:255:170:0"
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the highlighted slot.")
+        @ConfigOption(name = "Color", desc = "The color of the active pet.")
         @ConfigEditorColour
         var petActiveColor: String = "0:220:0:255:0" //0, 255, 0, 220
     }

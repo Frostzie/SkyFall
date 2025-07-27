@@ -1,10 +1,10 @@
 package io.github.frostzie.skyfall.features.inventory.attribute
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.TooltipEvents
+import io.github.frostzie.skyfall.events.inventory.TooltipEvents
 import io.github.frostzie.skyfall.utils.item.CustomLoreUtils
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 
 @Feature(name = "Hide Hunting Box Description")
-object HideDescription : IFeature {
+object HideDescription : IEventFeature {
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("HideDescription")
     private val config get() = SkyFall.feature.inventory.attributeMenu

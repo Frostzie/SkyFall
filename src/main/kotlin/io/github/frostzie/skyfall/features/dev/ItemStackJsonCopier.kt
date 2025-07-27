@@ -3,8 +3,8 @@ package io.github.frostzie.skyfall.features.dev
 import com.google.gson.*
 import com.mojang.serialization.JsonOps
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
@@ -20,7 +20,7 @@ import java.awt.datatransfer.StringSelection
 
 // Taken and modified from Component Viewer
 @Feature(name = "Item Stack JSON Copier")
-object ItemStackJsonCopier : IFeature {
+object ItemStackJsonCopier : IEventFeature {
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("ItemStackJsonCopier")
 

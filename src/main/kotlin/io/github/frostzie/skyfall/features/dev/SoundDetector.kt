@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.features.dev
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.SoundUtils
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
 @Feature(name = "Sound Detector")
-object SoundDetector : IFeature {
+object SoundDetector : IEventFeature {
     override var isRunning = false
 
     private val activeSounds = ConcurrentHashMap<String, SoundInfo>()

@@ -1,14 +1,14 @@
 package io.github.frostzie.skyfall.utils.item
 
-import io.github.frostzie.skyfall.utils.events.SlotClickEvent
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvent
+import io.github.frostzie.skyfall.events.inventory.SlotClickEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvent
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.text.Text
-
+//TODO: REMOVE
 /**
  * A centralized handler for dispatching all slot-related events.
  * This object is the bridge between game code (injected via Mixins) and our event system.

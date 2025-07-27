@@ -2,14 +2,14 @@ package io.github.frostzie.skyfall.features.gui
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.ConfigGuiManager
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import org.lwjgl.glfw.GLFW
 
 @Feature(name = "GUI Keybinds")
-object GuiKeybinds : IFeature {
+object GuiKeybinds : IEventFeature {
 
     override var isRunning = false
 

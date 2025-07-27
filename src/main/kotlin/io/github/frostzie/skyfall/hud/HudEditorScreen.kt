@@ -86,8 +86,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
         selectedElement?.let { element ->
             val infoText = "Selected: ${element.name} (${element.config.x}, ${element.config.y}) ${element.config.width}x${element.config.height}"
-            drawContext.drawTextWithShadow(textRenderer, infoText, 10, height - 20, 0x00FF00)
-        }
+            drawContext.drawTextWithShadow(textRenderer, infoText, 10, height - 20, 0xFF00FF00.toInt())}
     }
 
     private fun drawSelectionOutline(drawContext: DrawContext, element: HudElement) {
@@ -122,7 +121,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
         val infoText = "?"
         val textWidth = textRenderer.getWidth(infoText)
-        drawContext.drawTextWithShadow(textRenderer, infoText, infoBoxX + (INFO_BOX_SIZE - textWidth) / 2, infoBoxY + (INFO_BOX_SIZE - textRenderer.fontHeight) / 2, 0xFFFFFF)
+        drawContext.drawTextWithShadow(textRenderer, infoText, infoBoxX + (INFO_BOX_SIZE - textWidth) / 2, infoBoxY + (INFO_BOX_SIZE - textRenderer.fontHeight) / 2, 0xFFFFFFFF.toInt())
     }
 
     private fun drawInfoBoxTooltip(drawContext: DrawContext, mouseX: Int, mouseY: Int) {
@@ -141,7 +140,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         drawContext.drawBorder(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 0xFF666666.toInt())
 
         tooltipText.forEachIndexed { index, line ->
-            drawContext.drawTextWithShadow(textRenderer, line, tooltipX + padding, tooltipY + padding + index * lineHeight, 0xFFFFFF)
+            drawContext.drawTextWithShadow(textRenderer, line, tooltipX + padding, tooltipY + padding + index * lineHeight, 0xFFFFFFFF.toInt())
         }
     }
 
@@ -154,7 +153,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
         tooltipText.forEachIndexed { index, line ->
             val textX = layout.x + (layout.width - textRenderer.getWidth(line)) / 2
-            drawContext.drawTextWithShadow(textRenderer, line, textX, layout.y + 8 + index * (textRenderer.fontHeight + 3), 0xFFFFFF)
+            drawContext.drawTextWithShadow(textRenderer, line, textX, layout.y + 8 + index * (textRenderer.fontHeight + 3), 0xFFFFFFFF.toInt())
         }
 
         val isButtonHovered = mouseX in layout.buttonX..(layout.buttonX + layout.buttonWidth) && mouseY in layout.buttonY..(layout.buttonY + layout.buttonHeight)
@@ -164,7 +163,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
         drawContext.fill(layout.buttonX, layout.buttonY, layout.buttonX + layout.buttonWidth, layout.buttonY + layout.buttonHeight, buttonColor)
         drawContext.drawBorder(layout.buttonX, layout.buttonY, layout.buttonWidth, layout.buttonHeight, buttonBorderColor)
-        drawContext.drawTextWithShadow(textRenderer, buttonText, layout.buttonX + (layout.buttonWidth - textRenderer.getWidth(buttonText)) / 2, layout.buttonY + (layout.buttonHeight - textRenderer.fontHeight) / 2, 0xFFFFFF)
+        drawContext.drawTextWithShadow(textRenderer, buttonText, layout.buttonX + (layout.buttonWidth - textRenderer.getWidth(buttonText)) / 2, layout.buttonY + (layout.buttonHeight - textRenderer.fontHeight) / 2, 0xFFFFFFFF.toInt())
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

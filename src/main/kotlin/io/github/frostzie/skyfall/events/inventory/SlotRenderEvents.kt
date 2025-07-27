@@ -1,4 +1,4 @@
-package io.github.frostzie.skyfall.utils.events
+package io.github.frostzie.skyfall.events.inventory
 
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.screen.slot.Slot

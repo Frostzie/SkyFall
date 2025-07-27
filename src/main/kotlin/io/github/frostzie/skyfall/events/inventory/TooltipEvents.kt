@@ -1,6 +1,7 @@
-package io.github.frostzie.skyfall.utils.events
+package io.github.frostzie.skyfall.events.inventory
 
 import io.github.frostzie.skyfall.utils.LoggerProvider
+import io.github.frostzie.skyfall.events.core.Event
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 

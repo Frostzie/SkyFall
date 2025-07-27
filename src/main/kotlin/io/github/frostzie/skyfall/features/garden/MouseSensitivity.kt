@@ -2,8 +2,8 @@ package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.mixin.accessor.MouseAccessor
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
@@ -13,7 +13,7 @@ import net.minecraft.client.MinecraftClient
 import org.lwjgl.glfw.GLFW
 
 @Feature(name = "Mouse Sensitivity Lock")
-object MouseSensitivity : IFeature {
+object MouseSensitivity : IEventFeature {
 
     override var isRunning = false
     var isLockActive: Boolean = false

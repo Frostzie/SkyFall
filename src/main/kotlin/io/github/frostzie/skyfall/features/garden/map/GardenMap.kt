@@ -4,8 +4,8 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.data.GardenPlot
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.hud.FeatureHudElement
 import io.github.frostzie.skyfall.hud.HudElementConfig
 import io.github.frostzie.skyfall.hud.HudManager
@@ -24,7 +24,7 @@ import net.minecraft.util.Identifier
 import kotlin.math.min
 
 @Feature(name = "Garden Map")
-object GardenMap : IFeature {
+object GardenMap : IEventFeature {
 
     override var isRunning = false
     private val config get() = SkyFall.feature.garden.gardenMap

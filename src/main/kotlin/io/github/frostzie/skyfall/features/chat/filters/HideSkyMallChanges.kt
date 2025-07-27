@@ -2,15 +2,15 @@ package io.github.frostzie.skyfall.features.chat.filters
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.IslandDetector
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 
 @Feature(name = "Hide SkyMall Changes")
-object HideSkyMallChanges : IFeature {
+object HideSkyMallChanges : IEventFeature {
 
     override var isRunning = false
 

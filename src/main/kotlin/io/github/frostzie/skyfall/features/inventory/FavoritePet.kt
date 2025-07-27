@@ -3,14 +3,14 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.SlotClickEvent
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvent
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
+import io.github.frostzie.skyfall.events.inventory.SlotClickEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.frostzie.skyfall.utils.item.PetUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -25,13 +25,12 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
-import java.awt.Color
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
 @Feature(name = "Favorite Pets")
-object FavoritePet : IFeature {
+object FavoritePet : IEventFeature {
 
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("FavoritePet")

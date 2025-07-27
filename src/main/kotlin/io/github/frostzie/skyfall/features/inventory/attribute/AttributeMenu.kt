@@ -3,15 +3,15 @@ package io.github.frostzie.skyfall.features.inventory.attribute
 import com.google.gson.JsonObject
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.data.RarityType
 import io.github.frostzie.skyfall.data.RepoManager
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyHeld
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
-import io.github.frostzie.skyfall.utils.events.TooltipEvents
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvents
+import io.github.frostzie.skyfall.events.inventory.TooltipEvents
 import io.github.frostzie.skyfall.utils.item.TooltipUtils
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -27,7 +27,7 @@ import org.lwjgl.glfw.GLFW
 import java.awt.Color
 
 @Feature(name = "Attribute Menu")
-object AttributeMenu : IFeature {
+object AttributeMenu : IEventFeature {
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("AttributeMenu")
     private val config get() = SkyFall.feature.inventory.attributeMenu

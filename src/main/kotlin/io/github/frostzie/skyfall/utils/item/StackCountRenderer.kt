@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.utils.item
 
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvent
 import net.minecraft.screen.slot.Slot
-
+//TODO: REMOVE
 /**
  * A utility to render fake stack counts on items in slots.
  *

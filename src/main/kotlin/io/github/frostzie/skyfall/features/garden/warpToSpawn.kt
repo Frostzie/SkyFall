@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW
 import kotlin.time.Duration.Companion.milliseconds
 
 @Feature(name = "Warp to Garden Spawn")
-object warpToSpawn : IFeature {
+object warpToSpawn : IEventFeature {
     override var isRunning = false
     private var lastCommandTime = SimpleTimeMark.farPast()
     private val requeueKey get() = SkyFall.feature.garden.warpToSpawn

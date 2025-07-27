@@ -1,5 +1,7 @@
-package io.github.frostzie.skyfall.utils.events
+package io.github.frostzie.skyfall.events.inventory
 
+import io.github.frostzie.skyfall.events.core.Event
+import io.github.frostzie.skyfall.events.core.EventBus
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType

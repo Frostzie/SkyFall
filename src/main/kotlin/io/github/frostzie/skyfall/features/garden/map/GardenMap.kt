@@ -102,8 +102,6 @@ object GardenMap : IEventFeature {
 
         drawContext.fill(x, y, x + width, y + height, backgroundColor)
 
-        drawContext.fill(x, y, x + width, y + height, backgroundColor)
-
         val padding = 3
         val textHeight = textRenderer.fontHeight
         val headerHeight = textHeight
@@ -196,11 +194,11 @@ object GardenMap : IEventFeature {
     ) {
         if (smallBoxSize < 12) return
         val numberText = "$plotNumber"
-        val plottextColor = ColorUtils.parseColorString(config.plotTextColor)
+        val plotTextColor = ColorUtils.parseColorString(config.plotTextColor)
         val textWidth = textRenderer.getWidth(numberText)
         val textX = x + smallBoxSize - textWidth - 2
         val textY = y + smallBoxSize - textRenderer.fontHeight - 2
-        drawContext.drawText(textRenderer, numberText, textX, textY, plottextColor, false)
+        drawContext.drawText(textRenderer, numberText, textX, textY, plotTextColor, false)
     }
 
     private fun drawPlayerLocation(

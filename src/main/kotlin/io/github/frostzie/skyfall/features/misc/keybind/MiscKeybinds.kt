@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.features.misc.keybind
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -11,7 +11,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 // Original idea by Odin
 @Feature(name = "Misc Keybinds")
-object MiscKeybinds : IFeature {
+object MiscKeybinds : IEventFeature {
     override var isRunning = false
 
     private val commandCooldowns = mutableMapOf<String, SimpleTimeMark>()

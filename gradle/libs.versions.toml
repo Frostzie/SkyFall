@@ -4,10 +4,10 @@ version = "Beta 0.2.2"
 minecraft = "1.21.5"
 yarn_mappings="1.21.5+build.1"
 loader_version="0.16.14"
-fabric_version="0.127.1+1.21.5"
+fabric_version="0.129.0+1.21.8"
 kotlin = "2.1.0"
-fabric_kotlin = "1.13.3+kotlin.2.1.21"
-modmenu = "14.0.0-rc.2"
+fabric_kotlin = "1.13.4+kotlin.2.2.0"
+modmenu = "15.0.0-beta.3"
 moulconfig = "4.0.1-beta"
 gson = "2.11.0"
 devauth = "1.2.1"
@@ -20,11 +20,11 @@ fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "loader_v
 fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_version" }
 fabric_kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric_kotlin" }
 modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
-moulconfig = { module = "org.notenoughupdates.moulconfig:modern-1.21.5", version.ref = "moulconfig" }
+moulconfig = { module = "org.notenoughupdates.moulconfig:modern-1.21.7", version.ref = "moulconfig" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 devauth = { module = "me.djtheredstoner:DevAuth-fabric", version.ref = "devauth" }
 
 [plugins]
 kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-fabric_loom = { id = "fabric-loom", version = "1.10.5" }
+fabric_loom = { id = "fabric-loom", version = "1.11-SNAPSHOT" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }

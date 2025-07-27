@@ -1,14 +1,14 @@
 package io.github.frostzie.skyfall.features.chat.filters
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.util.Formatting
 
 // Taken and modified from Skyblocker
 @Feature(name = "Hide Watchdog Messages")
-object HideWatchdogMessage : IFeature {
+object HideWatchdogMessage : IEventFeature {
 
     override var isRunning = false
 

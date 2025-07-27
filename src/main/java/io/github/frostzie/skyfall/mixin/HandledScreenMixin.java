@@ -2,7 +2,7 @@ package io.github.frostzie.skyfall.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvents;
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvents;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;

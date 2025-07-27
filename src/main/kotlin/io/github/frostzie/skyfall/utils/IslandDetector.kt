@@ -1,7 +1,12 @@
 package io.github.frostzie.skyfall.utils
 
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.utils.events.*
+import io.github.frostzie.skyfall.events.IslandChangeEvent
+import io.github.frostzie.skyfall.events.RiftStateEvent
+import io.github.frostzie.skyfall.events.ScoreboardUpdateEvent
+import io.github.frostzie.skyfall.events.SkyblockStateEvent
+import io.github.frostzie.skyfall.events.TabListUpdateEvent
+import io.github.frostzie.skyfall.events.core.EventBus
 
 // Taken from SkyHanni and modified
 /**

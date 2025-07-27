@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.features.dungeon
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager.isKeyClicked
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
@@ -11,7 +11,7 @@ import org.lwjgl.glfw.GLFW
 import kotlin.time.Duration.Companion.milliseconds
 
 @Feature(name = "Requeue Key")
-object RequeueKey : IFeature {
+object RequeueKey : IEventFeature {
     override var isRunning = false
     private var lastCommandTime = SimpleTimeMark.farPast()
     private val requeueKey get() = SkyFall.feature.dungeon.requeueKey

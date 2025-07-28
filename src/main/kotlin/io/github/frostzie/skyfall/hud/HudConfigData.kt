@@ -1,13 +1,12 @@
 package io.github.frostzie.skyfall.hud
 
 import com.google.gson.GsonBuilder
+import io.github.frostzie.skyfall.events.core.EventBus
+import io.github.frostzie.skyfall.events.render.HudRenderEvent
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderTickCounter
-import net.minecraft.util.Identifier
 import java.io.File
 
 data class HudConfigData(
@@ -20,7 +19,6 @@ object HudManager {
     private val configFile = File(MinecraftClient.getInstance().runDirectory, "config/skyfall/location.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
-    private val HUD_LAYER_ID = Identifier.of("skyfall", "hud_elements")
     private var loadedConfig: HudConfigData? = null
     private var isInitialized = false
 
@@ -30,13 +28,10 @@ object HudManager {
 
         loadConfigFromFile()
 
-        HudElementRegistry.attachElementAfter(
-            VanillaHudElements.MISC_OVERLAYS,
-            HUD_LAYER_ID,
-            { context: DrawContext, tickCounter: RenderTickCounter ->
-                renderAllElements(context, tickCounter)
-            }
-        )
+        EventBus.listen(HudRenderEvent.Main::class.java) { event ->
+            renderAllElements(event.context, event.tickCounter)
+        }
+        logger.info("HudManager initialized and listening to render events.")
     }
 
     /**

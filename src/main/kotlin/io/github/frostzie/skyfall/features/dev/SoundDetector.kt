@@ -2,20 +2,16 @@ package io.github.frostzie.skyfall.features.dev
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.api.feature.Feature
-import io.github.frostzie.skyfall.api.feature.IEventFeature
+import io.github.frostzie.skyfall.api.feature.HudFeature
+import io.github.frostzie.skyfall.events.render.HudRenderEvent
 import io.github.frostzie.skyfall.utils.SoundUtils
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.util.Identifier
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
 @Feature(name = "Sound Detector")
-object SoundDetector : IEventFeature {
-    override var isRunning = false
+object SoundDetector : HudFeature() {
 
     private val activeSounds = ConcurrentHashMap<String, SoundInfo>()
     private val mc = MinecraftClient.getInstance()
@@ -29,27 +25,61 @@ object SoundDetector : IEventFeature {
         val soundId: String
     )
 
-    init {
-        HudElementRegistry.attachElementAfter(
-            VanillaHudElements.SUBTITLES,
-            Identifier.of("skyfall", "sounds")
-        ) { context, _ ->
-            if (!isRunning) return@attachElementAfter
-            renderSoundOverlay(context)
-        }
-    }
-
     override fun shouldLoad(): Boolean {
         return config.enabledDevMode && config.soundDetector
     }
 
-    override fun init() {
-        isRunning = true
+    override fun onTerminate() {
+        clearAllSounds()
     }
 
-    override fun terminate() {
-        isRunning = false
-        clearAllSounds()
+    override fun onHudRender(event: HudRenderEvent.Main) {
+        if (mc.player == null || activeSounds.isEmpty()) return
+
+        val currentTime = System.currentTimeMillis()
+        val maxDisplayTime = 4000L
+
+        activeSounds.entries.removeIf { (_, info) ->
+            currentTime - info.timestamp > maxDisplayTime
+        }
+
+        if (activeSounds.isEmpty()) return
+
+        val drawContext = event.context
+        val screenWidth = mc.window.scaledWidth
+        val screenHeight = mc.window.scaledHeight
+        val textRenderer = mc.textRenderer
+
+        val soundList = activeSounds.values.sortedByDescending { it.timestamp }
+        val maxSounds = min(10, soundList.size)
+
+        var yOffset = screenHeight - 40
+
+        for (i in 0 until maxSounds) {
+            val sound = soundList[i]
+            val age = currentTime - sound.timestamp
+            val alpha = ((maxDisplayTime - age) / maxDisplayTime.toFloat()).coerceIn(0f, 1f)
+
+            if (alpha <= 0f) continue
+
+            val displayText = sound.displayName
+            val textWidth = textRenderer.getWidth(displayText)
+            val xPos = screenWidth - textWidth - 15
+
+            val bgAlpha = (alpha * 0.7f * 255).toInt()
+            val bgColor = (bgAlpha shl 24) or 0x000000
+            drawContext.fill(xPos - 4, yOffset - 2, xPos + textWidth + 4, yOffset + 10, bgColor)
+
+            val borderAlpha = (alpha * 0.9f * 255).toInt()
+            val borderColor = (borderAlpha shl 24) or 0x404040
+            drawContext.drawBorder(xPos - 4, yOffset - 2, textWidth + 8, 12, borderColor)
+
+            val textAlpha = (alpha * 255).toInt()
+            val textColor = (textAlpha shl 24) or 0xFFFFFF
+            drawContext.drawText(textRenderer, displayText, xPos, yOffset, textColor, false)
+
+            yOffset -= 14
+        }
     }
 
     fun onSoundPlay(soundInstance: SoundInstance) {
@@ -72,6 +102,7 @@ object SoundDetector : IEventFeature {
     }
 
     fun onSoundStop(soundInstance: SoundInstance) {
+        // Kept for potential future use
     }
 
     private fun createDetailedSoundName(soundInstance: SoundInstance): String {
@@ -173,54 +204,6 @@ object SoundDetector : IEventFeature {
 
                 "🔊 $baseName$pitchInfo$volumeInfo"
             }
-        }
-    }
-
-    private fun renderSoundOverlay(drawContext: DrawContext) {
-        if (mc.player == null || activeSounds.isEmpty()) return
-
-        val currentTime = System.currentTimeMillis()
-        val maxDisplayTime = 4000L
-
-        activeSounds.entries.removeIf { (_, info) ->
-            currentTime - info.timestamp > maxDisplayTime
-        }
-
-        if (activeSounds.isEmpty()) return
-
-        val screenWidth = mc.window.scaledWidth
-        val screenHeight = mc.window.scaledHeight
-        val textRenderer = mc.textRenderer
-
-        val soundList = activeSounds.values.sortedByDescending { it.timestamp }
-        val maxSounds = min(10, soundList.size)
-
-        var yOffset = screenHeight - 40
-
-        for (i in 0 until maxSounds) {
-            val sound = soundList[i]
-            val age = currentTime - sound.timestamp
-            val alpha = ((maxDisplayTime - age) / maxDisplayTime.toFloat()).coerceIn(0f, 1f)
-
-            if (alpha <= 0f) continue
-
-            val displayText = sound.displayName
-            val textWidth = textRenderer.getWidth(displayText)
-            val xPos = screenWidth - textWidth - 15
-
-            val bgAlpha = (alpha * 0.7f * 255).toInt()
-            val bgColor = (bgAlpha shl 24) or 0x000000
-            drawContext.fill(xPos - 4, yOffset - 2, xPos + textWidth + 4, yOffset + 10, bgColor)
-
-            val borderAlpha = (alpha * 0.9f * 255).toInt()
-            val borderColor = (borderAlpha shl 24) or 0x404040
-            drawContext.drawBorder(xPos - 4, yOffset - 2, textWidth + 8, 12, borderColor)
-
-            val textAlpha = (alpha * 255).toInt()
-            val textColor = (textAlpha shl 24) or 0xFFFFFF
-            drawContext.drawText(textRenderer, displayText, xPos, yOffset, textColor, false)
-
-            yOffset -= 14
         }
     }
 }

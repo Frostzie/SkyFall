@@ -9,6 +9,7 @@ import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.hud.FeatureHudElement
 import io.github.frostzie.skyfall.hud.HudElementConfig
 import io.github.frostzie.skyfall.hud.HudManager
+import io.github.frostzie.skyfall.impl.minecraft.SkyfallRenderPipelines.Gui.GUI_TEXTURED
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.garden.PestData
@@ -18,9 +19,10 @@ import io.github.frostzie.skyfall.utils.garden.SprayUtils
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.RotationAxis
 import kotlin.math.min
 
 @Feature(name = "Garden Map")
@@ -222,12 +224,12 @@ object GardenMap : IEventFeature {
 
         if (config.playerIconType == GardenConfig.GardenMapConfig.PlayerIcon.ARROW) {
             val texture = Identifier.ofVanilla("textures/map/decorations/player.png")
-            drawContext.matrices.pushMatrix()
-            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat())
-            drawContext.matrices.rotate(kotlin.math.PI.toFloat() * (client.player!!.yaw - 360) / 180.0f)
-            drawContext.matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat())
+            drawContext.matrices.push()
+            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat(), 0f)
+            drawContext.matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(client.player!!.yaw - 360))
+            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat(), 0f)
             drawContext.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                { tex: Identifier -> RenderLayer.getGuiTexturedOverlay(tex)},
                 texture,
                 (pixelX - dotSize / 2),
                 (pixelZ - dotSize / 2),
@@ -238,7 +240,7 @@ object GardenMap : IEventFeature {
                 dotSize,
                 -dotSize
             )
-            drawContext.matrices.popMatrix()
+            drawContext.matrices.pop()
         } else {
             val playerColor = ColorUtils.parseColorString(config.playerIconColor)
             drawContext.fill(

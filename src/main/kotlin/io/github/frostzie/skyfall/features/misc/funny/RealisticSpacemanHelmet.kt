@@ -9,8 +9,10 @@ import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.frostzie.skyfall.utils.item.SkyBlockItemData
 import io.github.frostzie.skyfall.events.render.HudRenderEvent
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.util.Identifier
+import java.util.function.Function
 
 @Feature(name = "Realistic Spaceman Helmet")
 object RealisticSpacemanHelmet : HudFeature() {
@@ -54,7 +56,7 @@ object RealisticSpacemanHelmet : HudFeature() {
             val height = event.context.scaledWindowHeight
 
             event.context.drawTexture(
-                GUI_TEXTURED,
+                { id -> RenderLayer.getGuiTexturedOverlay(id) },
                 textureId,
                 0, 0, 0.0f, 0.0f,
                 width, height, width, height

@@ -6,9 +6,8 @@ import io.github.frostzie.skyfall.events.core.EventBus
 import io.github.frostzie.skyfall.events.render.HudRenderEvent
 import io.github.frostzie.skyfall.events.render.SlotClickEvent
 import io.github.frostzie.skyfall.events.render.SlotRenderEvent
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
+import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
+import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.RenderTickCounter
@@ -36,60 +35,65 @@ object FabricEventBridge {
         // Initialize feature event manager first
         FeatureEventManager.initializeEventListeners()
 
-        // Register HUD element with Fabric
-        registerHudElement()
+        // Register HUD layer with Fabric using the callback system
+        registerHudLayer()
 
         logger.info("Fabric event bridge initialized")
     }
 
-    private fun registerHudElement() {
-        val hudElement = HudElement { context: DrawContext, tickCounter: RenderTickCounter ->
-            val client = MinecraftClient.getInstance()
+    private fun registerHudLayer() {
+        HudLayerRegistrationCallback.EVENT.register { layeredDrawer ->
+            val hudLayer = IdentifiedLayer.of(HUD_LAYER_ID) { context: DrawContext, tickCounter: RenderTickCounter ->
+                val client = MinecraftClient.getInstance()
 
-            // Skip if conditions aren't met
-            if (client.player == null || client.options.hudHidden || client.debugHud.shouldShowDebugHud()) {
-                return@HudElement
+                if (client.player == null || client.options.hudHidden || client.debugHud.shouldShowDebugHud()) {
+                    return@of
+                }
+
+                val currentScreen = client.currentScreen
+                if (currentScreen?.javaClass?.simpleName == "HudEditorScreen") {
+                    return@of
+                }
+
+                safeEventCall {
+                    EventBus.post(HudRenderEvent.Pre(context, tickCounter))
+                    EventBus.post(HudRenderEvent.Main(context, tickCounter))
+                    EventBus.post(HudRenderEvent.Post(context, tickCounter))
+                }
             }
 
-            // Skip if in HUD editor
-            if (client.currentScreen?.javaClass?.simpleName == "HudEditorScreen") {
-                return@HudElement
-            }
-
-            // Emit our events
-            EventBus.post(HudRenderEvent.Pre(context, tickCounter))
-            EventBus.post(HudRenderEvent.Main(context, tickCounter))
-            EventBus.post(HudRenderEvent.Post(context, tickCounter))
+            // Attach after MISC_OVERLAYS (same position as before)
+            layeredDrawer.attachLayerAfter(IdentifiedLayer.MISC_OVERLAYS, hudLayer)
         }
-
-        HudElementRegistry.attachElementAfter(
-            VanillaHudElements.MISC_OVERLAYS,
-            HUD_LAYER_ID,
-            hudElement
-        )
     }
 
     /**
      * Call this from your slot rendering mixin
      */
     fun onSlotRenderPre(context: DrawContext, slot: Slot, originalStack: ItemStack) {
-        EventBus.post(SlotRenderEvent.Pre(context, slot, originalStack))
+        safeEventCall {
+            EventBus.post(SlotRenderEvent.Pre(context, slot, originalStack))
+        }
     }
 
     /**
      * Call this from your slot rendering mixin - returns modified render data
      */
     fun onSlotRenderMain(context: DrawContext, slot: Slot, originalStack: ItemStack): SlotRenderEvent.Main {
-        val event = SlotRenderEvent.Main(context, slot, originalStack)
-        EventBus.post(event)
-        return event
+        return safeEventCall {
+            val event = SlotRenderEvent.Main(context, slot, originalStack)
+            EventBus.post(event)
+            event
+        } ?: SlotRenderEvent.Main(context, slot, originalStack)
     }
 
     /**
      * Call this from your slot rendering mixin
      */
     fun onSlotRenderPost(context: DrawContext, slot: Slot, originalStack: ItemStack) {
-        EventBus.post(SlotRenderEvent.Post(context, slot, originalStack))
+        safeEventCall {
+            EventBus.post(SlotRenderEvent.Post(context, slot, originalStack))
+        }
     }
 
     /**
@@ -104,25 +108,27 @@ object FabricEventBridge {
         cursorStack: ItemStack,
         originalStack: ItemStack?
     ): SlotClickEvent {
-        val event = SlotClickEvent(slot, slotId, button, actionType, screenTitle, cursorStack, originalStack)
-        EventBus.post(event)
-        return event
+        return safeEventCall {
+            val event = SlotClickEvent(slot, slotId, button, actionType, screenTitle, cursorStack, originalStack)
+            EventBus.post(event)
+            event
+        } ?: SlotClickEvent(slot, slotId, button, actionType, screenTitle, cursorStack, originalStack)
     }
 
     /**
      * Cleanup method - removes Fabric registrations
+     * Note: In the older system, layers are registered via callback and cannot be easily removed
+     * This method is kept for API compatibility but has limited functionality
      */
     fun cleanup() {
         if (!isInitialized) return
 
-        try {
-            HudElementRegistry.removeElement(HUD_LAYER_ID)
-        } catch (e: Exception) {
-            logger.error("Error cleaning up HUD element: ${e.message}")
-        }
+        // In the older Fabric rendering system, there's no direct way to remove registered layers
+        // The layers are registered via callbacks during initialization
+        // This is a limitation of the older system compared to the newer HudElementRegistry
 
         isInitialized = false
-        logger.info("Fabric event bridge cleaned up")
+        logger.info("Fabric event bridge cleaned up (note: layer removal not supported in older Fabric versions)")
     }
 
     private inline fun <T> safeEventCall(action: () -> T): T? {

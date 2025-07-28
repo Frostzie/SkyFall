@@ -1,15 +1,14 @@
 package io.github.frostzie.skyfall.features.garden.map
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.data.GardenPlot
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.api.feature.Feature
-import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.hud.FeatureHudElement
 import io.github.frostzie.skyfall.hud.HudElementConfig
 import io.github.frostzie.skyfall.hud.HudManager
-import io.github.frostzie.skyfall.impl.minecraft.SkyfallRenderPipelines.Gui.GUI_TEXTURED
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.garden.PestData
@@ -227,9 +226,9 @@ object GardenMap : IEventFeature {
             drawContext.matrices.push()
             drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat(), 0f)
             drawContext.matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(client.player!!.yaw - 360))
-            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat(), 0f)
+            drawContext.matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat(), 0f)
             drawContext.drawTexture(
-                { tex: Identifier -> RenderLayer.getGuiTexturedOverlay(tex)},
+                { tex: Identifier? -> RenderLayer.getGuiTexturedOverlay(tex) },
                 texture,
                 (pixelX - dotSize / 2),
                 (pixelZ - dotSize / 2),

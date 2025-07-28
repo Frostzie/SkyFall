@@ -32,7 +32,6 @@ class SkyFall : ModInitializer {
 
 		Runtime.getRuntime().addShutdownHook(Thread {
 			configManager.saveConfig("shutdown-hook")
-			FeatureManager.updateFeatureStates()
 		})
 
 		ClientTickEvents.END_CLIENT_TICK.register { client ->

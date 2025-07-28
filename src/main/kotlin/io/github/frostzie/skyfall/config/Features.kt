@@ -2,6 +2,7 @@ package io.github.frostzie.skyfall.config
 
 import com.google.gson.annotations.Expose
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.api.feature.FeatureManager
 import io.github.frostzie.skyfall.config.features.chat.ChatConfig
 import io.github.frostzie.skyfall.config.features.dev.DevConfig
 import io.github.frostzie.skyfall.config.features.dungeon.DungeonConfig
@@ -17,6 +18,7 @@ import io.github.notenoughupdates.moulconfig.common.MyResourceLocation
 class Features : Config() {
     override fun saveNow() {
         SkyFall.configManager.saveConfig("close-gui")
+        FeatureManager.updateFeatureStates()
     }
 
     //TODO: add version change support and color gradient title

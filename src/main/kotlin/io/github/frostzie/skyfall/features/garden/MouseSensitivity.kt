@@ -185,13 +185,15 @@ object MouseSensitivity : IEventFeature {
         return isLockActive && client.currentScreen == null && isFeatureConditionallyActive()
     }
 
+    private val plotWarpCommands = listOf("plottp", "plotteleport")
+
     private fun handleSentCommand(command: String) {
         if (!isLockActive || !config.disableOnWarp) {
             return
         }
 
         val lowerCaseCommand = command.lowercase()
-        if (lowerCaseCommand.startsWith("plottp") || lowerCaseCommand.startsWith("plottp")) {
+        if (plotWarpCommands.any { lowerCaseCommand.startsWith(it) }) {
             isLockActive = false
             ChatUtils.messageToChat("Mouse Lock §cDisabled! §r(Plot warp)").send()
         }

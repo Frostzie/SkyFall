@@ -8,6 +8,7 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDropdown
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
+import javax.swing.text.Highlighter
 
 class InventoryConfig {
     //TODO: remove green glass pane in Power Stone menu
@@ -134,13 +135,23 @@ class InventoryConfig {
         var favoriteKey: Int = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the favorite pets.")
+        @ConfigOption(name = "Show exp Shared Pets", desc = "Highlights the exp shared pets")
+        @ConfigEditorBoolean
+        var showXPSharedPets: Boolean = true
+
+        @Expose
+        @ConfigOption(name = "Favorite Color", desc = "The color of the favorite pets.")
         @ConfigEditorColour
         var petHighlightColor: String = "0:220:255:170:0"
 
         @Expose
-        @ConfigOption(name = "Color", desc = "The color of the active pet.")
+        @ConfigOption(name = "Active Color", desc = "The color of the active pet.")
         @ConfigEditorColour
-        var petActiveColor: String = "0:220:0:255:0" //0, 255, 0, 220
+        var petActiveColor: String = "0:220:0:255:0"
+
+        @Expose
+        @ConfigOption(name = "Exp Shared Color", desc = "The color of the exp shared pets.")
+        @ConfigEditorColour
+        var xpSharedColor: String = "0:255:0:255:255"
     }
 }

@@ -6,9 +6,11 @@ import io.github.frostzie.skyfall.api.feature.FeatureManager
 import io.github.frostzie.skyfall.config.features.chat.ChatConfig
 import io.github.frostzie.skyfall.config.features.dev.DevConfig
 import io.github.frostzie.skyfall.config.features.dungeon.DungeonConfig
+import io.github.frostzie.skyfall.config.features.foraging.ForagingConfig
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.config.features.gui.GuiConfig
 import io.github.frostzie.skyfall.config.features.inventory.InventoryConfig
+import io.github.frostzie.skyfall.config.features.mining.MiningConfig
 import io.github.frostzie.skyfall.config.features.misc.MiscConfig
 import io.github.notenoughupdates.moulconfig.Config
 import io.github.notenoughupdates.moulconfig.Social
@@ -51,8 +53,16 @@ class Features : Config() {
     var dungeon: DungeonConfig = DungeonConfig()
 
     @Expose
+    @Category(name = "Foraging", desc = "Foraging related features")
+    var foraging: ForagingConfig = ForagingConfig()
+
+    @Expose
     @Category(name = "Garden", desc = "Garden related features")
     var garden: GardenConfig = GardenConfig()
+
+    @Expose
+    @Category(name = "Mining", desc = "Mining related features")
+    var mining: MiningConfig = MiningConfig()
 
     @Expose
     @Category(name = "Inventory", desc = "Inventory related features")

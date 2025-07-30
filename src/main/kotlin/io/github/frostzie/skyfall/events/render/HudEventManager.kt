@@ -12,14 +12,14 @@ object HudEventManager {
 
     fun registerFeature(feature: IHudRenderable) {
         if (registeredFeatures.add(feature)) {
-            logger.info("DEBUG: Registered HUD feature: ${feature::class.simpleName}")
+            logger.info(" Registered HUD feature: ${feature::class.simpleName}")
             if (!initialized) initialize()
         }
     }
 
     fun unregisterFeature(feature: IHudRenderable) {
         if (registeredFeatures.remove(feature)) {
-            logger.info("DEBUG: Unregistered HUD feature: ${feature::class.simpleName}")
+            logger.info(" Unregistered HUD feature: ${feature::class.simpleName}")
         }
     }
 

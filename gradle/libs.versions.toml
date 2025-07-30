@@ -1,10 +1,10 @@
 # Taken from Firmament
 [versions]
-version = "Beta 0.2.2"
+version = "Beta 0.2.3"
 minecraft = "1.21.8"
 yarn_mappings="1.21.8+build.1"
 loader_version="0.16.14"
-fabric_version="0.129.0+1.21.8"
+fabric_version="0.130.0+1.21.8"
 kotlin = "2.1.0"
 fabric_kotlin = "1.13.4+kotlin.2.2.0"
 modmenu = "15.0.0-beta.3"

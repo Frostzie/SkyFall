@@ -5,11 +5,11 @@ import io.github.frostzie.skyfall.config.ConfigGuiManager
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.data.RepoManager
-import io.github.frostzie.skyfall.features.FeatureManager
+import io.github.frostzie.skyfall.api.feature.FeatureManager
 import io.github.frostzie.skyfall.hud.HudManager
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.UpdateChecker
-import io.github.frostzie.skyfall.utils.events.TooltipEvents
+import io.github.frostzie.skyfall.events.inventory.TooltipEvents
 import io.github.frostzie.skyfall.utils.item.StackCountRenderer
 import io.github.frostzie.skyfall.utils.processors.ScoreboardProcessor
 import io.github.frostzie.skyfall.utils.processors.TabListProcessor
@@ -32,7 +32,6 @@ class SkyFall : ModInitializer {
 
 		Runtime.getRuntime().addShutdownHook(Thread {
 			configManager.saveConfig("shutdown-hook")
-			FeatureManager.updateFeatureStates()
 		})
 
 		ClientTickEvents.END_CLIENT_TICK.register { client ->

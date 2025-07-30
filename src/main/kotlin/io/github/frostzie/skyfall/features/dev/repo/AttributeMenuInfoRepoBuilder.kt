@@ -8,8 +8,8 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
 import com.mojang.serialization.JsonOps
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
@@ -26,7 +26,7 @@ import java.io.FileReader
 import java.io.FileWriter
 
 @Feature(name = "Attribute Menu Info Repo Builder")
-object AttributeMenuInfoRepoBuilder : IFeature {
+object AttributeMenuInfoRepoBuilder : IEventFeature {
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("AttributeMenuInfoRepoBuilder")
     private val repoFile = File("config/skyfall/AttributeMenuData.json")

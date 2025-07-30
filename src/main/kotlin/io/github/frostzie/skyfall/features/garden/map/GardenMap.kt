@@ -4,11 +4,11 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.config.features.garden.GardenConfig
 import io.github.frostzie.skyfall.data.GardenPlot
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
-import io.github.frostzie.skyfall.hud.FeatureHudElement
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.HudFeature
+import io.github.frostzie.skyfall.hud.HudElement
 import io.github.frostzie.skyfall.hud.HudElementConfig
-import io.github.frostzie.skyfall.hud.HudManager
+import io.github.frostzie.skyfall.impl.minecraft.SkyfallRenderPipelines.Gui.GUI_TEXTURED
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.garden.PestData
@@ -18,15 +18,15 @@ import io.github.frostzie.skyfall.utils.garden.SprayUtils
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.RotationAxis
 import kotlin.math.min
 
 @Feature(name = "Garden Map")
-object GardenMap : IFeature {
+object GardenMap : HudFeature() {
 
-    override var isRunning = false
     private val config get() = SkyFall.feature.garden.gardenMap
 
     private val PLOT_NUMBER_MAP = listOf(
@@ -43,12 +43,25 @@ object GardenMap : IFeature {
     private const val WORLD_SIZE_X = WORLD_MAX_X - WORLD_MIN_X
     private const val WORLD_SIZE_Z = WORLD_MAX_Z - WORLD_MIN_Z
 
+    private const val GRID_COUNT = 5
+    private const val GAP_SIZE = 1
+    private const val PADDING = 3
+    private const val PLAYER_ICON_BASE_SIZE_DIVISOR = 40.0
+    private const val PLAYER_ICON_MIN_SIZE = 2.0
+    private const val PLAYER_ICON_MAX_SIZE = 7.0
+    private const val PLAYER_DOT_SIZE_MULTIPLIER = 4
+    private val PLAYER_ARROW_TEXTURE = Identifier.ofVanilla("textures/map/decorations/player.png")
+
     override fun shouldLoad(): Boolean = config.enabled
+    override val isMovable: Boolean = true
 
-    override fun init() {
-        if (isRunning) return
-        isRunning = true
+    override val elementId: String = "skyfall:garden_map"
+    override val elementName: String = "Garden Map"
+    override val defaultElementConfig = HudElementConfig(x = 10, y = 10, width = 120, height = 145)
+    override val elementMinWidth: Int = 80
+    override val elementMinHeight: Int = 100
 
+    override fun onInit() {
         PestDetector.init()
         VisitorUtils.init()
 
@@ -58,35 +71,11 @@ object GardenMap : IFeature {
             }
             true
         }
-
-        HudManager.registerElement(
-            FeatureHudElement(
-                id = "skyfall:garden_map",
-                name = "Garden Map",
-                defaultConfig = HudElementConfig(x = 10, y = 10, width = 120, height = 145),
-                advancedSizingOverride = false,
-                minWidthOverride = 80,
-                minHeightOverride = 100,
-                renderAction = { drawContext, element ->
-                    renderHud(
-                        drawContext,
-                        element.config.x,
-                        element.config.y,
-                        element.config.width,
-                        element.config.height
-                    )
-                }
-            )
-        )
     }
 
-    override fun terminate() {
-        if (!isRunning) return
-        isRunning = false
-        HudManager.unregisterElement("skyfall:garden_map")
-    }
+    override fun onTerminate() {}
 
-    private fun renderHud(drawContext: DrawContext, x: Int, y: Int, width: Int, height: Int) {
+    override fun onMovableHudRender(drawContext: DrawContext, element: HudElement) {
         val client = MinecraftClient.getInstance()
         if (!IslandDetector.isOnIsland(IslandType.GARDEN) || client.player == null) {
             return
@@ -94,52 +83,36 @@ object GardenMap : IFeature {
 
         val player = client.player!!
         val textRenderer = client.textRenderer
+        val config = element.config // Get current position and size from the element
 
         val pestData = PestDetector.getPestData()
         val visitorData = VisitorUtils.getVisitorData()
-        val backgroundColor = ColorUtils.parseColorString(config.backgroundColor)
-        val headerTextColor = ColorUtils.parseColorString(config.textColor)
+        val backgroundColor = ColorUtils.parseColorString(this.config.backgroundColor)
+        val headerTextColor = ColorUtils.parseColorString(this.config.textColor)
 
-        drawContext.fill(x, y, x + width, y + height, backgroundColor)
+        drawContext.fill(config.x, config.y, config.x + config.width, config.y + config.height, backgroundColor)
 
-        drawContext.fill(x, y, x + width, y + height, backgroundColor)
-
-        val padding = 3
         val textHeight = textRenderer.fontHeight
-        val headerHeight = textHeight
+        val headerHeight = textHeight * 2 + PADDING // Correctly calculate height for two lines
 
         val pestText = "§lPests: ${pestData.totalAlive}"
         val visitorText = "§lVisitors: ${visitorData.count}"
 
-        drawContext.drawText(textRenderer, pestText, x + padding, y + padding, headerTextColor, false)
-        drawContext.drawText(textRenderer, visitorText, x + padding, y + padding + textHeight, headerTextColor, false)
+        drawContext.drawText(textRenderer, pestText, config.x + PADDING, config.y + PADDING, headerTextColor, false)
+        drawContext.drawText(textRenderer, visitorText, config.x + PADDING, config.y + PADDING + textHeight, headerTextColor, false)
 
-        val gridAvailableWidth = width - (padding + 2)
-        val gridAvailableHeight = height - headerHeight - padding
+        val gridAvailableWidth = config.width - (PADDING * 2)
+        val gridAvailableHeight = config.height - headerHeight - (PADDING * 2)
         val gridContentSize = min(gridAvailableWidth, gridAvailableHeight)
-        if (gridContentSize < 20) return
+        if (gridContentSize < 20) return // Don't render if too small
 
-        val gridStartX = x + padding + (gridAvailableWidth - gridContentSize) / 2
-        val gridStartY = y + height - padding - gridContentSize
-        val gridCount = 5
-        val gapSize = 1
-        val smallBoxSize = (gridContentSize - (gapSize * (gridCount - 1))) / gridCount
-
-        val sprayedPlots: List<GardenPlot> = SprayUtils.getSprayedPlots()
+        val gridStartX = config.x + PADDING + (gridAvailableWidth - gridContentSize) / 2
+        val gridStartY = config.y + config.height - PADDING - gridContentSize
+        val smallBoxSize = (gridContentSize - (GAP_SIZE * (GRID_COUNT - 1))) / GRID_COUNT
 
         if (smallBoxSize > 0) {
-            renderGrid(
-                drawContext,
-                gridStartX,
-                gridStartY,
-                smallBoxSize,
-                gapSize,
-                gridCount,
-                pestData,
-                sprayedPlots,
-                textRenderer
-            )
-            drawPlayerLocation(drawContext, player.x, player.z, gridStartX, gridStartY, gridContentSize, gridContentSize)
+            renderGrid(drawContext, gridStartX, gridStartY, smallBoxSize, pestData, textRenderer)
+            drawPlayerLocation(drawContext, player, gridStartX, gridStartY, gridContentSize)
         }
     }
 
@@ -148,35 +121,35 @@ object GardenMap : IFeature {
         gridStartX: Int,
         gridStartY: Int,
         smallBoxSize: Int,
-        gapSize: Int,
-        gridCount: Int,
         pestData: PestData,
-        sprayedPlots: List<GardenPlot>,
         textRenderer: TextRenderer
     ) {
+        val sprayedPlots: List<GardenPlot> = SprayUtils.getSprayedPlots()
         val sprayedColor = ColorUtils.parseColorString(config.sprayColor)
         val pestColor = ColorUtils.parseColorString(config.pestColor)
         val defaultColor = ColorUtils.parseColorString(config.defaultPlotColor)
 
-        for (row in 0 until gridCount) {
-            for (col in 0 until gridCount) {
-                val x = gridStartX + col * (smallBoxSize + gapSize)
-                val y = gridStartY + row * (smallBoxSize + gapSize)
+        for (row in 0 until GRID_COUNT) {
+            for (col in 0 until GRID_COUNT) {
+                val x = gridStartX + col * (smallBoxSize + GAP_SIZE)
+                val y = gridStartY + row * (smallBoxSize + GAP_SIZE)
                 val plotNumber = PLOT_NUMBER_MAP[row][col]
                 val hasPest = pestData.infestedPlots.contains(plotNumber)
                 val isSprayed = sprayedPlots.any { it.id == plotNumber }
 
-                if (isSprayed) {
-                    if (hasPest) {
-                        val halfHeight = smallBoxSize / 2
-                        drawContext.fill(x, y, x + smallBoxSize, y + halfHeight, sprayedColor)
-                        drawContext.fill(x, y + halfHeight, x + smallBoxSize, y + smallBoxSize, pestColor)
-                    } else {
-                        drawContext.fill(x, y, x + smallBoxSize, y + smallBoxSize, sprayedColor)
-                    }
-                } else {
-                    val boxColor = if (hasPest) pestColor else defaultColor
+                val boxColor = when {
+                    isSprayed && hasPest -> null // Special case for split color
+                    isSprayed -> sprayedColor
+                    hasPest -> pestColor
+                    else -> defaultColor
+                }
+
+                if (boxColor != null) {
                     drawContext.fill(x, y, x + smallBoxSize, y + smallBoxSize, boxColor)
+                } else {
+                    val halfHeight = smallBoxSize / 2
+                    drawContext.fill(x, y, x + smallBoxSize, y + halfHeight, sprayedColor)
+                    drawContext.fill(x, y + halfHeight, x + smallBoxSize, y + smallBoxSize, pestColor)
                 }
 
                 if (plotNumber > 0) {
@@ -196,58 +169,57 @@ object GardenMap : IFeature {
     ) {
         if (smallBoxSize < 12) return
         val numberText = "$plotNumber"
-        val plottextColor = ColorUtils.parseColorString(config.plotTextColor)
+        val plotTextColor = ColorUtils.parseColorString(config.plotTextColor)
         val textWidth = textRenderer.getWidth(numberText)
         val textX = x + smallBoxSize - textWidth - 2
         val textY = y + smallBoxSize - textRenderer.fontHeight - 2
-        drawContext.drawText(textRenderer, numberText, textX, textY, plottextColor, false)
+        drawContext.drawText(textRenderer, numberText, textX, textY, plotTextColor, false)
     }
 
     private fun drawPlayerLocation(
         drawContext: DrawContext,
-        playerX: Double,
-        playerZ: Double,
+        player: ClientPlayerEntity,
         mapStartX: Int,
         mapStartY: Int,
-        mapWidth: Int,
-        mapHeight: Int
+        mapSize: Int
     ) {
         val client = MinecraftClient.getInstance()
-        val clampedX = playerX.coerceIn(WORLD_MIN_X, WORLD_MAX_X)
-        val clampedZ = playerZ.coerceIn(WORLD_MIN_Z, WORLD_MAX_Z)
+        val clampedX = player.x.coerceIn(WORLD_MIN_X, WORLD_MAX_X)
+        val clampedZ = player.z.coerceIn(WORLD_MIN_Z, WORLD_MAX_Z)
         val normalizedX = (clampedX - WORLD_MIN_X) / WORLD_SIZE_X
         val normalizedZ = (clampedZ - WORLD_MIN_Z) / WORLD_SIZE_Z
-        val pixelX = mapStartX + (normalizedX * mapWidth).toInt()
-        val pixelZ = mapStartY + (normalizedZ * mapHeight).toInt()
-        val baseSize = (mapWidth / 40.0).coerceIn(2.0, 7.0)
-        val dotSize = (baseSize * 4).toInt()
+        val pixelX = mapStartX + (normalizedX * mapSize).toInt()
+        val pixelZ = mapStartY + (normalizedZ * mapSize).toInt()
+
+        val baseSize = (mapSize / PLAYER_ICON_BASE_SIZE_DIVISOR).coerceIn(PLAYER_ICON_MIN_SIZE, PLAYER_ICON_MAX_SIZE)
+        val iconSize = (baseSize * PLAYER_DOT_SIZE_MULTIPLIER).toInt()
 
         if (config.playerIconType == GardenConfig.GardenMapConfig.PlayerIcon.ARROW) {
-            val texture = Identifier.ofVanilla("textures/map/decorations/player.png")
-            drawContext.matrices.pushMatrix()
-            drawContext.matrices.translate(pixelX.toFloat(), pixelZ.toFloat())
-            drawContext.matrices.rotate(kotlin.math.PI.toFloat() * (client.player!!.yaw - 360) / 180.0f)
-            drawContext.matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat())
+            val matrices = drawContext.matrices
+            matrices.pushMatrix()
+            matrices.translate(pixelX.toFloat(), pixelZ.toFloat())
+            matrices.rotate(kotlin.math.PI.toFloat() * (client.player!!.yaw - 360) / 180.0f)
+            matrices.translate(-pixelX.toFloat(), -pixelZ.toFloat())
             drawContext.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
-                texture,
-                (pixelX - dotSize / 2),
-                (pixelZ - dotSize / 2),
+                GUI_TEXTURED,
+                PLAYER_ARROW_TEXTURE,
+                (pixelX - iconSize / 2),
+                (pixelZ - iconSize / 2),
                 0.0f,
                 0.0f,
-                dotSize,
-                dotSize,
-                dotSize,
-                -dotSize
+                iconSize,
+                iconSize,
+                iconSize,
+                -iconSize
             )
             drawContext.matrices.popMatrix()
         } else {
             val playerColor = ColorUtils.parseColorString(config.playerIconColor)
             drawContext.fill(
-                (pixelX - dotSize / 4),
-                (pixelZ - dotSize / 4),
-                (pixelX + dotSize / 4) + 1,
-                (pixelZ + dotSize / 4) + 1,
+                (pixelX - iconSize / 4),
+                (pixelZ - iconSize / 4),
+                (pixelX + iconSize / 4) + 1,
+                (pixelZ + iconSize / 4) + 1,
                 playerColor
             )
         }

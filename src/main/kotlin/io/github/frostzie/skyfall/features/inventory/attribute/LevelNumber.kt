@@ -1,8 +1,8 @@
 package io.github.frostzie.skyfall.features.inventory.attribute
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.item.StackCountRenderer
@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.slot.Slot
 
 @Feature(name = "Attribute Level Number")
-object LevelNumber : IFeature {
+object LevelNumber : IEventFeature {
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("LevelNumber")
     private val config get() = SkyFall.feature.inventory.attributeMenu

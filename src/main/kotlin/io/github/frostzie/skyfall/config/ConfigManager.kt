@@ -2,7 +2,7 @@ package io.github.frostzie.skyfall.config
 
 import com.google.gson.GsonBuilder
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.FeatureManager
+import io.github.frostzie.skyfall.api.feature.FeatureManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.utils.SimpleTimeMark
 import io.github.notenoughupdates.moulconfig.observer.PropertyTypeAdapterFactory
@@ -71,7 +71,7 @@ object ConfigManager {
         fixedRateTimer(name = "skyfall-config-auto-save", period = 60_000L, initialDelay = 60_000L) {
             try {
                 saveConfig("auto-save-60s")
-                logger.debug("60s Config Save.")
+                logger.info("DEBUG: 60s Config Save.")
             } catch (e: Throwable) {
                 logger.error("Error auto-saving config!", e)
             }
@@ -94,7 +94,6 @@ object ConfigManager {
                 StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.ATOMIC_MOVE
             )
-            FeatureManager.updateFeatureStates()
         } catch (e: IOException) {
             logger.error("Couldn't save config file to $file", e)
         }

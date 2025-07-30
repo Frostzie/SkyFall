@@ -94,7 +94,6 @@ object ConfigManager {
                 StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.ATOMIC_MOVE
             )
-            FeatureManager.updateFeatureStates()
         } catch (e: IOException) {
             logger.error("Couldn't save config file to $file", e)
         }

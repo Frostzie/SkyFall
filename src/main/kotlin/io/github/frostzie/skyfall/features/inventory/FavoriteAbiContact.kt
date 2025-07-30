@@ -214,7 +214,7 @@ object FavoriteAbiContact : IEventFeature {
 
     private fun isAbiPhoneContacts(screen: HandledScreen<*>): Boolean {
         val title = screen.title.string
-        return title.contains("Abiphone")
+        return title.contains("Abiphone") && !title.contains("Miscellaneous ➜ Abiphone")
     }
 
     fun isSlotInChestInventory(slot: Slot): Boolean {

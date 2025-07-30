@@ -73,14 +73,14 @@ abstract class HudFeature : IFeature, IHudRenderable {
     final override fun init() {
         if (isRunning) return
 
-        logger.info("DEBUG: Initializing HudFeature: ${this::class.simpleName}")
+        logger.info(" Initializing HudFeature: ${this::class.simpleName}")
 
         FabricEventBridge.initialize()
         HudEventManager.ensureInitialized()
         HudEventManager.registerFeature(this)
 
         isRunning = true
-        logger.info("DEBUG: HudFeature ${this::class.simpleName} initialization complete")
+        logger.info(" HudFeature ${this::class.simpleName} initialization complete")
 
         onInit()
     }
@@ -88,7 +88,7 @@ abstract class HudFeature : IFeature, IHudRenderable {
     final override fun terminate() {
         if (!isRunning) return
 
-        logger.info("DEBUG: Terminating HudFeature: ${this::class.simpleName}")
+        logger.info(" Terminating HudFeature: ${this::class.simpleName}")
 
         HudEventManager.unregisterFeature(this)
         isRunning = false

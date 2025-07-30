@@ -11,16 +11,16 @@ object HudEventManager {
     private var initialized = false
 
     fun registerFeature(feature: IHudRenderable) {
-        logger.info("DEBUG: Attempting to register HUD feature: ${feature::class.simpleName}")
+        logger.info(" Attempting to register HUD feature: ${feature::class.simpleName}")
 
         if (!initialized) {
-            logger.info("DEBUG: HUD system not initialized, initializing now...")
+            logger.info(" HUD system not initialized, initializing now...")
             initialize()
         }
 
         if (registeredFeatures.add(feature)) {
-            logger.info("DEBUG: Successfully registered HUD feature: ${feature::class.simpleName}")
-            logger.info("DEBUG: Total HUD features registered: ${registeredFeatures.size}")
+            logger.info(" Successfully registered HUD feature: ${feature::class.simpleName}")
+            logger.info(" Total HUD features registered: ${registeredFeatures.size}")
         } else {
             logger.warn("DEBUG: HUD feature ${feature::class.simpleName} was already registered")
         }
@@ -28,8 +28,8 @@ object HudEventManager {
 
     fun unregisterFeature(feature: IHudRenderable) {
         if (registeredFeatures.remove(feature)) {
-            logger.info("DEBUG: Unregistered HUD feature: ${feature::class.simpleName}")
-            logger.info("DEBUG: Remaining HUD features: ${registeredFeatures.size}")
+            logger.info(" Unregistered HUD feature: ${feature::class.simpleName}")
+            logger.info(" Remaining HUD features: ${registeredFeatures.size}")
         }
     }
 
@@ -39,7 +39,7 @@ object HudEventManager {
             return
         }
 
-        logger.info("DEBUG: Initializing HUD event system...")
+        logger.info(" Initializing HUD event system...")
 
         try {
             EventBus.listen(HudRenderEvent.Pre::class.java) { event ->
@@ -102,7 +102,7 @@ object HudEventManager {
             }
 
             initialized = true
-            logger.info("DEBUG: HUD event system successfully initialized")
+            logger.info(" HUD event system successfully initialized")
         } catch (e: Exception) {
             logger.error("Failed to initialize HUD event system", e)
             throw e
@@ -115,7 +115,7 @@ object HudEventManager {
      */
     fun ensureInitialized() {
         if (!initialized) {
-            logger.info("DEBUG: Force initializing HUD event system...")
+            logger.info(" Force initializing HUD event system...")
             initialize()
         }
     }

@@ -71,7 +71,7 @@ object ConfigManager {
         fixedRateTimer(name = "skyfall-config-auto-save", period = 60_000L, initialDelay = 60_000L) {
             try {
                 saveConfig("auto-save-60s")
-                logger.info("DEBUG: 60s Config Save.")
+                logger.info(" 60s Config Save.")
             } catch (e: Throwable) {
                 logger.error("Error auto-saving config!", e)
             }

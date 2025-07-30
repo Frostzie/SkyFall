@@ -19,14 +19,14 @@ object SlotEventManager {
 
         if (feature is ISlotRenderable) {
             if (renderableFeatures.add(feature)) {
-                logger.info("DEBUG: Registered slot renderable feature: ${feature::class.simpleName}")
+                logger.info(" Registered slot renderable feature: ${feature::class.simpleName}")
                 registered = true
             }
         }
 
         if (feature is ISlotInteractable) {
             if (interactableFeatures.add(feature)) {
-                logger.info("DEBUG: Registered slot interactable feature: ${feature::class.simpleName}")
+                logger.info(" Registered slot interactable feature: ${feature::class.simpleName}")
                 registered = true
             }
         }
@@ -39,14 +39,14 @@ object SlotEventManager {
 
         if (feature is ISlotRenderable) {
             if (renderableFeatures.remove(feature)) {
-                logger.info("DEBUG: Unregistered slot renderable feature: ${feature::class.simpleName}")
+                logger.info(" Unregistered slot renderable feature: ${feature::class.simpleName}")
                 unregistered = true
             }
         }
 
         if (feature is ISlotInteractable) {
             if (interactableFeatures.remove(feature)) {
-                logger.info("DEBUG: Unregistered slot interactable feature: ${feature::class.simpleName}")
+                logger.info(" Unregistered slot interactable feature: ${feature::class.simpleName}")
                 unregistered = true
             }
         }

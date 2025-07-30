@@ -1,7 +1,6 @@
 package io.github.frostzie.skyfall.config.features.garden
 
 import com.google.gson.annotations.Expose
-import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour

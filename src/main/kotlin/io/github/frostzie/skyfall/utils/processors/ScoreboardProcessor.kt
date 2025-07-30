@@ -1,9 +1,13 @@
 package io.github.frostzie.skyfall.utils.processors
 
 import io.github.frostzie.skyfall.data.IslandType
+import io.github.frostzie.skyfall.events.IslandChangeEvent
+import io.github.frostzie.skyfall.events.RiftStateEvent
+import io.github.frostzie.skyfall.events.ScoreboardUpdateEvent
+import io.github.frostzie.skyfall.events.SkyblockStateEvent
+import io.github.frostzie.skyfall.events.SlayerQuestEvent
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.*
 import net.minecraft.client.MinecraftClient
 import net.minecraft.scoreboard.ScoreboardDisplaySlot
 

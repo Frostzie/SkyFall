@@ -1,6 +1,7 @@
-package io.github.frostzie.skyfall.utils.events
+package io.github.frostzie.skyfall.events
 //TODO: change name
 import io.github.frostzie.skyfall.data.IslandType
+import io.github.frostzie.skyfall.events.core.Event
 
 /**
  * Event fired when scoreboard data changes

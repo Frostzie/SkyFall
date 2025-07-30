@@ -3,7 +3,7 @@ package io.github.frostzie.skyfall.utils.processors
 import io.github.frostzie.skyfall.mixin.accessor.TabListAccessor
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.TabListUpdateEvent
+import io.github.frostzie.skyfall.events.TabListUpdateEvent
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.PlayerListEntry
 import java.util.concurrent.ConcurrentHashMap

@@ -2,18 +2,23 @@ package io.github.frostzie.skyfall.features.garden
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.data.IslandType
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
+import io.github.frostzie.skyfall.hud.FeatureHudElement
+import io.github.frostzie.skyfall.hud.HudElementConfig
+import io.github.frostzie.skyfall.hud.HudManager
 import io.github.frostzie.skyfall.mixin.accessor.MouseAccessor
 import io.github.frostzie.skyfall.utils.ChatUtils
 import io.github.frostzie.skyfall.utils.IslandDetector
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.DrawContext
 import org.lwjgl.glfw.GLFW
 
 @Feature(name = "Mouse Sensitivity Lock")
-object MouseSensitivity : IFeature {
+object MouseSensitivity : IEventFeature {
 
     override var isRunning = false
     var isLockActive: Boolean = false
@@ -23,6 +28,7 @@ object MouseSensitivity : IFeature {
     private var mouseHookWasEffectiveLastTick: Boolean = false
     private val toggleKeyCode: Int
         get() = SkyFall.feature.garden.mouseSensitivity.mouseSensitivity
+    private val config get() = SkyFall.feature.garden.mouseSensitivity
 
     override fun shouldLoad(): Boolean {
         return SkyFall.feature.garden.mouseSensitivity.mouseSensitivity != GLFW.GLFW_KEY_UNKNOWN
@@ -40,6 +46,27 @@ object MouseSensitivity : IFeature {
     override fun init() {
         if (isRunning) return
         isRunning = true
+
+        HudManager.registerElement(
+            FeatureHudElement(
+                id = "skyfall:mouse_sensitivity_lock",
+                name = "Mouse Lock Status",
+                defaultConfig = HudElementConfig(x = 440, y = 225, width = 90, height = 25),
+                advancedSizingOverride = false,
+                minWidthOverride = 80,
+                minHeightOverride = 20,
+                renderAction = { drawContext, element ->
+                    renderHud(
+                        drawContext,
+                        element.config.x,
+                        element.config.y,
+                        element.config.width,
+                        element.config.height
+                    )
+                }
+            )
+        )
+
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client ->
             if (client.player == null) {
                 if (isLockActive) {
@@ -86,12 +113,32 @@ object MouseSensitivity : IFeature {
             }
             mouseHookWasEffectiveLastTick = mouseHookIsEffectiveThisTick
         })
+
+        ClientSendMessageEvents.COMMAND.register(::handleSentCommand)
     }
 
     override fun terminate() {
         isRunning = false
         isLockActive = false
         restoreMouseSensitivityOption(MinecraftClient.getInstance())
+        HudManager.unregisterElement("skyfall:mouse_sensitivity_lock")
+    }
+
+    private fun renderHud(drawContext: DrawContext, x: Int, y: Int, width: Int, height: Int) {
+        val client = MinecraftClient.getInstance()
+
+        if (!isLockActive || client.player == null || !isFeatureConditionallyActive() || !config.showHud) {
+            return
+        }
+
+        val textRenderer = client.textRenderer
+        val statusText = "§lMouse: §cDisabled"
+
+        val textWidth = textRenderer.getWidth(statusText)
+        val textX = x + (width - textWidth) / 2
+        val textY = y + (height - textRenderer.fontHeight) / 2
+
+        drawContext.drawTextWithShadow(textRenderer, statusText, textX, textY, 0xFFFFFFFF.toInt())
     }
 
     private fun disableMouseMovementEffect(client: MinecraftClient) {
@@ -135,5 +182,19 @@ object MouseSensitivity : IFeature {
     fun shouldCancelMouseMovement(): Boolean {
         val client = MinecraftClient.getInstance() ?: return false
         return isLockActive && client.currentScreen == null && isFeatureConditionallyActive()
+    }
+
+    private val plotWarpCommands = listOf("plottp", "plotteleport")
+
+    private fun handleSentCommand(command: String) {
+        if (!isLockActive || !config.disableOnWarp) {
+            return
+        }
+
+        val lowerCaseCommand = command.lowercase()
+        if (plotWarpCommands.any { lowerCaseCommand.startsWith(it) }) {
+            isLockActive = false
+            ChatUtils.messageToChat("Mouse Lock §cDisabled! §r(Plot warp)").send()
+        }
     }
 }

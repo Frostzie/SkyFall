@@ -3,14 +3,14 @@ package io.github.frostzie.skyfall.features.inventory
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.features.Feature
-import io.github.frostzie.skyfall.features.IFeature
+import io.github.frostzie.skyfall.api.feature.Feature
+import io.github.frostzie.skyfall.api.feature.IEventFeature
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.KeyboardManager
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.SlotClickEvent
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvent
-import io.github.frostzie.skyfall.utils.events.SlotRenderEvents
+import io.github.frostzie.skyfall.events.inventory.SlotClickEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvent
+import io.github.frostzie.skyfall.events.inventory.SlotRenderEvents
 import io.github.frostzie.skyfall.utils.item.ItemUtils
 import io.github.frostzie.skyfall.utils.item.PetUtils
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -25,19 +25,18 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
-import java.awt.Color
 import java.io.File
-import java.io.FileReader
 import java.io.FileWriter
 
 @Feature(name = "Favorite Pets")
-object FavoritePet : IFeature {
+object FavoritePet : IEventFeature {
 
     override var isRunning = false
     private val logger = LoggerProvider.getLogger("FavoritePet")
     private val configFile = File("config/skyfall/favorite-pets.json")
     private val gson = GsonBuilder().setPrettyPrinting().create()
-    private var highlightedItems = mutableListOf<String>()
+    private var highlightedItems = mutableSetOf<String>()
+    private var expSharedPets = mutableSetOf<String>()
     private var favoredOnlyToggle = true
     private var currentScreen: HandledScreen<*>? = null
 
@@ -50,6 +49,7 @@ object FavoritePet : IFeature {
 
     private val FAVORITE_COLOR get() = ColorUtils.parseColorString(SkyFall.feature.inventory.petMenu.petHighlightColor)
     private val ACTIVE_PET_COLOR get() = ColorUtils.parseColorString(SkyFall.feature.inventory.petMenu.petActiveColor)
+    private val XP_SHARED_COLOR get() = ColorUtils.parseColorString(SkyFall.feature.inventory.petMenu.xpSharedColor) // New color property
 
     init {
         loadConfig()
@@ -60,7 +60,7 @@ object FavoritePet : IFeature {
 
     override fun shouldLoad(): Boolean {
         val config = SkyFall.feature.inventory.petMenu
-        return config.favoriteKey != GLFW.GLFW_KEY_UNKNOWN || config.activePet
+        return config.favoriteKey != GLFW.GLFW_KEY_UNKNOWN || config.activePet || config.showXPSharedPets
     }
 
     override fun init() {
@@ -121,6 +121,12 @@ object FavoritePet : IFeature {
             }
 
             val screen = client.currentScreen
+            val config = SkyFall.feature.inventory.petMenu
+
+            if (config.showXPSharedPets && screen is HandledScreen<*> && isExpShareMenu(screen)) {
+                updateExpSharedPets(screen)
+            }
+
             if (screen is HandledScreen<*> && isPetMenu(screen)) {
                 if (currentScreen != screen) {
                     currentScreen = screen
@@ -129,8 +135,8 @@ object FavoritePet : IFeature {
                 handleKeyPress(screen)
             } else {
                 if (currentScreen != null) {
-                    currentScreen = null
                     removeToggleButton()
+                    currentScreen = null
                 }
             }
         }
@@ -251,17 +257,47 @@ object FavoritePet : IFeature {
         }
     }
 
-    private fun getPetHighlightColor(itemStack: ItemStack, isFavorite: Boolean): Int? {
+    private fun isExpShareMenu(screen: HandledScreen<*>): Boolean {
+        return screen.title.string == "Exp Sharing"
+    }
+
+    private fun updateExpSharedPets(screen: HandledScreen<*>) {
+        val expShareSlots = setOf(30, 31, 32)
+        val currentExpPets = mutableSetOf<String>()
+
+        for (slotIndex in expShareSlots) {
+            if (slotIndex >= screen.screenHandler.slots.size) continue
+
+            val slot = screen.screenHandler.getSlot(slotIndex)
+            if (!slot.stack.isEmpty) {
+                ItemUtils.getUuid(slot.stack)?.let { uuid ->
+                    currentExpPets.add(uuid)
+                }
+            }
+        }
+
+        if (expSharedPets != currentExpPets) {
+            expSharedPets = currentExpPets
+            saveConfig()
+        }
+    }
+
+    private fun getPetHighlightColor(itemStack: ItemStack, isFavorite: Boolean, isExpShared: Boolean): Int? {
         if (!PetUtils.isPet(itemStack)) {
             return null
         }
-        val activePetConfig = SkyFall.feature.inventory.petMenu.activePet
-        if (activePetConfig && PetUtils.isActivePet(itemStack)) {
+        val config = SkyFall.feature.inventory.petMenu
+
+        if (config.activePet && PetUtils.isActivePet(itemStack)) {
             return ACTIVE_PET_COLOR
         }
 
         if (isFavorite) {
             return FAVORITE_COLOR
+        }
+
+        if (config.showXPSharedPets && isExpShared) {
+            return XP_SHARED_COLOR
         }
 
         return null
@@ -287,30 +323,46 @@ object FavoritePet : IFeature {
 
         val itemUuid = ItemUtils.getUuid(slot.stack)
         val isFavorite = canShowFavorite && itemUuid != null && highlightedItems.contains(itemUuid)
+        val isExpShared = itemUuid != null && expSharedPets.contains(itemUuid)
 
-        val highlightColor = getPetHighlightColor(slot.stack, isFavorite)
+        val highlightColor = getPetHighlightColor(slot.stack, isFavorite, isExpShared)
         if (highlightColor != null) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColor)
         }
     }
 
     private fun loadConfig() {
-        if (!configFile.exists()) {
-            configFile.parentFile.mkdirs()
+        configFile.parentFile.mkdirs()
+        if (!configFile.exists() || configFile.length() == 0L) {
             return
         }
 
         try {
-            FileReader(configFile).use { reader ->
+            val jsonString = configFile.readText()
+            val trimmedJson = jsonString.trim()
+
+            if (trimmedJson.startsWith("{")) {
                 val type = object : TypeToken<Map<String, Any>>() {}.type
-                val configData: Map<String, Any> = gson.fromJson(reader, type) ?: emptyMap()
-                highlightedItems = (configData["highlightedItems"] as? List<*>)?.filterIsInstance<String>()?.toMutableList() ?: mutableListOf()
+                val configData: Map<String, Any> = gson.fromJson(trimmedJson, type) ?: emptyMap()
+                highlightedItems = (configData["highlightedItems"] as? List<*>)?.filterIsInstance<String>()?.toMutableSet() ?: mutableSetOf()
+                expSharedPets = (configData["expSharedPets"] as? List<*>)?.filterIsInstance<String>()?.toMutableSet() ?: mutableSetOf()
                 favoredOnlyToggle = configData["favoredOnlyToggle"] as? Boolean ?: true
+            } else if (trimmedJson.startsWith("[")) {
+                logger.info("Old favorite pets config format detected. Migrating...")
+                val listType = object : TypeToken<List<String>>() {}.type
+                val oldFavorites: List<String> = gson.fromJson(trimmedJson, listType) ?: emptyList()
+
+                highlightedItems = oldFavorites.toMutableSet()
+                expSharedPets = mutableSetOf()
+                favoredOnlyToggle = true
+
+                saveConfig()
+                logger.info("Successfully migrated favorite pets config to new format.")
+            } else {
+                logger.warn("Unknown config format in favorite-pets.json. Resetting.")
             }
         } catch (e: Exception) {
-            logger.error("Failed to load favorite pets config: ${e.message}", e)
-            highlightedItems = mutableListOf()
-            favoredOnlyToggle = true
+            logger.error("Failed to load favorite pets config. File may be corrupt. Resetting. Error: ${e.message}", e)
         }
     }
 
@@ -319,6 +371,7 @@ object FavoritePet : IFeature {
             configFile.parentFile.mkdirs()
             val configData = mapOf(
                 "highlightedItems" to highlightedItems,
+                "expSharedPets" to expSharedPets,
                 "favoredOnlyToggle" to favoredOnlyToggle
             )
             FileWriter(configFile).use { writer ->

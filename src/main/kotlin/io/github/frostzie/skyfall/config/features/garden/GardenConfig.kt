@@ -1,7 +1,6 @@
 package io.github.frostzie.skyfall.config.features.garden
 
 import com.google.gson.annotations.Expose
-import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
@@ -24,9 +23,19 @@ class GardenConfig {
         var mouseSensitivity = GLFW.GLFW_KEY_UNKNOWN
 
         @Expose
+        @ConfigOption(name = "Show on Screen", desc = "Shows if the mouse is disabled.")
+        @ConfigEditorBoolean
+        var showHud = false
+
+        @Expose
         @ConfigOption(name = "On Garden", desc = "Only works on the garden island")
         @ConfigEditorBoolean
         var onGarden = true
+
+        @Expose
+        @ConfigOption(name = "Disable on Warp", desc = "Only works on the garden island §eDoesn't disable when warping to garden spawn!")
+        @ConfigEditorBoolean
+        var disableOnWarp = true
     }
 
     @Expose

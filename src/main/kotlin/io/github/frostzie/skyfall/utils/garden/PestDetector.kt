@@ -3,9 +3,9 @@ package io.github.frostzie.skyfall.utils.garden
 import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.utils.ColorUtils
 import io.github.frostzie.skyfall.utils.LoggerProvider
-import io.github.frostzie.skyfall.utils.events.EventBus
-import io.github.frostzie.skyfall.utils.events.IslandChangeEvent
-import io.github.frostzie.skyfall.utils.events.TabListUpdateEvent
+import io.github.frostzie.skyfall.events.core.EventBus
+import io.github.frostzie.skyfall.events.IslandChangeEvent
+import io.github.frostzie.skyfall.events.TabListUpdateEvent
 
 /**
  * A simple data class to hold pest information derived only from the tab list.

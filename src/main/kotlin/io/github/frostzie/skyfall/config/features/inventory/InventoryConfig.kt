@@ -10,6 +10,7 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import org.lwjgl.glfw.GLFW
 
 class InventoryConfig {
+    //TODO: add a way to change the color of the highlight
     //TODO: remove green glass pane in Power Stone menu
     @Expose
     @Accordion

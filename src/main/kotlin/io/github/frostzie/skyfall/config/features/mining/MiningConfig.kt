@@ -8,12 +8,12 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 class MiningConfig {
 
     @Expose
-    @ConfigOption(name = "", desc = "")
-    @ConfigEditorInfoText(infoTitle = "§fMiddle Click the perk to add it to the HUD!")
+    @ConfigOption(name = "Info", desc = "§fMiddle Click the perk to add it to the HUD!")
+    @ConfigEditorInfoText(infoTitle = "")
     var infoText: String = ""
 
     @Expose
-    @ConfigOption(name = "Whisper HUD", desc = "Shows amount of power needed to level up a HOTM perk.")
+    @ConfigOption(name = "Powder HUD", desc = "Shows amount of power needed to level up a HOTM perk.")
     @ConfigEditorBoolean
     var neededPowderHud: Boolean = true
 

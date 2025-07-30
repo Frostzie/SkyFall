@@ -8,8 +8,8 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 class ForagingConfig {
 
     @Expose
-    @ConfigOption(name = "", desc = "")
-    @ConfigEditorInfoText(infoTitle = "§fMiddle Click the perk to add it to the HUD!")
+    @ConfigOption(name = "Info", desc = "§fMiddle Click the perk to add it to the HUD!")
+    @ConfigEditorInfoText(infoTitle = "")
     var infoText: String = ""
 
     @Expose

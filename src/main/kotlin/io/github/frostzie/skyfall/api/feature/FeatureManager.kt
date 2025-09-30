@@ -1,4 +1,3 @@
-// FeatureManager.kt - Enhanced to work with both old and new systems
 package io.github.frostzie.skyfall.api.feature
 
 import io.github.frostzie.skyfall.utils.LoggerProvider
@@ -21,11 +20,11 @@ object FeatureManager {
             try {
                 val reflections = Reflections("io.github.frostzie.skyfall.features")
                 val featureClasses = reflections.getTypesAnnotatedWith(Feature::class.java)
-                logger.info(" Found ${featureClasses.size} potential features.")
+                logger.debug(" Found ${featureClasses.size} potential features.")
 
                 if (featureClasses.isNotEmpty()) {
                     val classNames = featureClasses.joinToString(separator = ", ") { it.simpleName }
-                    logger.info(" Discovered features: [$classNames]")
+                    logger.debug(" Discovered features: [$classNames]")
                 }
 
                 for (featureClass in featureClasses) {
@@ -51,7 +50,7 @@ object FeatureManager {
                                 }
                             }
 
-                            logger.info(" Feature '${annotation.name}' type: [${capabilities.joinToString()}]")
+                            logger.debug(" Feature '${annotation.name}' type: [${capabilities.joinToString()}]")
                         } else {
                             logger.warn("Class ${featureClass.simpleName} is annotated with @Feature but does not implement IFeature.")
                         }
@@ -72,7 +71,7 @@ object FeatureManager {
      * Updates all discovered features - both new event system and legacy features
      */
     fun updateFeatureStates() {
-        logger.info(" Updating feature states...")
+        logger.debug(" Updating feature states...")
         if (discoveredFeatures.isEmpty()) {
             logger.warn("No features were discovered. Cannot update states. Was initialize() called?")
             return
@@ -84,10 +83,10 @@ object FeatureManager {
                 val isActuallyRunning = feature.isRunning
 
                 if (shouldBeRunning && !isActuallyRunning) {
-                    logger.info(" -> Starting feature: '$featureName'")
+                    logger.debug(" -> Starting feature: '$featureName'")
                     feature.init() // This handles registration automatically based on feature type
                 } else if (!shouldBeRunning && isActuallyRunning) {
-                    logger.info(" -> Stopping feature: '$featureName'")
+                    logger.debug(" -> Stopping feature: '$featureName'")
                     feature.terminate() // This handles unregistration automatically
                 }
             } catch (e: Exception) {
@@ -96,7 +95,7 @@ object FeatureManager {
         }
 
         logActiveFeatures()
-        logger.info(" Finished updating feature states.")
+        logger.debug(" Finished updating feature states.")
     }
 
     private fun logActiveFeatures() {
@@ -114,11 +113,11 @@ object FeatureManager {
 
         activeFeatures.forEach { (type, features) ->
             val names = features.joinToString(", ") { (_, name) -> name }
-            logger.info(" Active $type features: [$names]")
+            logger.debug(" Active $type features: [$names]")
         }
 
         if (activeFeatures.isEmpty()) {
-            logger.info(" No features are currently enabled.")
+            logger.debug(" No features are currently enabled.")
         }
     }
 

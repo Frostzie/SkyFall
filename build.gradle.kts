@@ -28,7 +28,7 @@ dependencies {
     mappings(libs.yarn)
     modCompileOnly(libs.fabric.api)
     implementation(libs.gson)
-    modImplementation(libs.modmenu)
+    //modImplementation(libs.modmenu) //TODO: add when modmenu is available
     modImplementation(libs.moulconfig)
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.kotlin)

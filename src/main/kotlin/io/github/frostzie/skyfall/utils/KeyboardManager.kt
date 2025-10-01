@@ -29,14 +29,16 @@ object KeyboardManager {
     fun InputUtil.Key.isPressed(): Boolean {
         return try {
             val minecraft = MinecraftClient.getInstance()
-            val windowHandle = minecraft?.window?.handle ?: return false
+            val window = minecraft.window
+            val windowHandle = window.handle
 
             when (this.category) {
                 InputUtil.Type.MOUSE -> {
                     GLFW.glfwGetMouseButton(windowHandle, this.code) == GLFW.GLFW_PRESS
                 }
+
                 InputUtil.Type.KEYSYM -> {
-                    InputUtil.isKeyPressed(windowHandle, this.code)
+                    GLFW.glfwGetKey(window.handle, this.code) == GLFW.GLFW_PRESS
                 }
                 else -> false
             }

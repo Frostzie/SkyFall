@@ -78,12 +78,19 @@ object FavoritePet : IEventFeature {
             if (!isRunning) return@subscribe
 
             val slot = event.slot ?: return@subscribe
+            val stack = slot.stack
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
                 if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
-                    if (favoredOnlyToggle && !slot.stack.isEmpty) {
-                        val itemUuid = ItemUtils.getUuid(slot.stack)
-                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
+                    if (favoredOnlyToggle && !stack.isEmpty && PetUtils.isPet(stack)) {
+                        val itemUuid = ItemUtils.getUuid(stack)
+                        val config = SkyFall.feature.inventory.petMenu
+
+                        val isFavorite = itemUuid != null && highlightedItems.contains(itemUuid)
+                        val isActive = config.activePet && PetUtils.isActivePet(stack)
+                        val isExpShared = config.showXPSharedPets && itemUuid != null && expSharedPets.contains(itemUuid)
+
+                        if (!isFavorite && !isActive && !isExpShared) {
                             event.cancel()
                         }
                     }
@@ -95,12 +102,19 @@ object FavoritePet : IEventFeature {
             if (!isRunning) return@subscribe
 
             val slot = event.slot
+            val stack = slot.stack
             val currentScreen = MinecraftClient.getInstance().currentScreen
             if (currentScreen is HandledScreen<*> && isPetMenu(currentScreen)) {
                 if (isSlotInChestInventory(slot) && validSlotRanges.any { slot.index in it }) {
-                    if (favoredOnlyToggle && !slot.stack.isEmpty) {
-                        val itemUuid = ItemUtils.getUuid(slot.stack)
-                        if (itemUuid == null || !highlightedItems.contains(itemUuid)) {
+                    if (favoredOnlyToggle && !stack.isEmpty && PetUtils.isPet(stack)) {
+                        val itemUuid = ItemUtils.getUuid(stack)
+                        val config = SkyFall.feature.inventory.petMenu
+
+                        val isFavorite = itemUuid != null && highlightedItems.contains(itemUuid)
+                        val isActive = config.activePet && PetUtils.isActivePet(stack)
+                        val isExpShared = config.showXPSharedPets && itemUuid != null && expSharedPets.contains(itemUuid)
+
+                        if (!isFavorite && !isActive && !isExpShared) {
                             event.hide()
                             event.hideTooltip()
                         }

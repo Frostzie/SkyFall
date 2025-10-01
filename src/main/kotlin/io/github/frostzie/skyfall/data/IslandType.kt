@@ -31,6 +31,7 @@ enum class IslandType(val displayName: String) {
 
     companion object {
         fun fromDisplayName(name: String): IslandType {
+            if (name.startsWith("Plot", ignoreCase = true)) return GARDEN // This is for visitors to be correctly counted
             return entries.firstOrNull {
                 name.contains(it.displayName, ignoreCase = true)
             } ?: UNKNOWN

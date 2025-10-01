@@ -214,7 +214,7 @@ object SoundDetector : IEventFeature {
 
             val borderAlpha = (alpha * 0.9f * 255).toInt()
             val borderColor = (borderAlpha shl 24) or 0x404040
-            drawContext.drawBorder(xPos - 4, yOffset - 2, textWidth + 8, 12, borderColor)
+            drawContext.drawStrokedRectangle(xPos - 4, yOffset - 2, textWidth + 8, 12, borderColor)
 
             val textAlpha = (alpha * 255).toInt()
             val textColor = (textAlpha shl 24) or 0xFFFFFF

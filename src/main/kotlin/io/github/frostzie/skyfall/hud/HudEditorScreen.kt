@@ -3,8 +3,10 @@ package io.github.frostzie.skyfall.hud
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.utils.LoggerProvider
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.input.KeyInput
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
 import java.io.File
@@ -91,7 +93,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
     private fun drawSelectionOutline(drawContext: DrawContext, element: HudElement) {
         val config = element.config
-        drawContext.drawBorder(config.x - 1, config.y - 1, config.width + 2, config.height + 2, COLOR_SELECTION_BORDER)
+        drawContext.drawStrokedRectangle(config.x - 1, config.y - 1, config.width + 2, config.height + 2, COLOR_SELECTION_BORDER)
     }
 
     private fun drawResizeHandles(drawContext: DrawContext, element: HudElement) {
@@ -117,7 +119,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
 
         val backgroundColor = if (isHovering) 0xCC444444.toInt() else 0xCC333333.toInt()
         drawContext.fill(infoBoxX, infoBoxY, infoBoxX + INFO_BOX_SIZE, infoBoxY + INFO_BOX_SIZE, backgroundColor)
-        drawContext.drawBorder(infoBoxX, infoBoxY, INFO_BOX_SIZE, INFO_BOX_SIZE, if (isHovering) 0xFF888888.toInt() else 0xFF666666.toInt())
+        drawContext.drawStrokedRectangle(infoBoxX, infoBoxY, INFO_BOX_SIZE, INFO_BOX_SIZE, if (isHovering) 0xFF888888.toInt() else 0xFF666666.toInt())
 
         val infoText = "?"
         val textWidth = textRenderer.getWidth(infoText)
@@ -137,7 +139,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         val tooltipY = INFO_BOX_MARGIN
 
         drawContext.fill(tooltipX, tooltipY, tooltipX + tooltipWidth, tooltipY + tooltipHeight, 0xCC000000.toInt())
-        drawContext.drawBorder(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 0xFF666666.toInt())
+        drawContext.drawStrokedRectangle(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 0xFF666666.toInt())
 
         tooltipText.forEachIndexed { index, line ->
             drawContext.drawTextWithShadow(textRenderer, line, tooltipX + padding, tooltipY + padding + index * lineHeight, 0xFFFFFFFF.toInt())
@@ -149,7 +151,7 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         val tooltipText = getHelpTooltipLines()
 
         drawContext.fill(layout.x, layout.y, layout.x + layout.width, layout.y + layout.height, 0xDD000000.toInt())
-        drawContext.drawBorder(layout.x, layout.y, layout.width, layout.height, 0xFF888888.toInt())
+        drawContext.drawStrokedRectangle(layout.x, layout.y, layout.width, layout.height, 0xFF888888.toInt())
 
         tooltipText.forEachIndexed { index, line ->
             val textX = layout.x + (layout.width - textRenderer.getWidth(line)) / 2
@@ -162,24 +164,23 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         val buttonText = "Understood"
 
         drawContext.fill(layout.buttonX, layout.buttonY, layout.buttonX + layout.buttonWidth, layout.buttonY + layout.buttonHeight, buttonColor)
-        drawContext.drawBorder(layout.buttonX, layout.buttonY, layout.buttonWidth, layout.buttonHeight, buttonBorderColor)
+        drawContext.drawStrokedRectangle(layout.buttonX, layout.buttonY, layout.buttonWidth, layout.buttonHeight, buttonBorderColor)
         drawContext.drawTextWithShadow(textRenderer, buttonText, layout.buttonX + (layout.buttonWidth - textRenderer.getWidth(buttonText)) / 2, layout.buttonY + (layout.buttonHeight - textRenderer.fontHeight) / 2, 0xFFFFFFFF.toInt())
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (button != 0) return super.mouseClicked(mouseX, mouseY, button)
+    override fun mouseClicked(click: Click, bl: Boolean): Boolean {
+        if (click.button() != 0) return super.mouseClicked(click, bl)
+        val mouseX = click.comp_4798().toInt()
+        val mouseY = click.comp_4799().toInt()
 
-        val mouseXInt = mouseX.toInt()
-        val mouseYInt = mouseY.toInt()
-
-        if (showCenterTooltip && isClickOnUnderstoodButton(mouseXInt, mouseYInt)) {
+        if (showCenterTooltip && isClickOnUnderstoodButton(mouseX, mouseY)) {
             showCenterTooltip = false
             markTooltipAsShown()
             return true
         }
 
         if (fullHudEditor && selectedElement != null) {
-            val handle = selectedElement!!.getResizeHandle(mouseXInt, mouseYInt)
+            val handle = selectedElement!!.getResizeHandle(mouseX, mouseY)
             if (handle != null) {
                 isResizing = true
                 resizeHandle = handle
@@ -188,19 +189,19 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
             }
         }
 
-        val clickedElement = findElementAt(mouseXInt, mouseYInt)
+        val clickedElement = findElementAt(mouseX, mouseY)
         if (clickedElement != null) {
             selectedElement = clickedElement
             isDragging = true
-            dragOffsetX = mouseXInt - clickedElement.config.x
-            dragOffsetY = mouseYInt - clickedElement.config.y
+            dragOffsetX = mouseX - clickedElement.config.x
+            dragOffsetY = mouseY - clickedElement.config.y
             originalConfig = clickedElement.config.copy()
         } else {
             deselectElement()
         }
 
         if (selectedElement != null && fullHudEditor && selectedElement!!.advancedSizing) {
-            val handle = selectedElement!!.getResizeHandle(mouseXInt, mouseYInt)
+            val handle = selectedElement!!.getResizeHandle(mouseX, mouseY)
             if (handle != null) {
                 isResizing = true
                 resizeHandle = handle
@@ -211,14 +212,13 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         return true
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (button == 0) {
-            isDragging = false
-            isResizing = false
-            resizeHandle = null
-            originalConfig = null
-        }
-        return super.mouseReleased(mouseX, mouseY, button)
+
+    override fun mouseReleased(click: Click): Boolean {
+        isDragging = false
+        isResizing = false
+        resizeHandle = null
+        originalConfig = null
+        return super.mouseReleased(click)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
@@ -239,12 +239,12 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
         return true
     }
 
-    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
-        if (button != 0 || selectedElement == null) return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+    override fun mouseDragged(click: Click, d: Double, e: Double): Boolean {
+        if (!isDragging || selectedElement == null) return super.mouseDragged(click, d, e)
 
         val element = selectedElement!!
-        val mouseXInt = mouseX.toInt()
-        val mouseYInt = mouseY.toInt()
+        val mouseXInt = click.comp_4798().toInt()
+        val mouseYInt = click.comp_4799().toInt()
 
         if (isDragging) {
             val newX = mouseXInt - dragOffsetX
@@ -268,20 +268,20 @@ class HudEditorScreen : Screen(Text.literal("HUD Editor")) {
             return true
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+        return super.mouseDragged(click, d, e)
     }
 
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (keyCode == GLFW.GLFW_KEY_R && selectedElement != null) {
+    override fun keyPressed(keyInput: KeyInput): Boolean {
+        if (keyInput.keycode == GLFW.GLFW_KEY_R && selectedElement != null) {
             selectedElement!!.resetToDefault()
             return true
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyInput.keycode == GLFW.GLFW_KEY_ESCAPE) {
             this.close()
             return true
         }
-        return super.keyPressed(keyCode, scanCode, modifiers)
+        return super.keyPressed(keyInput)
     }
 
     override fun close() {

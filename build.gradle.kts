@@ -34,7 +34,7 @@ dependencies {
     modImplementation(libs.fabric.kotlin)
     modImplementation(libs.fabric.api)
     modRuntimeOnly(libs.devauth)
-    implementation("org.reflections:reflections:0.10.2") // Might switch to something like ClassGraph
+    implementation("org.reflections:reflections:0.10.2")
     include("org.reflections:reflections:0.10.2")
     modImplementation("org.javassist:javassist:3.28.0-GA")
     include("org.javassist:javassist:3.28.0-GA")

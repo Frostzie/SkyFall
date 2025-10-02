@@ -2,7 +2,6 @@ package io.github.frostzie.skyfall.utils.garden
 
 import io.github.frostzie.skyfall.data.IslandType
 import io.github.frostzie.skyfall.utils.ColorUtils
-import io.github.frostzie.skyfall.utils.LoggerProvider
 import io.github.frostzie.skyfall.events.core.EventBus
 import io.github.frostzie.skyfall.events.IslandChangeEvent
 import io.github.frostzie.skyfall.events.TabListUpdateEvent
@@ -23,14 +22,7 @@ data class VisitorData(
  * at the Garden's main desk.
  */
 object VisitorUtils {
-
-    private val logger = LoggerProvider.getLogger("VisitorUtils")
-
-    private val VISITOR_PATTERNS = listOf(
-        "§b§lVisitors: §r§f\\((.*)\\)".toRegex(),
-        "Visitors: \\((.*)\\)".toRegex(),
-    )
-
+    private val VISITOR_PATTERN = "Visitors: \\((.*)\\)".toRegex()
     private var cachedVisitorData: VisitorData = VisitorData.NONE
     private var onGarden: Boolean = false
 
@@ -55,39 +47,18 @@ object VisitorUtils {
 
     private fun recalculateVisitorData(tabLines: List<String>) {
         var visitorCount: Int? = null
+        val cleanLines = tabLines.map { ColorUtils.stripColorCodes(it) }
 
-        for (line in tabLines) {
-            for (pattern in VISITOR_PATTERNS) {
-                val match = pattern.find(line)
-                if (match != null) {
-                    val countInfo = match.groupValues[1]
-                    visitorCount = when {
-                        countInfo.contains("Queue Full") || countInfo.contains("§r§c§lQueue Full!§r§f") -> 5
-                        countInfo.toIntOrNull() != null -> countInfo.toInt()
-                        else -> null
-                    }
-                    if (visitorCount != null) break
+        for (line in cleanLines) {
+            val match = VISITOR_PATTERN.find(line)
+            if (match != null) {
+                val countInfo = match.groupValues[1]
+                visitorCount = when {
+                    countInfo.contains("Queue Full") -> 5
+                    countInfo.toIntOrNull() != null -> countInfo.toInt()
+                    else -> null
                 }
-            }
-            if (visitorCount != null) break
-        }
-
-        if (visitorCount == null) {
-            val cleanLines = tabLines.map { ColorUtils.stripColorCodes(it) }
-            for (line in cleanLines) {
-                for (pattern in VISITOR_PATTERNS) {
-                    val match = pattern.find(line)
-                    if (match != null) {
-                        val countInfo = match.groupValues[1]
-                        visitorCount = when {
-                            countInfo.contains("Queue Full") -> 5
-                            countInfo.toIntOrNull() != null -> countInfo.toInt()
-                            else -> null
-                        }
-                        if (visitorCount != null) break
-                    }
-                }
-                if (visitorCount != null) break
+                break
             }
         }
 

@@ -34,15 +34,15 @@ object ConfigManager {
     fun firstLoad() {
         configDirectory.mkdirs()
         configFile = File(configDirectory, "config.json")
-        logger.info("Trying to load config from $configFile")
+        logger.debug("Trying to load config from {}", configFile)
 
         if (configFile!!.exists()) {
             try {
-                logger.info("load-config-now")
+                logger.debug("load-config-now")
                 val inputStreamReader = InputStreamReader(FileInputStream(configFile!!), StandardCharsets.UTF_8)
                 val bufferedReader = BufferedReader(inputStreamReader)
                 features = gson.fromJson(bufferedReader.readText(), Features::class.java)
-                logger.info("Loaded config File")
+                logger.debug("Loaded config File")
             } catch (e: Exception) {
                 logger.error("Exception while reading config file $configFile", e)
                 val backupFile = configFile!!.resolveSibling("config-${SimpleTimeMark.now().toMillis()}-backup.json")

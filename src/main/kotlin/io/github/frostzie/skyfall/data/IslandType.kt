@@ -32,6 +32,7 @@ enum class IslandType(val displayName: String) {
     companion object {
         fun fromDisplayName(name: String): IslandType {
             return entries.firstOrNull {
+                if (name.startsWith("Plot", ignoreCase = true)) return GARDEN
                 name.contains(it.displayName, ignoreCase = true)
             } ?: UNKNOWN
         }

@@ -22,7 +22,7 @@ data class VisitorData(
  * at the Garden's main desk.
  */
 object VisitorUtils {
-
+    private val VISITOR_PATTERN = "Visitors: \\((.*)\\)".toRegex()
     private var cachedVisitorData: VisitorData = VisitorData.NONE
     private var onGarden: Boolean = false
 
@@ -48,8 +48,9 @@ object VisitorUtils {
     private fun recalculateVisitorData(tabLines: List<String>) {
         var visitorCount: Int? = null
         val cleanLines = tabLines.map { ColorUtils.stripColorCodes(it) }
+
         for (line in cleanLines) {
-            val match = "§b§lVisitors: §r§f\\((.*)\\)".toRegex().find(line)
+            val match = VISITOR_PATTERN.find(line)
             if (match != null) {
                 val countInfo = match.groupValues[1]
                 visitorCount = when {
@@ -57,14 +58,10 @@ object VisitorUtils {
                     countInfo.toIntOrNull() != null -> countInfo.toInt()
                     else -> null
                 }
-                if (visitorCount != null) break
+                break
             }
         }
 
-        if (visitorCount != null) {
-            if (cachedVisitorData.count != visitorCount) {
-                cachedVisitorData = VisitorData(visitorCount)
-            }
-        }
+        cachedVisitorData = if (visitorCount != null) VisitorData(visitorCount) else VisitorData.NONE
     }
 }

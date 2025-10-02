@@ -1,6 +1,6 @@
 # Taken from Firmament
 [versions]
-version = "Beta 0.2.3"
+version = "Beta 0.2.4"
 minecraft = "1.21.9"
 yarn_mappings="1.21.9+build.1"
 loader_version="0.17.2"

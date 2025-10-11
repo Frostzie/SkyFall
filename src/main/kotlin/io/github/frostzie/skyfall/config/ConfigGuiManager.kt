@@ -2,7 +2,7 @@ package io.github.frostzie.skyfall.config
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.hud.HudEditorScreen
-import io.github.notenoughupdates.moulconfig.gui.GuiElementWrapper
+import io.github.frostzie.skyfall.utils.ConfigUtils.openEditor
 import io.github.notenoughupdates.moulconfig.gui.MoulConfigEditor
 import net.minecraft.client.gui.screen.Screen
 
@@ -12,7 +12,7 @@ object ConfigGuiManager {
 
     var currentScreenInstance: Screen? = null
 
-    private fun getConfigEditorInstance(): MoulConfigEditor<Features> {
+    fun getConfigEditorInstance(): MoulConfigEditor<Features> {
         if (configEditor == null) {
             configEditor = MoulConfigEditor(SkyFall.configManager.processor)
         }
@@ -24,20 +24,12 @@ object ConfigGuiManager {
         if (search != null) {
             currentEditor.search(search)
         }
-
-        val screen = GuiElementWrapper(currentEditor)
-        currentScreenInstance = screen
-        SkyFall.screenToOpen = screen
+        openEditor(currentEditor)
     }
 
     fun openHudEditor() {
         val screen = HudEditorScreen()
         currentScreenInstance = screen
         SkyFall.screenToOpen = screen
-    }
-
-    fun createModMenuScreen(parentScreenFromModMenu: Screen): Screen {
-        val newEditor = MoulConfigEditor(SkyFall.configManager.processor)
-        return GuiElementWrapper(newEditor)
     }
 }

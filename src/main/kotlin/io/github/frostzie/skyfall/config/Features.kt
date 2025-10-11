@@ -16,6 +16,8 @@ import io.github.notenoughupdates.moulconfig.Config
 import io.github.notenoughupdates.moulconfig.Social
 import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.common.MyResourceLocation
+import io.github.notenoughupdates.moulconfig.common.text.StructuredText
+import io.github.frostzie.skyfall.utils.ConfigUtils.asStructuredText
 
 class Features : Config() {
     override fun saveNow() {
@@ -24,18 +26,18 @@ class Features : Config() {
     }
 
     //TODO: add version change support and color gradient title
-    override fun getTitle(): String {
-        return "§b§lSkyFall§r by §3Frostzie§r, config by §5Moulberry §rand §5nea89"
+    override fun getTitle(): StructuredText {
+        return "§b§lSkyFall§r by §3Frostzie§r, config by §5Moulberry §rand §5nea89".asStructuredText()
     }
 
     // TODO: Make socials open directly in the browser
     private val discord = MyResourceLocation("skyfall", "social/discord.png")
     private val github = MyResourceLocation("skyfall", "social/github.png")
 
-    override fun getSocials(): List<Social?>? {
+    override fun getSocials(): List<Social> {
         return listOf(
-            Social.forLink("Discord", discord, "https://discord.gg/qZ885qTvkx"),
-            Social.forLink("GitHub", github, "https://github.com/Frostzie/SkyFall"),
+            Social.forLink("Discord".asStructuredText(), discord, "https://discord.gg/qZ885qTvkx"),
+            Social.forLink("GitHub".asStructuredText(), github, "https://github.com/Frostzie/SkyFall"),
         )
     }
 

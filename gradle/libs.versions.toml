@@ -7,13 +7,17 @@ javafx_plugin = "0.1.0"
 atlantafx-base = "2.1.0"
 ikonli = "12.4.0"
 richTextFXv = "0.11.6"
-flowlessv = "0.7.4"
+flowlessV = "0.7.4"
 reactFXv = "2.0-M5"
 undoFXv = "2.1.1"
 wellbehavedFXv = "0.3.3"
 directoryWatcherV = "0.19.1"
 jsvgV = "2.0.0"
 jacksonCoreV = "2.17.1"
+junit = "5.10.2"
+mockito = "5.11.0"
+mockito-kotlin = "5.2.1"
+fxStageV = "0.8.4"
 
 [libraries]
 fabric_kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric_kotlin" }
@@ -23,15 +27,23 @@ jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref 
 directoryWatcher = { module = "io.methvin:directory-watcher", version.ref = "directoryWatcherV" }
 jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvgV" }
 richTextFX = { module = "org.fxmisc.richtext:richtextfx", version.ref = "richTextFXv"}
-flowless = { module = "org.fxmisc.flowless:flowless", version.ref = "flowlessv" }
+flowless = { module = "org.fxmisc.flowless:flowless", version.ref = "flowlessV" }
 reactFX = { module = "org.reactfx:reactfx", version.ref = "reactFXv" }
 undofx = { module = "org.fxmisc.undo:undofx", version.ref = "undoFXv" }
 wellbehavedfx = { module = "org.fxmisc.wellbehaved:wellbehavedfx", version.ref = "wellbehavedFXv" }
+fxStage = { module = "io.github.micheljung:fxstage", version.ref = "fxStageV" }
+
 atlantaFX = { module = "io.github.mkpaz:atlantafx-base", version.ref = "atlantafx-base" }
 ikonliJavaFX = { module = "org.kordamp.ikonli:ikonli-javafx", version.ref = "ikonli"}
 ikonliCore = { module = "org.kordamp.ikonli:ikonli-core", version.ref = "ikonli"}
 material2 = { module = "org.kordamp.ikonli:ikonli-material2-pack", version.ref = "ikonli"}
 feather = { module = "org.kordamp.ikonli:ikonli-feather-pack", version.ref = "ikonli"}
+
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 [plugins]
 kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

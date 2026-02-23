@@ -83,8 +83,8 @@ dependencies {
 	include(libs.jacksonCore)
 
 	// For native windows bar
-	implementation("io.github.micheljung:fxstage:0.8.4")
-	include("io.github.micheljung:fxstage:0.8.4")
+	implementation(libs.fxStage)
+	include(libs.fxStage)
 
 	// JavaFX
 	for (classifier in javafxClassifiers) {
@@ -102,6 +102,16 @@ dependencies {
 		include(javafxDep("controls", classifier))
 		include(javafxDep("fxml", classifier))
 	}
+
+	testImplementation(libs.junit.jupiter.api)
+	testRuntimeOnly(libs.junit.jupiter.engine)
+	testRuntimeOnly(libs.junit.platform.launcher)
+	testImplementation(libs.mockito.core)
+	testImplementation(libs.mockito.kotlin)
+}
+
+tasks.test {
+	useJUnitPlatform()
 }
 
 // Taken from Stonecutter template

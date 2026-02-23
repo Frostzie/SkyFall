@@ -9,6 +9,10 @@ import kotlin.concurrent.thread
 /**
  * A thin bridge around the [DirectoryWatcher] library.
  * Utility that provides raw observation of disk changes.
+ *
+ * @param watchPath The path to watch.
+ * @param onAction The callback that is invoked when a disk change is detected.
+ * This callback is executed on the [watchThread].
  */
 class FileSystemWatcher(
     private val watchPath: Path,
@@ -47,6 +51,11 @@ class FileSystemWatcher(
 
     fun stop() {
         watchThread?.interrupt()
+        try {
+            watchThread?.join(500)
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
         watchThread = null
 
         try {

@@ -76,11 +76,18 @@ dependencies {
 	include(libs.wellbehavedfx)
 
 	implementation(libs.jacksonCore)
-	implementation(libs.directoryWatcher)
+	implementation(libs.jacksonDatabind)
+	implementation(libs.jacksonModuleKotlin)
+
+	include(libs.jacksonCore)
+	include(libs.jacksonDatabind)
+	include(libs.jacksonModuleKotlin)
+
 	implementation(libs.jsvg)
+	implementation(libs.directoryWatcher)
+
 	include(libs.jsvg)
 	include(libs.directoryWatcher)
-	include(libs.jacksonCore)
 
 	// For native windows bar
 	implementation(libs.fxStage)

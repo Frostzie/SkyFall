@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.view.rightbar
+package io.github.frostzie.nodex.ui.view.ide.rightbar
 
 import atlantafx.base.controls.Spacer
 import atlantafx.base.theme.Styles

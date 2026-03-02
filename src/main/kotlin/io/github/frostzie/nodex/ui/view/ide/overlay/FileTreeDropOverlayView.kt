@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.view.overlay
+package io.github.frostzie.nodex.ui.view.ide.overlay
 
 import io.github.frostzie.nodex.domain.uicontract.PanelPosition
 import javafx.beans.value.ObservableValue

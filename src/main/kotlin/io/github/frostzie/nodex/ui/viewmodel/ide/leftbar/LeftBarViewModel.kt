@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.viewmodel.leftbar
+package io.github.frostzie.nodex.ui.viewmodel.ide.leftbar
 
 import io.github.frostzie.nodex.services.core.LayoutService
 

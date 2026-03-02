@@ -1,8 +1,8 @@
-package io.github.frostzie.nodex.ui.view.leftbar
+package io.github.frostzie.nodex.ui.view.ide.leftbar
 
 import atlantafx.base.controls.Spacer
 import atlantafx.base.theme.Styles
-import io.github.frostzie.nodex.ui.viewmodel.leftbar.LeftBarViewModel
+import io.github.frostzie.nodex.ui.viewmodel.ide.leftbar.LeftBarViewModel
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button

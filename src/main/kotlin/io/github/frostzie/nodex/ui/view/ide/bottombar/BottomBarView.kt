@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.view.bottombar
+package io.github.frostzie.nodex.ui.view.ide.bottombar
 
 import atlantafx.base.controls.Spacer
 import atlantafx.base.theme.Styles
@@ -17,7 +17,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import javafx.beans.binding.Bindings
 import javafx.geometry.Side
 import org.kordamp.ikonli.material2.Material2OutlinedAL
-import io.github.frostzie.nodex.ui.viewmodel.bottombar.BottomBarViewModel
+import io.github.frostzie.nodex.ui.viewmodel.ide.bottombar.BottomBarViewModel
 
 class BottomBarView(private val viewModel: BottomBarViewModel) : HBox() {
     private val ideVersionLabel = Label().apply { padding = Insets(0.0, 0.0, 0.0, 5.0) }

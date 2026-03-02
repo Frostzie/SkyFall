@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.viewmodel.bottombar
+package io.github.frostzie.nodex.ui.viewmodel.ide.bottombar
 
 import io.github.frostzie.nodex.domain.entity.EditorDocument
 import io.github.frostzie.nodex.services.core.ModInfoService

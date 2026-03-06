@@ -1,5 +1,7 @@
 package io.github.frostzie.nodex.domain.config
 
+import io.github.frostzie.nodex.domain.uicontract.AppScreen
+
 data class WindowState(
     val x: Double,
     val y: Double,
@@ -8,20 +10,31 @@ data class WindowState(
     val isMaximized: Boolean
 )
 
+interface WindowLayout {
+    var x: Double
+    var y: Double
+    var width: Double
+    var height: Double
+    var isMaximized: Boolean
+}
+
 data class LayoutConfig(
+    var activeScreen: AppScreen? = null,
     var ide: IdeWindowLayout = IdeWindowLayout(),
     var projectManager: ProjectManagerWindowLayout = ProjectManagerWindowLayout(),
-    var settings: SettingWindowLayout = SettingWindowLayout()
+    var settings: SettingsWindowLayout = SettingsWindowLayout()
 )
-// IDE Layout
+
+// Main Screen Layout
+
 data class IdeWindowLayout(
-    var x: Double = -1.0,
-    var y: Double = -1.0,
-    var width: Double = 1200.0,
-    var height: Double = 800.0,
-    var isMaximized: Boolean = false,
+    override var x: Double = -1.0,
+    override var y: Double = -1.0,
+    override var width: Double = 1200.0,
+    override var height: Double = 800.0,
+    override var isMaximized: Boolean = false,
     var workbench: WorkbenchLayout = WorkbenchLayout()
-)
+) : WindowLayout
 
 data class WorkbenchLayout(
     var sidebarPosition: String = "LEFT",
@@ -29,20 +42,20 @@ data class WorkbenchLayout(
     var sidebarSize: Double = 0.25
 )
 
-// Project Manager Layout
 data class ProjectManagerWindowLayout(
-    var x: Double = -1.0,
-    var y: Double = -1.0,
-    var width: Double = 810.0,
-    var height: Double = 812.0,
-    var isMaximized: Boolean = false
-)
+    override var x: Double = -1.0,
+    override var y: Double = -1.0,
+    override var width: Double = 800.0,
+    override var height: Double = 600.0,
+    override var isMaximized: Boolean = false
+) : WindowLayout
 
-// Settings Layout
-data class SettingWindowLayout(
-    var x: Double = -1.0,
-    var y: Double = -1.0,
-    var width: Double = 810.0,
-    var height: Double = 812.0,
-    var isMaximized: Boolean = false
-)
+// Overlay Screen Layouts
+
+data class SettingsWindowLayout(
+    override var x: Double = -1.0,
+    override var y: Double = -1.0,
+    override var width: Double = 950.0,
+    override var height: Double = 750.0,
+    override var isMaximized: Boolean = false
+) : WindowLayout

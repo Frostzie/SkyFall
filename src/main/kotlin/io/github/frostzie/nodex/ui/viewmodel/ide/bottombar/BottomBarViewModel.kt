@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
 
 class BottomBarViewModel(
-    private val modInfoService: ModInfoService,
+    modInfoService: ModInfoService,
     private val editorService: EditorService,
     private val performanceService: PerformanceService
 ) {

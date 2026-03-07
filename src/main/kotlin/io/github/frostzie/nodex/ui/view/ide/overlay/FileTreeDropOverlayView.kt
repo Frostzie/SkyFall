@@ -9,7 +9,7 @@ import javafx.scene.shape.Rectangle
  * Overlay view that highlights the drop zones for the File Tree.
  */
 class FileTreeDropOverlayView(
-    private val dropTarget: ObservableValue<PanelPosition?>
+    dropTarget: ObservableValue<PanelPosition?>
 ) : Pane() {
     private val leftRect = createRect()
     private val rightRect = createRect()

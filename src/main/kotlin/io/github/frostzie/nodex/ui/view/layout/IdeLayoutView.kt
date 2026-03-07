@@ -1,11 +1,12 @@
 package io.github.frostzie.nodex.ui.view.layout
 
-import io.github.frostzie.nodex.ui.view.bottombar.BottomBarView
-import io.github.frostzie.nodex.ui.view.leftbar.LeftBarView
-import io.github.frostzie.nodex.ui.view.overlay.FileTreeDropOverlayView
-import io.github.frostzie.nodex.ui.view.rightbar.RightBarView
-import io.github.frostzie.nodex.ui.view.topbar.TopBarView
-import io.github.frostzie.nodex.ui.view.workbench.WorkbenchView
+import io.github.frostzie.nodex.ui.view.ide.bottombar.BottomBarView
+import io.github.frostzie.nodex.ui.view.ide.leftbar.LeftBarView
+import io.github.frostzie.nodex.ui.view.ide.overlay.FileTreeDropOverlayView
+import io.github.frostzie.nodex.ui.view.ide.rightbar.RightBarView
+import io.github.frostzie.nodex.ui.view.ide.topbar.TopBarView
+import io.github.frostzie.nodex.ui.view.ide.workbench.WorkbenchView
+import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.StackPane
 
@@ -14,10 +15,11 @@ import javafx.scene.layout.StackPane
  * Sets the Static Shell and the Workbench.
  */
 class IdeLayoutView(
-    private val workbenchView: WorkbenchView,
-    private val overlayView: FileTreeDropOverlayView,
-    private val leftBarView: LeftBarView,
-    private val bottomBarView: BottomBarView,
+    workbenchView: WorkbenchView,
+    overlayView: FileTreeDropOverlayView,
+    private val topBarView: TopBarView,
+    leftBarView: LeftBarView,
+    bottomBarView: BottomBarView,
 ): StackPane() {
 
     init {
@@ -25,7 +27,7 @@ class IdeLayoutView(
         val shell = BorderPane()
 
         // Top Area (TopBar)
-        shell.top = TopBarView()
+        shell.top = topBarView
 
         // Left Area (LeftBar)
         shell.left = leftBarView
@@ -42,4 +44,6 @@ class IdeLayoutView(
 
         children.addAll(shell)
     }
+
+    fun getNonCaptionNodes(): List<Node> = topBarView.nonCaptionNodes
 }

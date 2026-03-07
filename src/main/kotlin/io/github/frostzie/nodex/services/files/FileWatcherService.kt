@@ -1,10 +1,11 @@
 package io.github.frostzie.nodex.services.files
 
 import io.github.frostzie.nodex.domain.entity.Project
+import io.github.frostzie.nodex.services.core.ConcurrencyService
+import io.github.frostzie.nodex.services.ui.FocusService
 import io.github.frostzie.nodex.utils.LoggerProvider
 import io.github.frostzie.nodex.utils.file.FileSystemWatcher
 import io.methvin.watcher.DirectoryChangeEvent.EventType
-import javafx.application.Platform
 import java.nio.file.Path
 import java.util.concurrent.*
 
@@ -14,7 +15,10 @@ import java.util.concurrent.*
  * This service interprets raw disk changes into state updates.
  * It makes sure the external changes sync with the mod.
  */
-class FileWatcherService {
+class FileWatcherService(
+    private val focusService: FocusService,
+    private val concurrencyService: ConcurrencyService
+) {
     private val logger = LoggerProvider.getLogger("FileWatcherService")
     private val watchers = ConcurrentHashMap<Path, ProjectWatcher>()
 
@@ -25,8 +29,6 @@ class FileWatcherService {
     private val debounceDelayMs = 500L
     private val maxQueueSize = 50 // Possibly allow changing this through settings
 
-    @Volatile
-    private var isWindowFocused = true // Uses StageService for fucus listener
     private val pendingProjectsToSync = ConcurrentHashMap.newKeySet<Path>()
     private val pendingSyncs = ConcurrentHashMap<Path, ScheduledFuture<*>>()
 
@@ -34,6 +36,17 @@ class FileWatcherService {
         val project: Project,
         val watcher: FileSystemWatcher
     )
+
+    /**
+     * Initializes the service by observing focus changes.
+     */
+    fun initialize() {
+        focusService.isFocused.addListener { _, _, focused ->
+            if (focused) {
+                drainPendingSyncs()
+            }
+        }
+    }
 
     /**
      * Starts monitoring disk state for a project.
@@ -47,14 +60,14 @@ class FileWatcherService {
      */
     fun watch(project: Project) {
         val root = project.path
-        if (watchers.containsKey(root)) return
-
-        val watcher = FileSystemWatcher(root) { path, action ->
-            onRawAction(project, path, action)
+        watchers.computeIfAbsent(root) {
+            val watcher = FileSystemWatcher(root) { path, action ->
+                onRawAction(project, path, action)
+            }
+            watcher.start()
+            logger.debug("Monitoring project state at: {}", root)
+            ProjectWatcher(project, watcher)
         }
-        watcher.start()
-        watchers[root] = ProjectWatcher(project, watcher)
-        logger.debug("Monitoring project state at: {}", root)
     }
 
     /**
@@ -73,27 +86,6 @@ class FileWatcherService {
             changes.add(change)
         }
         return changes
-    }
-
-    /**
-     * Updates focus state to sync queued changes upon gaining focus.
-     *
-     * When focus is regained, any projects that had filesystem activity while the app
-     * was backgrounder are notified. This triggers a drain of all stored changes.
-     */
-    fun setWindowFocused(focused: Boolean) {
-        isWindowFocused = focused
-        if (focused) {
-            val iterator = pendingProjectsToSync.iterator()
-            while (iterator.hasNext()) {
-                val root = iterator.next()
-                iterator.remove()
-                val watcher = watchers[root]
-                if (watcher != null) {
-                    notifySync(watcher.project)
-                }
-            }
-        }
     }
 
     /**
@@ -118,7 +110,7 @@ class FileWatcherService {
         // Always track specific events to avoid forced full rescans
         handleRawEvent(project, path, action)
 
-        if (!isWindowFocused) {
+        if (!focusService.isFocusedSnapshot) {
             pendingProjectsToSync.add(root)
         }
     }
@@ -146,11 +138,11 @@ class FileWatcherService {
     }
 
     /**
-     * Enqueues a change for a project, with a measures to prevent UI flooding.
+     * Enqueues a change for a project, with measures to prevent UI flooding.
      *
-     * If too many changes accumulate before a sync, the nearest parent folder is invalidated
-     * instead of tracking hundreds of specific events. This triggers a targeted refresh
-     * rather than a whole-project rescan.
+     * If too many changes accumulate before a sync, the queue is cleared and a full
+     * project rescan is triggered. This prevents processing hundreds of specific events
+     * and ensures the tree state is consistent.
      */ // First time using a word like "enqueue" but sure google ig it describes it the best lol
     private fun enqueueChange(root: Path, change: FileTreeChange) {
         val queue = projectChangeQueues.computeIfAbsent(root) { ConcurrentLinkedQueue() }
@@ -186,7 +178,7 @@ class FileWatcherService {
         pendingSyncs[root]?.cancel(false)
         pendingSyncs[root] = syncExecutor.schedule({
             pendingSyncs.remove(root)
-            if (isWindowFocused) {
+            if (focusService.isFocusedSnapshot) {
                 notifySync(project)
             } else {
                 pendingProjectsToSync.add(root)
@@ -194,9 +186,21 @@ class FileWatcherService {
         }, debounceDelayMs, TimeUnit.MILLISECONDS)
     }
 
+    private fun drainPendingSyncs() {
+        val iterator = pendingProjectsToSync.iterator()
+        while (iterator.hasNext()) {
+            val root = iterator.next()
+            iterator.remove()
+            val watcher = watchers[root]
+            if (watcher != null) {
+                notifySync(watcher.project)
+            }
+        }
+    }
+
     private fun notifySync(project: Project) {
         // Increment state tick on UI thread to notify observers
-        Platform.runLater {
+        concurrencyService.runOnUI {
             project.filesystemTick.set(project.filesystemTick.get() + 1)
         }
     }
@@ -227,4 +231,6 @@ class FileWatcherService {
         stopAll()
         syncExecutor.shutdownNow()
     }
+
+    internal fun getWatcherCount(): Int = watchers.size // Only used by test
 }

@@ -2,60 +2,40 @@ package io.github.frostzie.nodex.domain.config
 
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 
-data class WindowState(
-    val x: Double,
-    val y: Double,
-    val width: Double,
-    val height: Double,
-    val isMaximized: Boolean
+/**
+ * Represents the geometric state of a window (Stage).
+ */
+data class WindowBounds(
+    var x: Double = -1.0,
+    var y: Double = -1.0,
+    var width: Double = -1.0,
+    var height: Double = -1.0,
+    var isMaximized: Boolean = false
 )
 
-interface WindowLayout {
-    var x: Double
-    var y: Double
-    var width: Double
-    var height: Double
-    var isMaximized: Boolean
-}
-
+/**
+ * Layout config for a project.
+ */
 data class LayoutConfig(
     var activeScreen: AppScreen? = null,
-    var ide: IdeWindowLayout = IdeWindowLayout(),
-    var projectManager: ProjectManagerWindowLayout = ProjectManagerWindowLayout(),
-    var settings: SettingsWindowLayout = SettingsWindowLayout()
-)
 
-// Main Screen Layout
+    /**
+     * Window states for different screens, indexed by screen name.
+     * Use the name of AppScreen or OverlayScreen as the key.
+     */
+    var windows: MutableMap<String, WindowBounds> = mutableMapOf(),
 
-data class IdeWindowLayout(
-    override var x: Double = -1.0,
-    override var y: Double = -1.0,
-    override var width: Double = 1200.0,
-    override var height: Double = 800.0,
-    override var isMaximized: Boolean = false,
+    /**
+     * Layout of the IDE workbench (Center area).
+     */
     var workbench: WorkbenchLayout = WorkbenchLayout()
-) : WindowLayout
-
-data class WorkbenchLayout(
-    var sidebarPosition: String = "LEFT",
-    var sidebarVisible: Boolean = true,
-    var sidebarSize: Double = 0.25
 )
 
-data class ProjectManagerWindowLayout(
-    override var x: Double = -1.0,
-    override var y: Double = -1.0,
-    override var width: Double = 800.0,
-    override var height: Double = 600.0,
-    override var isMaximized: Boolean = false
-) : WindowLayout
-
-// Overlay Screen Layouts
-
-data class SettingsWindowLayout(
-    override var x: Double = -1.0,
-    override var y: Double = -1.0,
-    override var width: Double = 950.0,
-    override var height: Double = 750.0,
-    override var isMaximized: Boolean = false
-) : WindowLayout
+/**
+ * Layout configuration specific to the workbench (fileTree).
+ */
+data class WorkbenchLayout(
+    var treePosition: String = "LEFT",
+    var treeVisible: Boolean = true,
+    var treeSize: Double = 0.25
+)

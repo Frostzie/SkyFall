@@ -5,7 +5,9 @@ import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.services.core.LayoutService
 import io.github.frostzie.nodex.ui.ViewFactory
+import io.github.frostzie.nodex.ui.ScreenRegistry
 import io.github.frostzie.nodex.ui.util.WindowGeometryTracker
+import io.github.frostzie.nodex.ui.util.applyBasePolicy
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.scene.Scene
 import javafx.scene.layout.Region
@@ -63,12 +65,7 @@ open class OverlayStageService(
         val scene = Scene(rootNode)
 
         configureFxStage(stage, rootNode, scene)
-
-        // Geometry Tracking
-        val tracker = WindowGeometryTracker(stage) { newState ->
-            layoutService.updateOverlayWindowState(overlay, newState)
-        }
-
+        val tracker = setupGeometryTracker(stage, overlay)
         applyPolicy(stage, rootNode, overlay, tracker)
 
         stage.setOnCloseRequest { event ->
@@ -79,29 +76,6 @@ open class OverlayStageService(
         activeStages[overlay] = stage
         stage.show()
         focusService.trackStage(stage)
-    }
-
-    private fun applyPolicy(
-        stage: Stage,
-        rootNode: Region,
-        overlay: OverlayScreen,
-        tracker: WindowGeometryTracker
-    ) {
-        val policy = WindowPolicy.forOverlay(overlay)
-        val savedState = layoutService.getOverlayWindowState(overlay)
-
-        primaryWindowStage?.let { stage.initOwner(it) }
-        if (policy.isModal) {
-            stage.initModality(Modality.APPLICATION_MODAL)
-        }
-        stage.isAlwaysOnTop = policy.alwaysOnTop
-
-        tracker.applyState(savedState)
-
-        stage.title = policy.title
-        rootNode.minWidth = policy.minWidth
-        rootNode.minHeight = policy.minHeight
-        stage.isResizable = policy.isResizable
     }
 
     private fun configureFxStage(stage: Stage, rootNode: Region, scene: Scene) {
@@ -115,6 +89,47 @@ open class OverlayStageService(
             logger.error("Failed to configure FxStage for overlay", e)
             stage.scene = scene
         }
+    }
+
+    private fun setupGeometryTracker(stage: Stage, overlay: OverlayScreen): WindowGeometryTracker {
+        return WindowGeometryTracker(stage) { newState ->
+            val profile = ScreenRegistry.getProfile(overlay)
+            if (profile.isPersistent) {
+                layoutService.updateOverlayWindowState(overlay, newState)
+            }
+        }
+    }
+
+    private fun applyPolicy(
+        stage: Stage,
+        rootNode: Region,
+        overlay: OverlayScreen,
+        tracker: WindowGeometryTracker
+    ) {
+        val profile = ScreenRegistry.getProfile(overlay)
+        val policy = WindowPolicy(
+            title = profile.title,
+            minWidth = profile.minWidth,
+            minHeight = profile.minHeight,
+            prefWidth = profile.prefWidth,
+            prefHeight = profile.prefHeight,
+            isResizable = profile.isResizable,
+            isPersistent = profile.isPersistent,
+            isModal = profile.isModal,
+            alwaysOnTop = profile.alwaysOnTop
+        )
+
+        val state = layoutService.getOverlayWindowState(overlay)
+
+        // Overlay specific settings
+        primaryWindowStage?.let { stage.initOwner(it) }
+        if (policy.isModal) {
+            stage.initModality(Modality.APPLICATION_MODAL)
+        }
+        stage.isAlwaysOnTop = policy.alwaysOnTop
+
+        // Shared logic via extension
+        stage.applyBasePolicy(rootNode, policy, state, tracker)
     }
 
     private fun closeAllOverlays() {

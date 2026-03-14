@@ -1,6 +1,6 @@
 package io.github.frostzie.nodex.ui.util
 
-import io.github.frostzie.nodex.domain.config.WindowState
+import io.github.frostzie.nodex.domain.config.WindowBounds
 import javafx.stage.Stage
 
 /**
@@ -9,7 +9,7 @@ import javafx.stage.Stage
  */
 class WindowGeometryTracker(
     private val stage: Stage,
-    private val onGeometryChanged: (WindowState) -> Unit
+    private val onGeometryChanged: (WindowBounds) -> Unit
 ) {
     init {
         setupListeners()
@@ -18,23 +18,23 @@ class WindowGeometryTracker(
     private fun setupListeners() {
         // Track position
         stage.xProperty().addListener { _, _, newValue ->
-            if (shouldTrack()) onGeometryChanged(getCurrentState().copy(x = newValue.toDouble()))
+            if (shouldTrack()) onGeometryChanged(getCurrentBounds().copy(x = newValue.toDouble()))
         }
         stage.yProperty().addListener { _, _, newValue ->
-            if (shouldTrack()) onGeometryChanged(getCurrentState().copy(y = newValue.toDouble()))
+            if (shouldTrack()) onGeometryChanged(getCurrentBounds().copy(y = newValue.toDouble()))
         }
 
         // Track size
         stage.widthProperty().addListener { _, _, newValue ->
-            if (shouldTrack()) onGeometryChanged(getCurrentState().copy(width = newValue.toDouble()))
+            if (shouldTrack()) onGeometryChanged(getCurrentBounds().copy(width = newValue.toDouble()))
         }
         stage.heightProperty().addListener { _, _, newValue ->
-            if (shouldTrack()) onGeometryChanged(getCurrentState().copy(height = newValue.toDouble()))
+            if (shouldTrack()) onGeometryChanged(getCurrentBounds().copy(height = newValue.toDouble()))
         }
 
         // Track maximized state
         stage.maximizedProperty().addListener { _, _, maximized ->
-            onGeometryChanged(getCurrentState().copy(isMaximized = maximized))
+            onGeometryChanged(getCurrentBounds().copy(isMaximized = maximized))
         }
     }
 
@@ -48,10 +48,10 @@ class WindowGeometryTracker(
     }
 
     /**
-     * Captures the current state of the stage.
+     * Captures the current bounds of the stage.
      */
-    private fun getCurrentState(): WindowState {
-        return WindowState(
+    private fun getCurrentBounds(): WindowBounds {
+        return WindowBounds(
             x = stage.x,
             y = stage.y,
             width = stage.width,
@@ -61,17 +61,17 @@ class WindowGeometryTracker(
     }
 
     /**
-     * Helper to apply a state to the stage.
+     * Helper to apply bounds to the stage.
      */
-    fun applyState(state: WindowState) {
-        stage.width = state.width
-        stage.height = state.height
-        stage.isMaximized = state.isMaximized
+    fun applyState(bounds: WindowBounds) {
+        stage.width = bounds.width
+        stage.height = bounds.height
+        stage.isMaximized = bounds.isMaximized
 
-        if (state.x != -1.0 && state.y != -1.0) {
-            stage.x = state.x
-            stage.y = state.y
-        } else if (!state.isMaximized) {
+        if (bounds.x != -1.0 && bounds.y != -1.0) {
+            stage.x = bounds.x
+            stage.y = bounds.y
+        } else if (!bounds.isMaximized) {
             stage.centerOnScreen()
         }
     }

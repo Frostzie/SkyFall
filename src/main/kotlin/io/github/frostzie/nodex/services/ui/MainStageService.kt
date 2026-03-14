@@ -4,7 +4,9 @@ import ch.micheljung.fxwindow.FxStage
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.services.core.LayoutService
+import io.github.frostzie.nodex.ui.ScreenRegistry
 import io.github.frostzie.nodex.ui.util.WindowGeometryTracker
+import io.github.frostzie.nodex.ui.util.applyBasePolicy
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.scene.Node
 import javafx.scene.Scene
@@ -38,14 +40,7 @@ open class MainStageService(
         this.content = content
 
         configureFxStage(primaryStage, content, scene)
-
-        // Setup Geometry Tracker
-        tracker = WindowGeometryTracker(primaryStage) { newState ->
-            val screen = navigationService.currentScreen.get()
-            if (screen != AppScreen.INTRO) {
-                layoutService.updateWindowState(screen, newState)
-            }
-        }
+        setupGeometryTracker(primaryStage)
 
         focusService.trackStage(primaryStage)
         setupScreenListeners()
@@ -58,10 +53,11 @@ open class MainStageService(
 
     fun show() {
         val currentStage = stage ?: return
+        val currentContent = content ?: return
         val screen = navigationService.currentScreen.get()
 
         if (!currentStage.isShowing) {
-            applyPolicy(currentStage, screen)
+            applyPolicy(currentStage, currentContent, screen)
             currentStage.show()
         }
 
@@ -90,31 +86,44 @@ open class MainStageService(
         }
     }
 
-    private fun setupScreenListeners() {
-        navigationService.currentScreen.addListener { _, _, newScreen ->
-            val currentStage = stage ?: return@addListener
-            if (currentStage.isShowing) {
-                applyPolicy(currentStage, newScreen)
+    private fun setupGeometryTracker(primaryStage: Stage) {
+        tracker = WindowGeometryTracker(primaryStage) { newState ->
+            val screen = navigationService.currentScreen.get()
+            val profile = ScreenRegistry.getProfile(screen)
+            if (profile.isPersistent) {
+                layoutService.updateWindowState(screen, newState)
             }
         }
     }
 
-    private fun applyPolicy(currentStage: Stage, screen: AppScreen) {
-        val policy = WindowPolicy.forScreen(screen)
+    private fun setupScreenListeners() {
+        navigationService.currentScreen.addListener { _, _, newScreen ->
+            val currentStage = stage ?: return@addListener
+            val currentContent = content ?: return@addListener
+            if (currentStage.isShowing) {
+                applyPolicy(currentStage, currentContent, newScreen)
+            }
+        }
+    }
+
+    private fun applyPolicy(currentStage: Stage, content: Region, screen: AppScreen) {
+        val profile = ScreenRegistry.getProfile(screen)
+        val policy = WindowPolicy(
+            title = profile.title,
+            minWidth = profile.minWidth,
+            minHeight = profile.minHeight,
+            prefWidth = profile.prefWidth,
+            prefHeight = profile.prefHeight,
+            isResizable = profile.isResizable,
+            isPersistent = profile.isPersistent,
+            isModal = profile.isModal,
+            alwaysOnTop = profile.alwaysOnTop
+        )
+
         val state = layoutService.getWindowState(screen)
 
-        currentStage.title = policy.title
-
-        // Applying min size to content instead of stage
-        // because FxStage binds stage min size to content min size
-        content?.let {
-            it.minWidth = policy.minWidth
-            it.minHeight = policy.minHeight
-        }
-
-        currentStage.isResizable = policy.isResizable
-
-        tracker?.applyState(state)
+        // Shared logic via extension
+        currentStage.applyBasePolicy(content, policy, state, tracker)
     }
 
     fun registerNonCaptionNodes(nodes: Collection<Node>) {

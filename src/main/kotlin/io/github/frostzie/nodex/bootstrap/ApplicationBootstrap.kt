@@ -5,7 +5,10 @@ object ApplicationBootstrap {
         PlatformBootstrap.start()
         ServiceBootstrap.start()
         MinecraftBootstrap.start()
-        LegacyBootstrap.start()
         UiBootstrap.start()
+    }
+
+    fun stop() {
+        ServiceBootstrap.stop()
     }
 }

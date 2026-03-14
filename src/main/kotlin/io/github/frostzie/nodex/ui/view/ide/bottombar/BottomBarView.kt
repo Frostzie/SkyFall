@@ -51,7 +51,7 @@ class BottomBarView(private val viewModel: BottomBarViewModel) : HBox() {
                 if (viewModel.isDocumentLocked.get()) lockedIcon else unlockedIcon
             }, viewModel.isDocumentLocked))
 
-            readOnlyToggle.setOnAction { viewModel.toggleFileLock() }
+            /*readOnlyToggle.setOnAction { viewModel.toggleFileLock() }*/ //TODO: Reimplement
 
             children.add(readOnlyToggle)
         }

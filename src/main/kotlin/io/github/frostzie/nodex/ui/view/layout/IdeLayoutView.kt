@@ -2,7 +2,7 @@ package io.github.frostzie.nodex.ui.view.layout
 
 import io.github.frostzie.nodex.ui.view.ide.bottombar.BottomBarView
 import io.github.frostzie.nodex.ui.view.ide.leftbar.LeftBarView
-import io.github.frostzie.nodex.ui.view.ide.overlay.FileTreeDropOverlayView
+import io.github.frostzie.nodex.ui.view.ide.overlay.ToolWindowDropOverlayView
 import io.github.frostzie.nodex.ui.view.ide.rightbar.RightBarView
 import io.github.frostzie.nodex.ui.view.ide.topbar.TopBarView
 import io.github.frostzie.nodex.ui.view.ide.workbench.WorkbenchView
@@ -16,7 +16,7 @@ import javafx.scene.layout.StackPane
  */
 class IdeLayoutView(
     workbenchView: WorkbenchView,
-    overlayView: FileTreeDropOverlayView,
+    overlayView: ToolWindowDropOverlayView,
     private val topBarView: TopBarView,
     leftBarView: LeftBarView,
     bottomBarView: BottomBarView,

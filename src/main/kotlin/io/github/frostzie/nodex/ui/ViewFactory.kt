@@ -1,13 +1,10 @@
 package io.github.frostzie.nodex.ui
 
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.services.core.ConcurrencyService
+import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 import io.github.frostzie.nodex.services.core.LayoutService
-import io.github.frostzie.nodex.services.core.ModInfoService
 import io.github.frostzie.nodex.services.core.PerformanceService
 import io.github.frostzie.nodex.services.ui.NavigationService
-import io.github.frostzie.nodex.services.workspace.EditorService
-import io.github.frostzie.nodex.services.workspace.WorkspaceService
 import io.github.frostzie.nodex.services.settings.SettingsService
 import io.github.frostzie.nodex.ui.view.layout.IdeLayoutView
 import io.github.frostzie.nodex.ui.view.layout.ProjectManagerLayoutView
@@ -21,22 +18,22 @@ import io.github.frostzie.nodex.ui.viewmodel.ide.leftbar.LeftBarViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.topbar.TopBarViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.editor.EditorAreaViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.editor.pane.CodeEditorViewModel
-import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.editor.pane.EmptyCodeEditorViewModel
-import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.WorkbenchViewModel
+import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.DockLayerViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree.FileTreeViewModel
-import io.github.frostzie.nodex.services.files.FileWatcherService
 import io.github.frostzie.nodex.ui.view.ide.bottombar.BottomBarView
 import io.github.frostzie.nodex.ui.view.ide.leftbar.LeftBarView
-import io.github.frostzie.nodex.ui.view.ide.overlay.FileTreeDropOverlayView
+import io.github.frostzie.nodex.ui.view.ide.overlay.ToolWindowDropOverlayView
 import io.github.frostzie.nodex.ui.view.ide.topbar.TopBarView
 import io.github.frostzie.nodex.ui.view.ide.workbench.WorkbenchView
-import io.github.frostzie.nodex.ui.view.ide.workbench.editor.EditorAreaView
 import io.github.frostzie.nodex.ui.view.ide.workbench.editor.pane.CodeEditorView
 import io.github.frostzie.nodex.ui.view.ide.workbench.editor.pane.EmptyCodeEditorView
 import io.github.frostzie.nodex.ui.view.ide.workbench.tree.FileTreeView
 import io.github.frostzie.nodex.ui.view.intro.IntroView
 import io.github.frostzie.nodex.ui.view.layout.IntroLayoutView
 import io.github.frostzie.nodex.ui.viewmodel.intro.IntroViewModel
+import io.github.frostzie.nodex.ui.view.projectManager.MainAreaView
+import io.github.frostzie.nodex.ui.view.projectManager.ProjectManagerTopBarView
+import io.github.frostzie.nodex.ui.view.projectManager.RecentListView
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 
@@ -46,55 +43,39 @@ import javafx.scene.layout.StackPane
 class ViewFactory(
     private val layoutService: LayoutService,
     private val navigationService: NavigationService,
-    private val editorService: EditorService,
-    private val workspaceService: WorkspaceService,
-    private val fileWatcherService: FileWatcherService,
-    private val concurrencyService: ConcurrencyService,
-    private val modInfoService: ModInfoService,
     private val performanceService: PerformanceService,
     private val settingsService: SettingsService
 ) {
 
     fun createIdeLayout(): IdeLayoutView {
         // ViewModels
-        val workbenchViewModel = WorkbenchViewModel(layoutService)
-        val fileTreeViewModel = FileTreeViewModel(
-            workspaceService,
-            fileWatcherService,
-            concurrencyService,
-            editorService
-        )
-        val editorAreaViewModel = EditorAreaViewModel(editorService)
-        val codeEditorViewModel = CodeEditorViewModel(editorService)
-        val emptyCodeEditorViewModel = EmptyCodeEditorViewModel()
+        val dockLayerViewModel = DockLayerViewModel(layoutService)
+        val fileTreeViewModel = FileTreeViewModel()
+        val editorAreaViewModel = EditorAreaViewModel()
+        val codeEditorViewModel = CodeEditorViewModel()
         val leftBarViewModel = LeftBarViewModel(layoutService)
-        val topBarViewModel = TopBarViewModel(workspaceService, navigationService)
-        val bottomBarViewModel = BottomBarViewModel(
-            modInfoService,
-            editorService,
-            performanceService
-        )
+        val topBarViewModel = TopBarViewModel(navigationService)
+        val bottomBarViewModel = BottomBarViewModel(performanceService)
 
         // Views
         val codeEditorView = CodeEditorView(codeEditorViewModel)
-        val emptyCodeEditorView = EmptyCodeEditorView(emptyCodeEditorViewModel)
+        val emptyCodeEditorView = EmptyCodeEditorView()
 
-        val editorAreaView = EditorAreaView(
-            editorAreaViewModel,
-            codeEditorView,
-            emptyCodeEditorView
+        //TODO: Move it out of ViewFactory
+        val toolViews = mapOf(
+            ToolWindow.FILES to FileTreeView(fileTreeViewModel)
         )
-
-        val fileTreeView = FileTreeView(fileTreeViewModel)
 
         val workbenchView = WorkbenchView(
-            workbenchViewModel,
-            editorAreaView,
-            fileTreeView
+            dockLayerViewModel,
+            editorAreaViewModel,
+            codeEditorView,
+            emptyCodeEditorView,
+            toolViews
         )
 
-        val overlayView = FileTreeDropOverlayView(workbenchViewModel.currentDropTarget)
-        
+        val overlayView = ToolWindowDropOverlayView(dockLayerViewModel.currentDropTarget)
+
         val leftBarView = LeftBarView(leftBarViewModel)
         val topBarView = TopBarView(topBarViewModel)
         val bottomBarView = BottomBarView(bottomBarViewModel)
@@ -108,11 +89,15 @@ class ViewFactory(
         )
     }
 
-    //TODO: add actual views
     fun createProjectManagerLayout(): ProjectManagerLayoutView {
+        val topBarView = ProjectManagerTopBarView()
+        val recentListView = RecentListView()
+        val mainAreaView = MainAreaView()
 
         return ProjectManagerLayoutView(
-
+            topBarView,
+            recentListView,
+            mainAreaView
         )
     }
 

@@ -6,7 +6,6 @@ import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.HBox
-import javafx.stage.DirectoryChooser
 
 /**
  * The TopBar of the IDE, containing action bar and window controls.
@@ -32,21 +31,8 @@ class TopBarView(private val viewModel: TopBarViewModel) : HBox() {
     //TODO: Remove this and add an actual menu bar
     private fun createMenuBar(): MenuBar {
         val menuBar = MenuBar()
+        menuBar.style = "-fx-background-color: transparent;" // Oh, got that stupid bg box I hate it temp for now but yeah just had to say it
         menuBar.menus.addAll(
-
-            Menu("File Temp", null,
-                MenuItem("OpenFile").apply {
-                    setOnAction {
-                        val chooser = DirectoryChooser().apply {
-                            title = "Select Project Folder"
-                        }
-                        val selected = chooser.showDialog(scene.window)
-                        if (selected != null) {
-                            viewModel.openFolder(selected.toPath())
-                        }
-                    }
-                },
-            ),
             Menu("Dev", null,
                 Menu(
                     "Screen Switching", null,

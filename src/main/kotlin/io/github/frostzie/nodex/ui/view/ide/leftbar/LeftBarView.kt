@@ -23,7 +23,7 @@ class LeftBarView(private val viewModel: LeftBarViewModel) : VBox() {
             alignment = Pos.TOP_CENTER
 
             val toggleFileTreeBtn = Button(null, FontIcon(Material2OutlinedAL.FOLDER)).apply {
-                setOnAction { viewModel.toggleSidebar() }
+                setOnAction { viewModel.toggleFileTree() }
             }
 
             toggleFileTreeBtn.styleClass.addAll(

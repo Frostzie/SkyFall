@@ -1,6 +1,7 @@
 package io.github.frostzie.nodex.domain.config
 
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
+import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 
 /**
  * Represents the geometric state of a window (Stage).
@@ -11,6 +12,16 @@ data class WindowBounds(
     var width: Double = -1.0,
     var height: Double = -1.0,
     var isMaximized: Boolean = false
+)
+
+/**
+ * Single tool window's layout.
+ */
+data class ToolWindowConfig(
+    var toolType: String = "",
+    var anchor: String = "RIGHT",
+    var visible: Boolean = true,
+    var sizeRatio: Double = 0.25
 )
 
 /**
@@ -35,7 +46,7 @@ data class LayoutConfig(
  * Layout configuration specific to the workbench (fileTree).
  */
 data class WorkbenchLayout(
-    var treePosition: String = "LEFT",
-    var treeVisible: Boolean = true,
-    var treeSize: Double = 0.25
+    var toolWindows: MutableMap<String, ToolWindowConfig> = mutableMapOf(
+        ToolWindow.FILES.name to ToolWindowConfig(ToolWindow.FILES.name, "LEFT", true, 0.25)
+    )
 )

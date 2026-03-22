@@ -21,6 +21,8 @@ class FileWatcherService(
 ) {
     private val logger = LoggerProvider.getLogger("FileWatcherService")
     private val watchers = ConcurrentHashMap<Path, ProjectWatcher>()
+    private val genericWatchers = ConcurrentHashMap<Path, FileSystemWatcher>()
+    private val fileCallbacks = ConcurrentHashMap<Path, ConcurrentHashMap<Path, (Path, EventType) -> Unit>>()
 
     private val syncExecutor = Executors.newSingleThreadScheduledExecutor()
     private val ignoredPaths = ConcurrentHashMap<Path, Long>()
@@ -49,6 +51,34 @@ class FileWatcherService(
     }
 
     /**
+     * Starts monitoring a specific file for changes.
+     * 
+     * Since DirectoryWatcher monitors directories, this watches the parent
+     * directory and filters events for the target file.
+     * 
+     * @param path The file to watch.
+     * @param onAction The callback to invoke when the file changes.
+     */
+    fun watchFile(path: Path, onAction: (Path, EventType) -> Unit) {
+        val parent = path.parent ?: return
+        val fileName = path.fileName
+        
+        val callbacks = fileCallbacks.computeIfAbsent(parent) { ConcurrentHashMap() }
+        callbacks[fileName] = onAction
+        
+        genericWatchers.computeIfAbsent(parent) {
+            val watcher = FileSystemWatcher(parent) { eventPath, action ->
+                if (!shouldIgnore(eventPath)) {
+                    fileCallbacks[parent]?.get(eventPath.fileName)?.invoke(eventPath, action)
+                }
+            }
+            watcher.start()
+            logger.debug("Monitoring parent directory for file: {}", path)
+            watcher
+        }
+    }
+
+    /**
      * Starts monitoring disk state for a project.
      *
      * This method triggers project-level invalidation (via filesystemTick) upon disk changes.
@@ -68,6 +98,19 @@ class FileWatcherService(
             logger.debug("Monitoring project state at: {}", root)
             ProjectWatcher(project, watcher)
         }
+    }
+
+    /**
+     * Stops monitoring a specific project root.
+     * 
+     * @param root The root path of the project to stop watching.
+     */
+    fun unwatch(root: Path) {
+        watchers.remove(root)?.watcher?.stop()
+        pendingSyncs.remove(root)?.cancel(false)
+        pendingProjectsToSync.remove(root)
+        projectChangeQueues.remove(root)
+        logger.debug("Stopped monitoring project at: {}", root)
     }
 
     /**
@@ -213,6 +256,10 @@ class FileWatcherService(
     fun stopAll() {
         watchers.values.forEach { it.watcher.stop() }
         watchers.clear()
+        
+        genericWatchers.values.forEach { it.stop() }
+        genericWatchers.clear()
+        fileCallbacks.clear()
 
         pendingSyncs.values.forEach { it.cancel(false) }
         pendingSyncs.clear()

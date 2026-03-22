@@ -4,8 +4,11 @@ import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 import io.github.frostzie.nodex.services.core.LayoutService
 import io.github.frostzie.nodex.services.core.PerformanceService
+import io.github.frostzie.nodex.services.files.FileTreePersistenceService
+import io.github.frostzie.nodex.services.files.FileTreeService
 import io.github.frostzie.nodex.services.ui.NavigationService
 import io.github.frostzie.nodex.services.settings.SettingsService
+import io.github.frostzie.nodex.services.workspace.ProjectRuntimeService
 import io.github.frostzie.nodex.ui.view.layout.IdeLayoutView
 import io.github.frostzie.nodex.ui.view.layout.ProjectManagerLayoutView
 import io.github.frostzie.nodex.ui.view.layout.SettingsLayoutView
@@ -44,13 +47,16 @@ class ViewFactory(
     private val layoutService: LayoutService,
     private val navigationService: NavigationService,
     private val performanceService: PerformanceService,
-    private val settingsService: SettingsService
+    private val settingsService: SettingsService,
+    private val fileTreeService: FileTreeService,
+    private val projectRuntimeService: ProjectRuntimeService,
+    private val fileTreePersistenceService: FileTreePersistenceService
 ) {
 
     fun createIdeLayout(): IdeLayoutView {
         // ViewModels
         val dockLayerViewModel = DockLayerViewModel(layoutService)
-        val fileTreeViewModel = FileTreeViewModel()
+        val fileTreeViewModel = FileTreeViewModel(fileTreeService, projectRuntimeService, fileTreePersistenceService)
         val editorAreaViewModel = EditorAreaViewModel()
         val codeEditorViewModel = CodeEditorViewModel()
         val leftBarViewModel = LeftBarViewModel(layoutService)

@@ -10,38 +10,37 @@ class MigrationService {
     private val migrations = mutableListOf<Migration>()
 
     private data class Migration(
-        val toVersion: String,
+        val fromVersion: String,
         val action: (JsonNode) -> JsonNode
     )
 
     /**
      * Registers a migration step targeting a specific version.
-     * 
-     * @param toVersion The version this migration achieves.
+     *
+     * @param fromVersion The version that has this migration rule.
      * @param action The transformation logic.
      */
-    fun register(toVersion: String, action: (JsonNode) -> JsonNode) {
-        migrations.add(Migration(toVersion, action))
+    fun register(fromVersion: String, action: (JsonNode) -> JsonNode) {
+        migrations.add(Migration(fromVersion, action))
     }
 
     /**
      * Migrates the given [node] from [storedVersion] to the latest registered version.
      * 
-     * Applies all migrations where the target version is greater than [storedVersion],
-     * sorted by the target version in ascending order.
+     * Applies all migrations set after [storedVersion], sorted in ascending order.
      */
     fun migrate(node: JsonNode, storedVersion: String): JsonNode {
         var currentNode = node
-        
+
         // Only care about migrations newer than what's stored in the config (idc about backwards compatibility rn)
         val applicable = migrations
-            .filter { ModVersionUtils.isNewerThan(it.toVersion, storedVersion) }
-            .sortedWith { m1, m2 -> ModVersionUtils.compare(m1.toVersion, m2.toVersion) }
-        
+            .filter { ModVersionUtils.isNewerThan(it.fromVersion, storedVersion) }
+            .sortedWith { m1, m2 -> ModVersionUtils.compare(m1.fromVersion, m2.fromVersion) }
+
         applicable.forEach { migration ->
             currentNode = migration.action(currentNode)
         }
-        
+
         return currentNode
     }
 }

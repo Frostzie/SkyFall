@@ -3,18 +3,16 @@ package io.github.frostzie.nodex.ui.view.intro
 import atlantafx.base.controls.Spacer
 import atlantafx.base.theme.Styles
 import io.github.frostzie.nodex.domain.uicontract.Links
-import io.github.frostzie.nodex.ui.util.HyperlinkUtils
+import io.github.frostzie.nodex.ui.utils.HyperlinkUtils
 import io.github.frostzie.nodex.ui.viewmodel.intro.IntroViewModel
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.control.Tooltip
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 
 /**

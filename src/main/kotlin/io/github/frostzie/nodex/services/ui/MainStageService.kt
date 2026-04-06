@@ -5,8 +5,8 @@ import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.services.core.LayoutService
 import io.github.frostzie.nodex.ui.ScreenRegistry
-import io.github.frostzie.nodex.ui.util.WindowGeometryTracker
-import io.github.frostzie.nodex.ui.util.applyBasePolicy
+import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
+import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.scene.Node
 import javafx.scene.Scene

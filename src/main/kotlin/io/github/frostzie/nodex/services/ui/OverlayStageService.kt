@@ -6,8 +6,9 @@ import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.services.core.LayoutService
 import io.github.frostzie.nodex.ui.ViewFactory
 import io.github.frostzie.nodex.ui.ScreenRegistry
-import io.github.frostzie.nodex.ui.util.WindowGeometryTracker
-import io.github.frostzie.nodex.ui.util.applyBasePolicy
+import io.github.frostzie.nodex.ui.utils.NonCaptionNodesProvider
+import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
+import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.scene.Scene
 import javafx.scene.layout.Region
@@ -64,7 +65,10 @@ open class OverlayStageService(
         val rootNode = viewFactory.createOverlayContent(overlay)
         val scene = Scene(rootNode)
 
-        configureFxStage(stage, rootNode, scene)
+        val fxStage = configureFxStage(stage, rootNode, scene)
+        if (fxStage != null && rootNode is NonCaptionNodesProvider) {
+            fxStage.nonCaptionNodes.addAll(rootNode.getNonCaptionNodes())
+        }
         val tracker = setupGeometryTracker(stage, overlay)
         applyPolicy(stage, rootNode, overlay, tracker)
 
@@ -78,16 +82,18 @@ open class OverlayStageService(
         focusService.trackStage(stage)
     }
 
-    private fun configureFxStage(stage: Stage, rootNode: Region, scene: Scene) {
-        try {
-            FxStage.configure(stage)
+    private fun configureFxStage(stage: Stage, rootNode: Region, scene: Scene): FxStage? {
+        return try {
+            val configured = FxStage.configure(stage)
                 .withSceneFactory { parent -> scene.apply { root = parent } }
                 .withContent(rootNode)
                 .allowMinimize(false)
                 .apply()
+            configured
         } catch (e: Exception) {
             logger.error("Failed to configure FxStage for overlay", e)
             stage.scene = scene
+            null
         }
     }
 

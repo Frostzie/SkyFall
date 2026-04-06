@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.ui.util
+package io.github.frostzie.nodex.ui.utils
 
 import io.github.frostzie.nodex.loader.minecraft.MCInterface
 import io.github.frostzie.nodex.utils.LoggerProvider

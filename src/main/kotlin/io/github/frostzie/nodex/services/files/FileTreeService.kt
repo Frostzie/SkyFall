@@ -145,7 +145,7 @@ class FileTreeService(
 
         if (Files.isDirectory(path)) {
             // Since also dir renames could trigger for now the easiest is just rescanning the whole tree.
-            // Eventually can be improved...
+            //TODO: Eventually improved...
             return handleParentInvalidated(state)
         }
 

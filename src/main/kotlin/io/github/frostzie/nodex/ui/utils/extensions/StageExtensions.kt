@@ -1,7 +1,8 @@
-package io.github.frostzie.nodex.ui.util
+package io.github.frostzie.nodex.ui.utils.extensions
 
 import io.github.frostzie.nodex.domain.config.WindowBounds
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
+import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
 import javafx.scene.layout.Region
 import javafx.stage.Stage
 

@@ -6,6 +6,7 @@ import io.github.frostzie.nodex.ui.view.ide.overlay.ToolWindowDropOverlayView
 import io.github.frostzie.nodex.ui.view.ide.rightbar.RightBarView
 import io.github.frostzie.nodex.ui.view.ide.topbar.TopBarView
 import io.github.frostzie.nodex.ui.view.ide.workbench.WorkbenchView
+import io.github.frostzie.nodex.ui.utils.NonCaptionNodesProvider
 import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.StackPane
@@ -20,7 +21,7 @@ class IdeLayoutView(
     private val topBarView: TopBarView,
     leftBarView: LeftBarView,
     bottomBarView: BottomBarView,
-): StackPane() {
+) : StackPane(), NonCaptionNodesProvider {
 
     init {
         // The Static Shell
@@ -45,5 +46,5 @@ class IdeLayoutView(
         children.addAll(shell)
     }
 
-    fun getNonCaptionNodes(): List<Node> = topBarView.nonCaptionNodes
+    override fun getNonCaptionNodes(): List<Node> = topBarView.nonCaptionNodes
 }

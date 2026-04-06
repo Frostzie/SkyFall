@@ -18,7 +18,7 @@ class FileTreeView(private val viewModel: FileTreeViewModel) : VBox() {
     init {
         setupHeader()
         setupTreeView()
-        
+
         children.addAll(header, treeView)
     }
 
@@ -26,8 +26,6 @@ class FileTreeView(private val viewModel: FileTreeViewModel) : VBox() {
         header.minHeight = 30.0
         header.prefHeight = 30.0
         header.maxHeight = 30.0
-        //TODO: remove this
-        header.style = "-fx-background-color: #ffffff;" // Just styling the draggable area so easier to tell the diff
 
         // Reimplementing the drag logic for the Workbench
         header.setOnDragDetected { event ->
@@ -42,7 +40,7 @@ class FileTreeView(private val viewModel: FileTreeViewModel) : VBox() {
     private fun setupTreeView() {
         treeView.rootProperty().bind(viewModel.root)
         treeView.isShowRoot = true //TODO: Need to add Project name next to root similar to IntelliJ
-        
+
         treeView.selectionModel.selectedItemProperty().addListener { _, _, newItem ->
             viewModel.selectedPath.set(newItem?.value?.path)
         }

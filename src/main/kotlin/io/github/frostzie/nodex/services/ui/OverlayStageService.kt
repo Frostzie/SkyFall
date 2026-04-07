@@ -25,6 +25,7 @@ open class OverlayStageService(
     private val layoutService: LayoutService,
     private val navigationService: NavigationService,
     private val focusService: FocusService,
+    private val stylingService: StylingService,
     private val viewFactory: ViewFactory
 ) {
     private val logger = LoggerProvider.getLogger("OverlayStageService")
@@ -64,6 +65,8 @@ open class OverlayStageService(
         val stage = Stage()
         val rootNode = viewFactory.createOverlayContent(overlay)
         val scene = Scene(rootNode)
+
+        scene.stylesheets.addAll(stylingService.getStylesheetUrls())
 
         val fxStage = configureFxStage(stage, rootNode, scene)
         if (fxStage != null && rootNode is NonCaptionNodesProvider) {

@@ -18,7 +18,8 @@ import io.github.frostzie.nodex.services.core.ModVersionService
 import io.github.frostzie.nodex.services.config.stationary.ConfigService
 import io.github.frostzie.nodex.services.config.MigrationService
 import io.github.frostzie.nodex.services.config.ConfigMoveService
-import io.github.frostzie.nodex.services.config.global.BackupService
+import io.github.frostzie.nodex.services.config.BackupService
+import io.github.frostzie.nodex.services.settings.SettingsValidationService
 import io.github.frostzie.nodex.services.config.global.SettingsConfigService
 import io.github.frostzie.nodex.services.config.global.ProjectsConfigService
 import io.github.frostzie.nodex.services.config.project.ProjectConfigService
@@ -36,31 +37,34 @@ object ServiceBootstrap {
     private val logger = LoggerProvider.getLogger("ServiceBootstrap")
 
     lateinit var concurrencyService: ConcurrencyService
-    lateinit var modVersionService: ModVersionService
-    lateinit var fileWatcherService: FileWatcherService
-    lateinit var fileTreeService: FileTreeService
-    lateinit var treeConfigService: TreeConfigService
-    lateinit var fileTreePersistenceService: FileTreePersistenceService
-    lateinit var projectRuntimeService: ProjectRuntimeService
     lateinit var focusService: FocusService
+    lateinit var fileWatcherService: FileWatcherService
     lateinit var fileService: FileService
-    lateinit var settingsService: SettingsService
-    lateinit var navigationService: NavigationService
-    lateinit var stylingService: StylingService
     lateinit var performanceService: PerformanceService
-    lateinit var toolWindowService: ToolWindowService
-    lateinit var layoutService: LayoutService
+    lateinit var modVersionService: ModVersionService
 
-    // Tiered Config Services
-    lateinit var configLocationService: ConfigLocationService
     lateinit var configService: ConfigService
     lateinit var migrationService: MigrationService
     lateinit var configMoveService: ConfigMoveService
     lateinit var backupService: BackupService
+    lateinit var settingsValidationService: SettingsValidationService
+    lateinit var configLocationService: ConfigLocationService
     lateinit var settingsConfigService: SettingsConfigService
     lateinit var projectsConfigService: ProjectsConfigService
     lateinit var projectConfigService: ProjectConfigService
     lateinit var layoutConfigService: LayoutConfigService
+    lateinit var treeConfigService: TreeConfigService
+
+    lateinit var settingsService: SettingsService
+    lateinit var navigationService: NavigationService
+    lateinit var toolWindowService: ToolWindowService
+    lateinit var layoutService: LayoutService
+    lateinit var fileTreePersistenceService: FileTreePersistenceService
+
+    lateinit var fileTreeService: FileTreeService
+    lateinit var projectRuntimeService: ProjectRuntimeService
+
+    lateinit var stylingService: StylingService
 
     fun start() {
         logger.info("Starting services...")
@@ -97,6 +101,8 @@ object ServiceBootstrap {
         configMoveService = ConfigMoveService(fileService)
         backupService = BackupService(fileService)
 
+        settingsValidationService = SettingsValidationService(SettingsBootstrap.settingsRegistry)
+
         configLocationService = ConfigLocationService(fileService, configService, configMoveService)
         val localNodexDir = configRoot.resolve("nodex")
         val effectiveNodexDir = configLocationService.resolveEffectiveNodexDir(localNodexDir)
@@ -112,8 +118,8 @@ object ServiceBootstrap {
             configService,
             migrationService,
             modVersionService,
-            fileWatcherService,
-            backupService
+            backupService,
+            settingsValidationService
         )
 
         projectsConfigService = ProjectsConfigService(projectsPath, backupDir, fileService, fileWatcherService, backupService)
@@ -124,7 +130,7 @@ object ServiceBootstrap {
     }
 
     private fun initPersistenceServices() {
-        settingsService = SettingsService(settingsConfigService, concurrencyService)
+        settingsService = SettingsService(settingsConfigService, settingsValidationService)
         settingsService.initialize()
         navigationService = NavigationService(concurrencyService)
         toolWindowService = ToolWindowService()
@@ -157,10 +163,6 @@ object ServiceBootstrap {
         logger.info("Shutting down services...")
 
         fileTreePersistenceService.flushPending()
-
-        if (::settingsService.isInitialized) {
-            settingsService.flushPendingWrites()
-        }
 
         if (::fileWatcherService.isInitialized) {
             fileWatcherService.shutdown()

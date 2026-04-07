@@ -13,7 +13,7 @@ import io.github.frostzie.nodex.ui.builder.IdeScreenBuilder
 import io.github.frostzie.nodex.ui.builder.IntroScreenBuilder
 import io.github.frostzie.nodex.ui.builder.OverlayBuilder
 import io.github.frostzie.nodex.ui.builder.ProjectManagerScreenBuilder
-import io.github.frostzie.nodex.ui.builder.settings.SettingsScreenBuilder
+import io.github.frostzie.nodex.ui.builder.SettingsScreenBuilder
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 

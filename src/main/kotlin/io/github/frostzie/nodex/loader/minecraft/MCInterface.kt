@@ -1,8 +1,10 @@
 package io.github.frostzie.nodex.loader.minecraft
 
+import net.minecraft.Util
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.storage.LevelResource
+import java.net.URI
 import java.nio.file.Path
 
 /**
@@ -48,5 +50,12 @@ object MCInterface {
      */
     fun getGamePath(): Path? {
         return Minecraft.getInstance().gameDirectory?.toPath()
+    }
+
+    /**
+     * Opens a URI using the platform's default browser.
+     */
+    fun openUri(uri: URI) {
+        Util.getPlatform().openUri(uri)
     }
 }

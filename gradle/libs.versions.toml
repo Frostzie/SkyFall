@@ -26,6 +26,7 @@ devauth = { module = "me.djtheredstoner:DevAuth-fabric", version.ref = "devauth"
 jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jacksonCoreV" }
 jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jacksonCoreV" }
 jacksonModuleKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonCoreV" }
+jacksonDatatypeJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jacksonCoreV" }
 directoryWatcher = { module = "io.methvin:directory-watcher", version.ref = "directoryWatcherV" }
 jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvgV" }
 richTextFX = { module = "org.fxmisc.richtext:richtextfx", version.ref = "richTextFXv"}

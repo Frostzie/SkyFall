@@ -12,6 +12,6 @@ class IntroViewModel(
     }
 
     fun tutorialSkip() {
-        navigationService.navigateTo(AppScreen.IDE) //TODO: Replace with Project Manegr
+        navigationService.navigateTo(AppScreen.PROJECT_MANAGER)
     }
 }

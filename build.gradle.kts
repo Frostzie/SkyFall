@@ -78,10 +78,12 @@ dependencies {
 	implementation(libs.jacksonCore)
 	implementation(libs.jacksonDatabind)
 	implementation(libs.jacksonModuleKotlin)
+	implementation(libs.jacksonDatatypeJsr310)
 
 	include(libs.jacksonCore)
 	include(libs.jacksonDatabind)
 	include(libs.jacksonModuleKotlin)
+	include(libs.jacksonDatatypeJsr310)
 
 	implementation(libs.jsvg)
 	implementation(libs.directoryWatcher)
@@ -92,6 +94,11 @@ dependencies {
 	// For native windows bar
 	implementation(libs.fxStage)
 	include(libs.fxStage)
+
+	// TODO: add license + move to libs
+	// Source: https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-javafx
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.10.2")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 
 	// JavaFX
 	for (classifier in javafxClassifiers) {

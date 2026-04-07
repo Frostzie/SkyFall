@@ -38,7 +38,10 @@ class ViewFactory(
         projectRuntimeService,
         fileTreePersistenceService
     )
-    private val projectManagerBuilder = ProjectManagerScreenBuilder()
+    private val projectManagerBuilder = ProjectManagerScreenBuilder(
+        navigationService,
+        projectRuntimeService
+    )
     private val introBuilder = IntroScreenBuilder(navigationService)
     private val settingsBuilder = SettingsScreenBuilder(
         settingsService,

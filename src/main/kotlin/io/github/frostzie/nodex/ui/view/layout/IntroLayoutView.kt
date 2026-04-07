@@ -7,7 +7,7 @@ import javafx.scene.layout.StackPane
  * The Intro Layout View.
  */
 class IntroLayoutView(
-    private val introView: IntroView
+    introView: IntroView
 ) : StackPane() {
 
     init {

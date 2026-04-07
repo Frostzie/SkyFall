@@ -29,7 +29,6 @@ class SettingsActionsBarView(
         }
 
         val saveBtn = Button("Save").apply {
-            disableProperty().bind(vm.isValid.not())
             setOnAction { vm.save() }
         }
 

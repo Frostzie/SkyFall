@@ -1,15 +1,15 @@
-package io.github.frostzie.nodex.ui
+package io.github.frostzie.nodex.domain.registry
 
 import io.github.frostzie.nodex.domain.uicontract.PanelPosition
 import io.github.frostzie.nodex.domain.uicontract.ToolPolicy
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 
 /**
- * Registry for workbench tool windows and their default behaviors.
+ * Static metadata for all tool window profiles.
  */
-object ToolRegistry {
+object ToolProfiles {
 
-    private val tools = mapOf(
+    val profiles: Map<ToolWindow, ToolPolicy> = mapOf(
         ToolWindow.FILES to ToolPolicy(
             title = "Files",
             defaultAnchor = PanelPosition.LEFT,
@@ -17,9 +17,4 @@ object ToolRegistry {
             defaultVisible = true
         )
     )
-
-    fun getProfile(kind: ToolWindow): ToolPolicy =
-        tools[kind] ?: throw IllegalArgumentException("No profile found for tool window: $kind")
-
-    fun getAllKinds(): List<ToolWindow> = tools.keys.toList()
 }

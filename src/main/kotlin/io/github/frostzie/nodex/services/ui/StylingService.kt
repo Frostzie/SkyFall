@@ -1,12 +1,13 @@
 package io.github.frostzie.nodex.services.ui
 
 import atlantafx.base.theme.PrimerDark
+import io.github.frostzie.nodex.api.misc.Styling
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.application.Application
 import java.util.concurrent.ConcurrentHashMap
 
 //TODO: Remake just temp to get styles loaded.
-class StylingService {
+class StylingService : Styling {
     private val logger = LoggerProvider.getLogger("StylingService")
     private val stylesheets = ConcurrentHashMap<String, String>()
 
@@ -15,10 +16,9 @@ class StylingService {
         registerBuiltInCss()
     }
 
-    fun getStylesheetUrls(): List<String> = stylesheets.values.toList()
+    override fun getStylesheetUrls(): List<String> = stylesheets.values.toList()
 
-
-    fun registerCss(id: String, classpathPath: String) {
+    override fun registerCss(id: String, classpathPath: String) {
         StylingService::class.java
             .getResource(classpathPath)
             ?.toExternalForm()

@@ -1,9 +1,11 @@
 package io.github.frostzie.nodex.services.ui
 
+import io.github.frostzie.nodex.api.concurrency.Concurrency
+import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.services.core.ConcurrencyService
 import io.github.frostzie.nodex.utils.LoggerProvider
+import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
 /**
@@ -14,30 +16,32 @@ import javafx.beans.property.SimpleObjectProperty
  * Also manages the active [OverlayScreen].
  * State changes are assigned to the UI thread.
  */
-class NavigationService(private val concurrencyService: ConcurrencyService) {
+class NavigationService(private val concurrency: Concurrency) : Navigation {
     private val logger = LoggerProvider.getLogger("NavigationService")
 
     /**
      * The currently active primary screen.
      * ViewModels should bind to this property to react to navigation changes.
      */
-    val currentScreen = SimpleObjectProperty(AppScreen.INTRO)
+    private val _currentScreen = SimpleObjectProperty(AppScreen.INTRO)
+    override val currentScreen: ReadOnlyObjectProperty<AppScreen> = _currentScreen
 
     /**
      * The primary screen that was active before the current one.
      */
-    var previousScreen: AppScreen = AppScreen.INTRO
+    override var previousScreen: AppScreen = AppScreen.INTRO
         private set
 
     /**
      * The currently active overlay, or null if no overlay is shown.
      */
-    val activeOverlay = SimpleObjectProperty<OverlayScreen?>(null)
+    private val _activeOverlay = SimpleObjectProperty<OverlayScreen?>(null)
+    override val activeOverlay: ReadOnlyObjectProperty<OverlayScreen?> = _activeOverlay
 
-    fun initialize(initialScreen: AppScreen) {
-        currentScreen.set(initialScreen)
-        
-        currentScreen.addListener { _, old, new ->
+    override fun initialize(initialScreen: AppScreen) {
+        _currentScreen.set(initialScreen)
+
+        _currentScreen.addListener { _, old, new ->
             if (old != new) {
                 logger.debug("Screen switch: {} -> {}", old, new)
             }
@@ -45,16 +49,16 @@ class NavigationService(private val concurrencyService: ConcurrencyService) {
 
         logger.debug("NavigationService initialized. Screen: {}", initialScreen)
     }
-    
+
     /**
      * Switch the current screen to a specified screen.
      */
-    fun navigateTo(screen: AppScreen) {
-        concurrencyService.runOnUI {
-            val current = currentScreen.get()
+    override fun navigateTo(screen: AppScreen) {
+        concurrency.runOnUI {
+            val current = _currentScreen.get()
             if (current != screen) {
                 previousScreen = current
-                currentScreen.set(screen)
+                _currentScreen.set(screen)
             }
         }
     }
@@ -62,10 +66,10 @@ class NavigationService(private val concurrencyService: ConcurrencyService) {
     /**
      * Open the specified overlay.
      */
-    fun showOverlay(overlay: OverlayScreen) {
-        concurrencyService.runOnUI {
-            if (activeOverlay.get() != overlay) {
-                activeOverlay.set(overlay)
+    override fun showOverlay(overlay: OverlayScreen) {
+        concurrency.runOnUI {
+            if (_activeOverlay.get() != overlay) {
+                _activeOverlay.set(overlay)
             }
         }
     }
@@ -73,10 +77,10 @@ class NavigationService(private val concurrencyService: ConcurrencyService) {
     /**
      * Close the currently active overlay.
      */
-    fun closeOverlay() {
-        concurrencyService.runOnUI {
-            if (activeOverlay.get() != null) {
-                activeOverlay.set(null)
+    override fun closeOverlay() {
+        concurrency.runOnUI {
+            if (_activeOverlay.get() != null) {
+                _activeOverlay.set(null)
             }
         }
     }

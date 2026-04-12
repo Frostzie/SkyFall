@@ -2,8 +2,9 @@ package io.github.frostzie.nodex.services.config.project
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.github.frostzie.nodex.api.config.LayoutPersistence
 import io.github.frostzie.nodex.domain.config.LayoutConfig
-import io.github.frostzie.nodex.services.core.FileService
+import io.github.frostzie.nodex.api.file.FileOperations
 import io.github.frostzie.nodex.utils.LoggerProvider
 import java.nio.file.Path
 
@@ -12,24 +13,24 @@ import java.nio.file.Path
  */
 class LayoutConfigService(
     private val projectConfigService: ProjectConfigService,
-    private val fileService: FileService
-) {
+    private val fileOps: FileOperations
+) : LayoutPersistence {
     private val logger = LoggerProvider.getLogger("LayoutConfigService")
     private val mapper = ObjectMapper().registerKotlinModule()
 
     /**
      * Loads the layout configs for a given project.
      */
-    fun load(projectRoot: Path): LayoutConfig {
+    override fun load(projectRoot: Path): LayoutConfig {
         val configPath = getConfigPath(projectRoot)
-        
-        if (!fileService.exists(configPath)) {
+
+        if (!fileOps.exists(configPath)) {
             logger.debug("No layout config found at {}, using defaults.", configPath)
             return LayoutConfig()
         }
 
         return try {
-            val json = fileService.readText(configPath)
+            val json = fileOps.readText(configPath)
             mapper.readValue(json, LayoutConfig::class.java)
         } catch (e: Exception) {
             logger.error("Failed to load layout config for project: $projectRoot", e)
@@ -40,7 +41,7 @@ class LayoutConfigService(
     /**
      * Saves the layout configs for a given project.
      */
-    fun save(projectRoot: Path, config: LayoutConfig) {
+    override fun save(projectRoot: Path, config: LayoutConfig) {
         if (projectConfigService.lockLost) {
             logger.warn("Project lock was lost for $projectRoot. Skipping layout save to prevent data corruption.")
             return
@@ -49,13 +50,13 @@ class LayoutConfigService(
         val configPath = getConfigPath(projectRoot)
         try {
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config)
-            fileService.writeAtomic(configPath, json)
+            fileOps.writeAtomic(configPath, json)
             logger.debug("Successfully saved layout config for project: {}", projectRoot)
         } catch (e: Exception) {
             logger.error("Failed to save layout config for project: $projectRoot", e)
         }
     }
 
-    private fun getConfigPath(projectRoot: Path): Path = 
+    private fun getConfigPath(projectRoot: Path): Path =
         projectRoot.resolve(".nodex").resolve("layout.json")
 }

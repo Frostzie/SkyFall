@@ -1,5 +1,6 @@
 package io.github.frostzie.nodex.services.core
 
+import io.github.frostzie.nodex.api.concurrency.Concurrency
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.application.Platform
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
  *
  * @see kotlinx.coroutines.Dispatchers
  */
-class ConcurrencyService {
+class ConcurrencyService : Concurrency {
     private val logger = LoggerProvider.getLogger("ConcurrencyService")
 
     // Master Job that controls the lifecycle of the entire app's background tasks
@@ -27,36 +28,36 @@ class ConcurrencyService {
      * Dispatcher for Input/Output operations (File reading, Network).
      * Backed by [Dispatchers.IO] (Elastic thread pool).
      */
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    override val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     /**
      * Dispatcher for UI operations (Main = JavaFX App Thread).
      * Use this within coroutines to switch to the UI thread.
      */
-    val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
+    override val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
 
     /**
      * Dispatcher for CPU-intensive operations (Data parsing, calculations).
      */
-    val cpuDispatcher: CoroutineDispatcher = Dispatchers.Default
+    override val cpuDispatcher: CoroutineDispatcher = Dispatchers.Default
 
     /**
      * A global scope for IO operations that should live as long as the app is running.
      * Use this for firing background tasks in Services.
      */
-    val ioScope = CoroutineScope(ioDispatcher + masterJob)
+    override val ioScope = CoroutineScope(ioDispatcher + masterJob)
 
     /**
      * A global scope for CPU operations.
      */
-    val cpuScope = CoroutineScope(cpuDispatcher + masterJob)
+    override val cpuScope = CoroutineScope(cpuDispatcher + masterJob)
 
     /**
      * Helper to run a block on the UI thread safely.
      * If already on the UI thread, run immediately. Otherwise, queues it.
      * Use this for simple data updates (e.g., updating a Label text or a List).
      */
-    fun runOnUI(action: () -> Unit) {
+    override fun runOnUI(action: () -> Unit) {
         if (Platform.isFxApplicationThread()) {
             action()
         } else {
@@ -67,14 +68,14 @@ class ConcurrencyService {
     /**
      * Helper to run a block on the I/O thread pool asynchronously.
      */
-    fun runOnIO(action: () -> Unit) {
+    override fun runOnIO(action: () -> Unit) {
         ioScope.launch { action() }
     }
 
     /**
      * Helper to run a block on the CPU-intensive thread pool asynchronously.
      */
-    fun runOnCPU(action: () -> Unit) {
+    override fun runOnCPU(action: () -> Unit) {
         cpuScope.launch { action() }
     }
 
@@ -82,7 +83,7 @@ class ConcurrencyService {
      * Forces the action to run on the next UI pulse, even if currently on the UI thread.
      * Use this for focus requests, scrolling, or something that need the Scene Graph to settle first.
      */
-    fun runLater(action: () -> Unit) {
+    override fun runLater(action: () -> Unit) {
         Platform.runLater(action)
     }
 
@@ -90,7 +91,7 @@ class ConcurrencyService {
      * Cancels all active coroutines in the application.
      * Call this when the application is shut down to ensure clean exit.
      */
-    fun shutdown() {
+    override fun shutdown() {
         logger.info("Shutting down ConcurrencyService.")
         masterJob.cancel()
         logger.debug("All background scopes cancelled.")

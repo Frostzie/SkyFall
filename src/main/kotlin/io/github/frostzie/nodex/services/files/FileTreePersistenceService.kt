@@ -1,8 +1,9 @@
 package io.github.frostzie.nodex.services.files
 
+import io.github.frostzie.nodex.api.concurrency.Concurrency
+import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.domain.config.TreeConfig
 import io.github.frostzie.nodex.services.config.project.TreeConfigService
-import io.github.frostzie.nodex.services.core.ConcurrencyService
 import io.github.frostzie.nodex.utils.LoggerProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -12,14 +13,19 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
+ *
  * Manages runtime persistence of the file tree state.
+ *
+ * @param concurrency Provides the coroutine scope for debounced saves.
+ * @param treeConfigService Loads and saves the tree config JSON per project.
  */
 class FileTreePersistenceService(
-    private val concurrencyService: ConcurrencyService,
+    private val concurrency: Concurrency,
     private val treeConfigService: TreeConfigService
-) {
+) : FileTreePersistence {
     private val logger = LoggerProvider.getLogger("FileTreePersistenceService")
     private var saveJob: Job? = null
     private val saveMutex = Mutex()
@@ -28,9 +34,9 @@ class FileTreePersistenceService(
     private var cachedExpanded: Set<Path>? = null
 
     /**
-     * Records a new expanded set and schedules it.
+     * Records a new expanded set and schedules a debounced save.
      */
-    fun onExpandedChanged(projectRoot: Path, expanded: Set<Path>) {
+    override fun onExpandedChanged(projectRoot: Path, expanded: Set<Path>) {
         if (cachedProjectRoot == projectRoot && cachedExpanded == expanded) return
 
         cachedProjectRoot = projectRoot
@@ -40,8 +46,8 @@ class FileTreePersistenceService(
 
     private fun scheduleSave(projectRoot: Path, expanded: Set<Path>) {
         saveJob?.cancel()
-        saveJob = concurrencyService.ioScope.launch {
-            delay(500)
+        saveJob = concurrency.ioScope.launch {
+            delay(500.milliseconds)
             saveMutex.withLock {
                 saveNow(projectRoot, expanded)
             }
@@ -50,9 +56,9 @@ class FileTreePersistenceService(
     }
 
     /**
-     * Immediately saves any pending expanded state changes.
+     * Immediately writes any pending expanded state changes.
      */
-    fun flushPending() {
+    override fun flushPending() {
         saveJob?.cancel()
         saveJob = null
         val root = cachedProjectRoot
@@ -87,7 +93,7 @@ class FileTreePersistenceService(
     /**
      * Loads the persisted expanded paths for a given project.
      */
-    fun loadOnProjectOpen(projectRoot: Path): Set<Path> {
+    override fun loadOnProjectOpen(projectRoot: Path): Set<Path> {
         val config = treeConfigService.load(projectRoot)
         val paths = mutableSetOf<Path>()
         config.expanded.forEach { stored ->

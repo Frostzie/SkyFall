@@ -1,15 +1,16 @@
 package io.github.frostzie.nodex.services.config
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.github.frostzie.nodex.api.config.Migration
 import io.github.frostzie.nodex.utils.ModVersionUtils
 
 /**
  * Service responsible for transforming [JsonNode] data across version boundaries.
  */
-class MigrationService {
-    private val migrations = mutableListOf<Migration>()
+class MigrationService : Migration {
+    private val migrations = mutableListOf<MigrationEntry>()
 
-    private data class Migration(
+    private data class MigrationEntry(
         val fromVersion: String,
         val action: (JsonNode) -> JsonNode
     )
@@ -20,16 +21,16 @@ class MigrationService {
      * @param fromVersion The version that has this migration rule.
      * @param action The transformation logic.
      */
-    fun register(fromVersion: String, action: (JsonNode) -> JsonNode) {
-        migrations.add(Migration(fromVersion, action))
+    override fun register(fromVersion: String, action: (JsonNode) -> JsonNode) {
+        migrations.add(MigrationEntry(fromVersion, action))
     }
 
     /**
      * Migrates the given [node] from [storedVersion] to the latest registered version.
-     * 
+     *
      * Applies all migrations set after [storedVersion], sorted in ascending order.
      */
-    fun migrate(node: JsonNode, storedVersion: String): JsonNode {
+    override fun migrate(node: JsonNode, storedVersion: String): JsonNode {
         var currentNode = node
 
         // Only care about migrations newer than what's stored in the config (idc about backwards compatibility rn)

@@ -1,9 +1,10 @@
 package io.github.frostzie.nodex.services.workspace
 
+import io.github.frostzie.nodex.api.file.FileTree
+import io.github.frostzie.nodex.api.config.FileTreePersistence
+import io.github.frostzie.nodex.api.file.FileWatcher
+import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import io.github.frostzie.nodex.domain.entity.Project
-import io.github.frostzie.nodex.services.files.FileTreePersistenceService
-import io.github.frostzie.nodex.services.files.FileTreeService
-import io.github.frostzie.nodex.services.files.FileWatcherService
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -14,15 +15,15 @@ import java.nio.file.Path
  * Manages the active project lifecycle at runtime.
  */
 class ProjectRuntimeService(
-    private val fileWatcherService: FileWatcherService,
-    private val fileTreeService: FileTreeService,
-    private val fileTreePersistenceService: FileTreePersistenceService
-) {
+    private val fileWatcher: FileWatcher,
+    private val fileTreeService: FileTree,
+    private val fileTreePersistenceService: FileTreePersistence
+) : ProjectRuntime {
     private val logger = LoggerProvider.getLogger("ProjectRuntimeService")
     private val _currentProject = SimpleObjectProperty<Project?>()
 
     private val _loadedExpandedPaths = SimpleObjectProperty<Set<Path>>(emptySet())
-    val loadedExpandedPathsProperty: ReadOnlyObjectProperty<Set<Path>> = _loadedExpandedPaths
+    override val loadedExpandedPathsProperty: ReadOnlyObjectProperty<Set<Path>> = _loadedExpandedPaths
 
     private var isBuilding = false
     private var pendingTick = false
@@ -41,7 +42,7 @@ class ProjectRuntimeService(
     /**
      * Switches the active project, rebuilding the file tree and watcher state.
      */
-    fun setProject(project: Project) {
+    override fun setProject(project: Project) {
         val oldProject = _currentProject.get()
         if (oldProject == project) return
 
@@ -60,7 +61,7 @@ class ProjectRuntimeService(
             isBuilding = false
         }
 
-        fileWatcherService.watch(project)
+        fileWatcher.watch(project)
 
         project.filesystemTick.addListener(tickListener)
 
@@ -73,12 +74,12 @@ class ProjectRuntimeService(
     /**
      * Clears the current project, stopping its watcher and flushing state.
      */
-    fun clearProject() {
+    override fun clearProject() {
         val project = _currentProject.get() ?: return
 
         project.filesystemTick.removeListener(tickListener)
         fileTreePersistenceService.flushPending()
-        fileWatcherService.unwatch(project.path)
+        fileWatcher.unwatch(project.path)
 
         _currentProject.set(null)
         _loadedExpandedPaths.set(emptySet())
@@ -87,5 +88,5 @@ class ProjectRuntimeService(
         logger.debug("Project cleared: {}", project.path)
     }
 
-    fun getCurrentProject(): Project? = _currentProject.get()
+    override fun getCurrentProject(): Project? = _currentProject.get()
 }

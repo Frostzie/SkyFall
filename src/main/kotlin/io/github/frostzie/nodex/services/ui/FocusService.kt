@@ -1,5 +1,6 @@
 package io.github.frostzie.nodex.services.ui
 
+import io.github.frostzie.nodex.api.navigation.FocusTracker
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.application.Platform
 import javafx.beans.property.ReadOnlyBooleanProperty
@@ -13,14 +14,14 @@ import java.util.WeakHashMap
  * Monitors multiple [Stage]s and provides a single [isFocused] property
  * that indicates if any part of the app is currently active.
  */
-class FocusService {
+class FocusService : FocusTracker {
     private val logger = LoggerProvider.getLogger("FocusService")
     private val _isFocused = SimpleBooleanProperty(true)
-    val isFocused: ReadOnlyBooleanProperty = _isFocused
+    override val isFocused: ReadOnlyBooleanProperty = _isFocused
 
     @Volatile
     private var _isFocusedSnapshot = true
-    val isFocusedSnapshot: Boolean get() = _isFocusedSnapshot
+    override val isFocusedSnapshot: Boolean get() = _isFocusedSnapshot
 
     private var hasEverTrackedAStage = false
 
@@ -30,7 +31,7 @@ class FocusService {
     /**
      * Register a stage to be tracked for focus changes.
      */
-    fun trackStage(stage: Stage) {
+    override fun trackStage(stage: Stage) {
         check(Platform.isFxApplicationThread()) { "trackStage must be called on the UI thread" }
 
         hasEverTrackedAStage = true

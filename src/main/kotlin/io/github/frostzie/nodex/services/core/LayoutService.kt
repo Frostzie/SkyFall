@@ -1,51 +1,56 @@
 package io.github.frostzie.nodex.services.core
 
+import io.github.frostzie.nodex.api.config.LayoutPersistence
+import io.github.frostzie.nodex.api.navigation.Layout
+import io.github.frostzie.nodex.api.navigation.ToolWindowProvider
+import io.github.frostzie.nodex.api.navigation.WindowProfile
 import io.github.frostzie.nodex.domain.config.*
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.services.config.project.LayoutConfigService
-import io.github.frostzie.nodex.services.ui.ToolWindowService
-import io.github.frostzie.nodex.ui.ScreenRegistry
 import java.nio.file.Path
 
 /**
  * Service responsible for tracking and providing access to the UI layout state.
  */
-class LayoutService(val toolWindowService: ToolWindowService) {
+class LayoutService(
+    override val toolWindowProvider: ToolWindowProvider,
+    private val windowProfile: WindowProfile,
+    private val layoutConfigPersistence: LayoutPersistence
+) : Layout {
     private val windowStates = mutableMapOf<String, WindowBounds>()
 
     /**
      * Loads layout state for a specific project.
      */
-    fun loadForProject(projectRoot: Path, layoutConfigService: LayoutConfigService) {
-        val config = layoutConfigService.load(projectRoot)
+    override fun loadForProject(projectRoot: Path) {
+        val config = layoutConfigPersistence.load(projectRoot)
         updateFromConfig(config)
     }
 
     /**
      * Saves layout state for a specific project.
      */
-    fun saveForProject(projectRoot: Path, layoutConfigService: LayoutConfigService) {
+    override fun saveForProject(projectRoot: Path) {
         val config = createConfigFromCurrentState()
-        layoutConfigService.save(projectRoot, config)
+        layoutConfigPersistence.save(projectRoot, config)
     }
 
     private fun updateFromConfig(config: LayoutConfig) {
         windowStates.clear()
         windowStates.putAll(config.windows)
 
-        toolWindowService.initializeFromConfig(config.workbench.toolWindows)
+        toolWindowProvider.initializeFromConfig(config.workbench.toolWindows)
     }
 
     private fun createConfigFromCurrentState(): LayoutConfig {
         val persistentWindows = windowStates.filterKeys { screenName ->
             try {
                 val appScreen = AppScreen.valueOf(screenName)
-                ScreenRegistry.getProfile(appScreen).isPersistent
+                windowProfile.getScreenPolicy(appScreen).isPersistent
             } catch (_: Exception) {
                 try {
                     val overlayScreen = OverlayScreen.valueOf(screenName)
-                    ScreenRegistry.getProfile(overlayScreen).isPersistent
+                    windowProfile.getOverlayPolicy(overlayScreen).isPersistent
                 } catch (_: Exception) {
                     false
                 }
@@ -55,22 +60,22 @@ class LayoutService(val toolWindowService: ToolWindowService) {
         return LayoutConfig(
             windows = persistentWindows,
             workbench = WorkbenchLayout(
-                toolWindows = toolWindowService.createConfigs().toMutableMap()
+                toolWindows = toolWindowProvider.createConfigs().toMutableMap()
             )
         )
     }
 
-    fun getWindowState(screen: AppScreen): WindowBounds =
+    override fun getWindowState(screen: AppScreen): WindowBounds =
         windowStates.getOrPut(screen.name) { WindowBounds() }
 
-    fun updateWindowState(screen: AppScreen, bounds: WindowBounds) {
+    override fun updateWindowState(screen: AppScreen, bounds: WindowBounds) {
         windowStates[screen.name] = bounds
     }
 
-    fun getOverlayWindowState(overlay: OverlayScreen): WindowBounds =
+    override fun getOverlayWindowState(overlay: OverlayScreen): WindowBounds =
         windowStates.getOrPut(overlay.name) { WindowBounds() }
 
-    fun updateOverlayWindowState(overlay: OverlayScreen, bounds: WindowBounds) {
+    override fun updateOverlayWindowState(overlay: OverlayScreen, bounds: WindowBounds) {
         windowStates[overlay.name] = bounds
     }
 }

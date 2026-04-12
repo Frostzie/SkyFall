@@ -1,5 +1,8 @@
 package io.github.frostzie.nodex.services.files
 
+import io.github.frostzie.nodex.api.file.FileTree
+import io.github.frostzie.nodex.domain.tree.FileTreeChange
+import io.github.frostzie.nodex.api.file.FileWatcher
 import io.github.frostzie.nodex.domain.entity.Project
 import io.github.frostzie.nodex.domain.tree.FileNodeState
 import io.github.frostzie.nodex.domain.tree.FileTreeState
@@ -12,20 +15,29 @@ import kotlin.io.path.isSymbolicLink
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
+/**
+ * Manages in-memory state of the file tree in a project.
+ *
+ * Maintains a snapshot of the project's file hierarchy as a
+ * [FileTreeState] and applies incremental changes from the filesystem watcher
+ * to keep it in sync without full rescan.
+ *
+ * @param fileWatcher Provides filesystem change events to react to.
+ */
 class FileTreeService(
-    private val fileWatcherService: FileWatcherService
-) {
+    private val fileWatcher: FileWatcher
+) : FileTree {
     private val logger = LoggerProvider.getLogger("FileTreeService")
     private val _state = SimpleObjectProperty<FileTreeState>()
-    val stateProperty: ReadOnlyObjectProperty<FileTreeState> = _state
-    
+    override val stateProperty: ReadOnlyObjectProperty<FileTreeState> = _state
+
     private val _lastChanges = SimpleObjectProperty<List<FileTreeChange>>(emptyList())
-    val lastChangesProperty: ReadOnlyObjectProperty<List<FileTreeChange>> = _lastChanges
+    override val lastChangesProperty: ReadOnlyObjectProperty<List<FileTreeChange>> = _lastChanges
 
     /**
      * Performs a full scan of the project root and replaces the current tree state.
      */
-    fun build(project: Project) {
+    override fun build(project: Project) {
         logger.debug("Building file tree for project: {}", project.path)
         val rootPath = project.path
         val state = buildState(rootPath)
@@ -92,10 +104,10 @@ class FileTreeService(
     }
 
     /**
-     * Applies queued file system changes to the in-memory tree state.
+     * Applies pending filesystem changes to the in-memory tree state.
      */
-    fun onFilesystemTick(project: Project) {
-        val changes = fileWatcherService.drainChanges(project.path)
+    override fun onFilesystemTick(project: Project) {
+        val changes = fileWatcher.drainChanges(project.path)
         if (changes.isEmpty()) return
 
         if (changes.any { it is FileTreeChange.FileSystemRescanRequired }) {
@@ -113,17 +125,21 @@ class FileTreeService(
                     updatedState = handleFileCreated(updatedState, change.path)
                     stateChanged = true
                 }
+
                 is FileTreeChange.FileDeleted -> {
                     updatedState = handleFileDeleted(updatedState, change.path)
                     stateChanged = true
                 }
+
                 is FileTreeChange.ParentInvalidated -> {
                     updatedState = handleParentInvalidated(updatedState)
                     stateChanged = true
                 }
+
                 is FileTreeChange.FileModified -> {
                     // Ignore for now as it doesn't affect tree yet
                 }
+
                 FileTreeChange.FileSystemRescanRequired -> {
                     build(project)
                     return
@@ -139,7 +155,7 @@ class FileTreeService(
 
     private fun handleFileCreated(state: FileTreeState, path: Path): FileTreeState {
         if (shouldIgnore(path)) return state
-        
+
         val id = path.toAbsolutePath().toString()
         if (state.nodes.containsKey(id)) return state
 
@@ -164,7 +180,7 @@ class FileTreeService(
 
         val parentPath = path.parent
         val parentId = parentPath?.toAbsolutePath()?.toString() ?: state.rootIds.firstOrNull()
-        
+
         if (parentId != null) {
             val parentNode = newNodes[parentId]
             if (parentNode != null) {
@@ -175,7 +191,7 @@ class FileTreeService(
                 }
             }
         }
-        
+
         return state.copy(nodes = newNodes)
     }
 
@@ -188,7 +204,7 @@ class FileTreeService(
 
         val parentPath = path.parent
         val parentId = parentPath?.toAbsolutePath()?.toString() ?: state.rootIds.firstOrNull()
-        
+
         if (parentId != null) {
             val parentNode = newNodes[parentId]
             if (parentNode != null) {
@@ -198,7 +214,7 @@ class FileTreeService(
                 }
             }
         }
-        
+
         return state.copy(nodes = newNodes)
     }
 

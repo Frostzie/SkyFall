@@ -1,8 +1,10 @@
 package io.github.frostzie.nodex.services.files
 
 import io.github.frostzie.nodex.domain.entity.Project
-import io.github.frostzie.nodex.services.core.ConcurrencyService
-import io.github.frostzie.nodex.services.ui.FocusService
+import io.github.frostzie.nodex.api.concurrency.Concurrency
+import io.github.frostzie.nodex.domain.tree.FileTreeChange
+import io.github.frostzie.nodex.api.file.FileWatcher
+import io.github.frostzie.nodex.api.navigation.FocusTracker
 import io.github.frostzie.nodex.utils.LoggerProvider
 import io.github.frostzie.nodex.utils.file.FileSystemWatcher
 import io.methvin.watcher.DirectoryChangeEvent.EventType
@@ -10,15 +12,15 @@ import java.nio.file.Path
 import java.util.concurrent.*
 
 /**
- * Manages file system synchronization for active projects.
+ * Observes file system changes for projects and individual files.
  *
  * This service interprets raw disk changes into state updates.
  * It makes sure the external changes sync with the mod.
  */
 class FileWatcherService(
-    private val focusService: FocusService,
-    private val concurrencyService: ConcurrencyService
-) {
+    private val focusService: FocusTracker,
+    private val concurrency: Concurrency
+) : FileWatcher {
     private val logger = LoggerProvider.getLogger("FileWatcherService")
     private val watchers = ConcurrentHashMap<Path, ProjectWatcher>()
     private val genericWatchers = ConcurrentHashMap<Path, FileSystemWatcher>()
@@ -42,7 +44,7 @@ class FileWatcherService(
     /**
      * Initializes the service by observing focus changes.
      */
-    fun initialize() {
+    override fun initialize() {
         focusService.isFocused.addListener { _, _, focused ->
             if (focused) {
                 drainPendingSyncs()
@@ -59,13 +61,13 @@ class FileWatcherService(
      * @param path The file to watch.
      * @param onAction The callback to invoke when the file changes.
      */
-    fun watchFile(path: Path, onAction: (Path, EventType) -> Unit) {
+    override fun watchFile(path: Path, onAction: (Path, EventType) -> Unit) {
         val parent = path.parent ?: return
         val fileName = path.fileName
-        
+
         val callbacks = fileCallbacks.computeIfAbsent(parent) { ConcurrentHashMap() }
         callbacks[fileName] = onAction
-        
+
         genericWatchers.computeIfAbsent(parent) {
             val watcher = FileSystemWatcher(parent) { eventPath, action ->
                 if (!shouldIgnore(eventPath)) {
@@ -81,14 +83,14 @@ class FileWatcherService(
     /**
      * Starts monitoring disk state for a project.
      *
-     * This method triggers project-level invalidation (via filesystemTick) upon disk changes.
+     * Triggers project-level invalidation (via filesystemTick) upon disk changes.
      * It provides file-level change details through [drainChanges], signaling that
      * parts of the project need to be re-synced.
      *
      * The [Project.filesystemTick] acts as the primary trigger; listeners should call
      * [drainChanges] to retrieve the actual modification details.
      */
-    fun watch(project: Project) {
+    override fun watch(project: Project) {
         val root = project.path
         watchers.computeIfAbsent(root) {
             val watcher = FileSystemWatcher(root) { path, action ->
@@ -105,7 +107,7 @@ class FileWatcherService(
      * 
      * @param root The root path of the project to stop watching.
      */
-    fun unwatch(root: Path) {
+    override fun unwatch(root: Path) {
         watchers.remove(root)?.watcher?.stop()
         pendingSyncs.remove(root)?.cancel(false)
         pendingProjectsToSync.remove(root)
@@ -116,12 +118,12 @@ class FileWatcherService(
     /**
      * Drains the current change queue for a given project root.
      *
-     * This clears the queue and ensures events are returned in the exact order they were sent.
+     * Clears the queue and ensures events are returned in the exact order they were sent.
      *
      * @param projectRoot The root path of the project.
      * @return A list of [FileTreeChange] events that have occurred since the last drain.
      */
-    fun drainChanges(projectRoot: Path): List<FileTreeChange> {
+    override fun drainChanges(projectRoot: Path): List<FileTreeChange> {
         val queue = projectChangeQueues[projectRoot] ?: return emptyList()
         val changes = mutableListOf<FileTreeChange>()
         while (true) {
@@ -134,7 +136,7 @@ class FileWatcherService(
     /**
      * Temporarily ignores a path to prevent reload loops.
      */
-    fun ignorePath(path: Path) {
+    override fun ignorePath(path: Path) {
         ignoredPaths[path] = System.currentTimeMillis()
     }
 
@@ -243,7 +245,7 @@ class FileWatcherService(
 
     private fun notifySync(project: Project) {
         // Increment state tick on UI thread to notify observers
-        concurrencyService.runOnUI {
+        concurrency.runOnUI {
             project.filesystemTick.set(project.filesystemTick.get() + 1)
         }
     }
@@ -251,12 +253,12 @@ class FileWatcherService(
     /**
      * Stops monitoring all projects.
      *
-     * This resets the watcher state but does not shut down the background executor.
+     * Resets the watcher state but does not shut down the background executor.
      */
-    fun stopAll() {
+    override fun stopAll() {
         watchers.values.forEach { it.watcher.stop() }
         watchers.clear()
-        
+
         genericWatchers.values.forEach { it.stop() }
         genericWatchers.clear()
         fileCallbacks.clear()
@@ -274,7 +276,7 @@ class FileWatcherService(
     /**
      * Permanently shuts down the file watcher service and its background threads.
      */
-    fun shutdown() {
+    override fun shutdown() {
         stopAll()
         syncExecutor.shutdownNow()
     }

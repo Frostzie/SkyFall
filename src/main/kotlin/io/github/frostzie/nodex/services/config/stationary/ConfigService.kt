@@ -2,8 +2,9 @@ package io.github.frostzie.nodex.services.config.stationary
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.github.frostzie.nodex.services.core.FileService
-import io.github.frostzie.nodex.services.core.ModVersionService
+import io.github.frostzie.nodex.api.config.Config
+import io.github.frostzie.nodex.api.file.FileOperations
+import io.github.frostzie.nodex.api.misc.ModVersion
 import io.github.frostzie.nodex.utils.LoggerProvider
 import java.nio.file.Path
 
@@ -13,9 +14,9 @@ import java.nio.file.Path
  */
 class ConfigService(
     configRoot: Path,
-    private val fileService: FileService,
-    private val modVersionService: ModVersionService
-) {
+    private val fileOps: FileOperations,
+    private val modVersion: ModVersion
+) : Config {
     private val logger = LoggerProvider.getLogger("ConfigService")
     private val mapper = ObjectMapper().registerKotlinModule()
     private val configPath = configRoot.resolve("nodex").resolve("nodex.json")
@@ -24,9 +25,9 @@ class ConfigService(
     private var _universalPathEnabled: Boolean = false
     private var _universalPath: String? = null
 
-    val lastUsedModVersion: String get() = _lastUsedModVersion
-    val universalPathEnabled: Boolean get() = _universalPathEnabled
-    val universalPath: String? get() = _universalPath
+    override val lastUsedModVersion: String get() = _lastUsedModVersion
+    override val universalPathEnabled: Boolean get() = _universalPathEnabled
+    override val universalPath: String? get() = _universalPath
 
     private data class StationaryConfig(
         val modVersion: String,
@@ -35,10 +36,10 @@ class ConfigService(
     )
 
     /**
-     * Loads from disk or creates defaults if missing.
+     * Loads from nodex.json or creates defaults if missing.
      */
-    fun initialize() {
-        if (fileService.exists(configPath)) {
+    override fun initialize() {
+        if (fileOps.exists(configPath)) {
             load()
         } else {
             createDefault()
@@ -47,7 +48,7 @@ class ConfigService(
 
     private fun load() {
         try {
-            val json = fileService.readText(configPath)
+            val json = fileOps.readText(configPath)
             val config = mapper.readValue(json, StationaryConfig::class.java)
 
             _lastUsedModVersion = config.modVersion
@@ -62,7 +63,7 @@ class ConfigService(
     }
 
     private fun createDefault() {
-        _lastUsedModVersion = modVersionService.currentVersion
+        _lastUsedModVersion = modVersion.currentVersion
         _universalPathEnabled = false
         _universalPath = null
         save()
@@ -72,18 +73,18 @@ class ConfigService(
      * Marks that settings have been successfully loaded and migrated.
      * Updates the modVersion to current one.
      */
-    fun markSettingsLoadCompleted() {
-        if (_lastUsedModVersion != modVersionService.currentVersion) {
-            logger.info("Settings load completed. Updating recorded version to ${modVersionService.currentVersion}")
-            _lastUsedModVersion = modVersionService.currentVersion
+    override fun markSettingsLoadCompleted() {
+        if (_lastUsedModVersion != modVersion.currentVersion) {
+            logger.info("Settings load completed. Updating recorded version to ${modVersion.currentVersion}")
+            _lastUsedModVersion = modVersion.currentVersion
             save()
         }
     }
 
     /**
-     * Saves the current state to disk.
+     * Saves the current state to nodex.json.
      */
-    fun save() {
+    override fun save() {
         try {
             val config = StationaryConfig(
                 modVersion = _lastUsedModVersion,
@@ -91,7 +92,7 @@ class ConfigService(
                 universalPath = _universalPath
             )
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config)
-            fileService.writeAtomic(configPath, json)
+            fileOps.writeAtomic(configPath, json)
         } catch (e: Exception) {
             logger.error("Failed to save stationary config", e)
         }

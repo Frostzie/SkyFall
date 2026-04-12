@@ -1,15 +1,15 @@
-package io.github.frostzie.nodex.ui
+package io.github.frostzie.nodex.domain.registry
 
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 
 /**
- * Registry for screen-specific metadata and layout policies.
+ * Static metadata for all screen profiles.
  */
-object ScreenRegistry {
+object ScreenProfiles {
 
-    private val appScreens = mapOf(
+    val appScreens: Map<AppScreen, WindowPolicy> = mapOf(
         AppScreen.INTRO to WindowPolicy(
             title = "Nodex - Welcome",
             prefWidth = 825.0,
@@ -29,7 +29,7 @@ object ScreenRegistry {
         )
     )
 
-    private val overlayScreens = mapOf(
+    val overlayScreens: Map<OverlayScreen, WindowPolicy> = mapOf(
         OverlayScreen.SETTINGS to WindowPolicy(
             title = "Settings",
             prefWidth = 950.0,
@@ -38,16 +38,4 @@ object ScreenRegistry {
             isResizable = true
         )
     )
-
-    /**
-     * Returns the profile for a primary app screen.
-     */
-    fun getProfile(screen: AppScreen): WindowPolicy =
-        appScreens[screen] ?: throw IllegalArgumentException("No profile found for screen: $screen")
-
-    /**
-     * Returns the profile for an overlay screen.
-     */
-    fun getProfile(overlay: OverlayScreen): WindowPolicy =
-        overlayScreens[overlay] ?: throw IllegalArgumentException("No profile found for overlay: $overlay")
 }

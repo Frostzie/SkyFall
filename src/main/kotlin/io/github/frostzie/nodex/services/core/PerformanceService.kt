@@ -1,5 +1,6 @@
 package io.github.frostzie.nodex.services.core
 
+import io.github.frostzie.nodex.api.misc.PerformanceMonitor
 import javafx.animation.AnimationTimer
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -7,16 +8,16 @@ import javafx.beans.property.SimpleStringProperty
 /**
  * Service that tracks FPS and Memory usage.
  */
-class PerformanceService {
+class PerformanceService : PerformanceMonitor {
     private val _fpsProperty = SimpleStringProperty("FPS: 0")
-    val fpsProperty: ReadOnlyStringProperty = _fpsProperty
+    override val fpsProperty: ReadOnlyStringProperty = _fpsProperty
 
     private val _memoryProperty = SimpleStringProperty("Mem: 0 MB")
-    val memoryProperty: ReadOnlyStringProperty = _memoryProperty
+    override val memoryProperty: ReadOnlyStringProperty = _memoryProperty
 
     private var timer: AnimationTimer? = null
 
-    fun initialize() {
+    override fun initialize() {
         start()
     }
 

@@ -1,10 +1,13 @@
 package io.github.frostzie.nodex.services.ui
 
 import ch.micheljung.fxwindow.FxStage
+import io.github.frostzie.nodex.api.navigation.FocusTracker
+import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
-import io.github.frostzie.nodex.services.core.LayoutService
-import io.github.frostzie.nodex.ui.ScreenRegistry
+import io.github.frostzie.nodex.api.navigation.Layout
+import io.github.frostzie.nodex.api.navigation.MainStage
+import io.github.frostzie.nodex.api.navigation.WindowProfile
 import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
 import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
 import io.github.frostzie.nodex.utils.LoggerProvider
@@ -14,16 +17,17 @@ import javafx.scene.layout.Region
 import javafx.stage.Stage
 
 /**
- * Service responsible for managing the mod's primary JavaFX Stage.
+ * Service responsible for managing the primary application window lifecycle.
  *
  * Handles the window lifecycle, geometry tracking, and integration with
  * FxStage lib for native window behavior.
  */
 open class MainStageService(
-    private val layoutService: LayoutService,
-    private val navigationService: NavigationService,
-    private val focusService: FocusService
-) {
+    private val layoutService: Layout,
+    private val navigationService: Navigation,
+    private val focusService: FocusTracker,
+    private val windowProfile: WindowProfile
+) : MainStage {
     private val logger = LoggerProvider.getLogger("MainStageService")
     private var stage: Stage? = null
     private var content: Region? = null
@@ -34,7 +38,7 @@ open class MainStageService(
     /**
      * Initialize the service with the primary stage and content.
      */
-    fun initialize(primaryStage: Stage, content: Region, scene: Scene) {
+    override fun initialize(primaryStage: Stage, content: Region, scene: Scene) {
         check(stage == null) { "MainStageService has already been initialized." }
         this.stage = primaryStage
         this.content = content
@@ -51,7 +55,7 @@ open class MainStageService(
         }
     }
 
-    fun show() {
+    override fun show() {
         val currentStage = stage ?: return
         val currentContent = content ?: return
         val screen = navigationService.currentScreen.get()
@@ -89,7 +93,7 @@ open class MainStageService(
     private fun setupGeometryTracker(primaryStage: Stage) {
         tracker = WindowGeometryTracker(primaryStage) { newState ->
             val screen = navigationService.currentScreen.get()
-            val profile = ScreenRegistry.getProfile(screen)
+            val profile = windowProfile.getScreenPolicy(screen)
             if (profile.isPersistent) {
                 layoutService.updateWindowState(screen, newState)
             }
@@ -107,7 +111,7 @@ open class MainStageService(
     }
 
     private fun applyPolicy(currentStage: Stage, content: Region, screen: AppScreen) {
-        val profile = ScreenRegistry.getProfile(screen)
+        val profile = windowProfile.getScreenPolicy(screen)
         val policy = WindowPolicy(
             title = profile.title,
             minWidth = profile.minWidth,
@@ -126,7 +130,7 @@ open class MainStageService(
         currentStage.applyBasePolicy(content, policy, state, tracker)
     }
 
-    fun registerNonCaptionNodes(nodes: Collection<Node>) {
+    override fun registerNonCaptionNodes(nodes: Collection<Node>) {
         if (nodes.isEmpty()) return
         val configuredFxStage = fxStage
         if (configuredFxStage != null) {
@@ -142,10 +146,10 @@ open class MainStageService(
         pendingNonCaptionNodes.clear()
     }
 
-    fun hide() {
+    override fun hide() {
         stage?.let { it.isIconified = true }
     }
 
-    fun isShowing(): Boolean = stage?.isShowing ?: false
-    fun isIconified(): Boolean = stage?.isIconified ?: false
+    override fun isShowing(): Boolean = stage?.isShowing ?: false
+    override fun isIconified(): Boolean = stage?.isIconified ?: false
 }

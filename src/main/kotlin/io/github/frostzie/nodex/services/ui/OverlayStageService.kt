@@ -1,11 +1,15 @@
 package io.github.frostzie.nodex.services.ui
 
 import ch.micheljung.fxwindow.FxStage
+import io.github.frostzie.nodex.api.misc.Styling
+import io.github.frostzie.nodex.api.navigation.FocusTracker
+import io.github.frostzie.nodex.api.navigation.Layout
+import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.navigation.OverlayStage
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
-import io.github.frostzie.nodex.services.core.LayoutService
 import io.github.frostzie.nodex.ui.ViewFactory
-import io.github.frostzie.nodex.ui.ScreenRegistry
+import io.github.frostzie.nodex.api.navigation.WindowProfile
 import io.github.frostzie.nodex.ui.utils.NonCaptionNodesProvider
 import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
 import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
@@ -22,12 +26,13 @@ import javafx.stage.Stage
  * JavaFX Stages based on the active [OverlayScreen].
  */
 open class OverlayStageService(
-    private val layoutService: LayoutService,
-    private val navigationService: NavigationService,
-    private val focusService: FocusService,
-    private val stylingService: StylingService,
-    private val viewFactory: ViewFactory
-) {
+    private val layoutService: Layout,
+    private val navigationService: Navigation,
+    private val focusService: FocusTracker,
+    private val stylingService: Styling,
+    private val viewFactory: ViewFactory,
+    private val windowProfile: WindowProfile
+) : OverlayStage {
     private val logger = LoggerProvider.getLogger("OverlayStageService")
     private val activeStages = mutableMapOf<OverlayScreen, Stage>()
     private var primaryWindowStage: Stage? = null
@@ -35,14 +40,14 @@ open class OverlayStageService(
     /**
      * Sets the primary window stage to be used as the owner for modals.
      */
-    fun setPrimaryStage(stage: Stage) {
+    override fun setPrimaryStage(stage: Stage) {
         this.primaryWindowStage = stage
     }
 
     /**
      * Initializes the service by observing overlay changes.
      */
-    fun initialize() {
+    override fun initialize() {
         setupNavigationListeners()
     }
 
@@ -102,7 +107,7 @@ open class OverlayStageService(
 
     private fun setupGeometryTracker(stage: Stage, overlay: OverlayScreen): WindowGeometryTracker {
         return WindowGeometryTracker(stage) { newState ->
-            val profile = ScreenRegistry.getProfile(overlay)
+            val profile = windowProfile.getOverlayPolicy(overlay)
             if (profile.isPersistent) {
                 layoutService.updateOverlayWindowState(overlay, newState)
             }
@@ -115,7 +120,7 @@ open class OverlayStageService(
         overlay: OverlayScreen,
         tracker: WindowGeometryTracker
     ) {
-        val profile = ScreenRegistry.getProfile(overlay)
+        val profile = windowProfile.getOverlayPolicy(overlay)
         val policy = WindowPolicy(
             title = profile.title,
             minWidth = profile.minWidth,

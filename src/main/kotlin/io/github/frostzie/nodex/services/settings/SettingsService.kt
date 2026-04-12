@@ -1,21 +1,13 @@
 package io.github.frostzie.nodex.services.settings
 
+import io.github.frostzie.nodex.api.settings.Settings
 import io.github.frostzie.nodex.domain.settings.AppSettings
+import io.github.frostzie.nodex.domain.settings.ApplyResult
 import io.github.frostzie.nodex.services.config.global.SettingsConfigService
-import io.github.frostzie.nodex.settings.validation.ValidationIssue
-import io.github.frostzie.nodex.ui.viewmodel.settings.BaseSettingsPanelViewModel
 import io.github.frostzie.nodex.utils.LoggerProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-/**
- * Result of an apply/save operation.
- */
-sealed class ApplyResult {
-    data object Success : ApplyResult()
-    data class Failure(val issues: List<ValidationIssue>) : ApplyResult()
-}
 
 /**
  * State service for app settings.
@@ -27,16 +19,12 @@ sealed class ApplyResult {
  * State is exposed as [StateFlow] for reactive consumption,
  * and as synchronous getters ([committed], [staged]) for simple reads.
  *
- * Implements [BaseSettingsPanelViewModel.SettingsAccess] so ViewModels
- * can read committed settings and stage changes without depending on
- * the full service class.
- *
  * @param settingsConfigService Service for loading/saving settings to disk.
  */
 class SettingsService(
     private val settingsConfigService: SettingsConfigService,
     private val validationService: SettingsValidationService
-) : BaseSettingsPanelViewModel.SettingsAccess {
+) : Settings {
     private val logger = LoggerProvider.getLogger("SettingsService")
     private var isInitialized = false
 
@@ -59,7 +47,7 @@ class SettingsService(
      */
     val stagedSettingsFlow: StateFlow<AppSettings> = _stagedSettings.asStateFlow()
 
-    fun initialize() {
+    override fun initialize() {
         check(!isInitialized) { "SettingsService.initialize() can only be called once" }
 
         val loaded = try {
@@ -117,12 +105,12 @@ class SettingsService(
     }
 
     /**
-     * Applies the staged settings, making them the new committed settings.
+     * Applies staged settings as the new committed settings.
      *
      * Validates staged settings before committing. Returns [ApplyResult.Failure]
      * if validation errors are found (blocks the commit).
      */
-    fun apply(): ApplyResult {
+    override fun apply(): ApplyResult {
         checkInitialized()
 
         val validationResult = validationService.validateStaged(_stagedSettings.value)
@@ -145,9 +133,9 @@ class SettingsService(
     }
 
     /**
-     * Discards staged changes by reverting to committed settings.
+     * Discards staged changes, reverting to committed settings.
      */
-    fun discard() {
+    override fun discard() {
         checkInitialized()
         _stagedSettings.value = _committedSettings.value.copy()
         logger.debug("Staged settings discarded. Restored from committed.")

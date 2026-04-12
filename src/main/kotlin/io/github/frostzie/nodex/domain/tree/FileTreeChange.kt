@@ -1,4 +1,4 @@
-package io.github.frostzie.nodex.services.files
+package io.github.frostzie.nodex.domain.tree
 
 import java.nio.file.Path
 

@@ -1,10 +1,10 @@
 package io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree
 
+import io.github.frostzie.nodex.api.file.FileTree
 import io.github.frostzie.nodex.domain.tree.FileTreeState
-import io.github.frostzie.nodex.services.files.FileTreeChange
-import io.github.frostzie.nodex.services.files.FileTreePersistenceService
-import io.github.frostzie.nodex.services.files.FileTreeService
-import io.github.frostzie.nodex.services.workspace.ProjectRuntimeService
+import io.github.frostzie.nodex.domain.tree.FileTreeChange
+import io.github.frostzie.nodex.api.config.FileTreePersistence
+import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.TreeItem
 import java.nio.file.Path
@@ -13,9 +13,9 @@ import java.nio.file.Path
  * ViewModel for the file tree, responsible for managing the tree structure.
  */
 class FileTreeViewModel(
-    private val fileTreeService: FileTreeService,
-    projectRuntimeService: ProjectRuntimeService,
-    private val fileTreePersistenceService: FileTreePersistenceService
+    private val fileTreeService: FileTree,
+    projectRuntimeService: ProjectRuntime,
+    private val fileTreePersistenceService: FileTreePersistence
 ) {
     val root = SimpleObjectProperty<TreeItem<FileTreeItem>>()
     val nodeCache = mutableMapOf<String, TreeItem<FileTreeItem>>()

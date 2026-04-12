@@ -1,19 +1,19 @@
 package io.github.frostzie.nodex.ui.viewmodel.ide.bottombar
 
 import io.github.frostzie.nodex.domain.entity.ModInfo
-import io.github.frostzie.nodex.services.core.PerformanceService
+import io.github.frostzie.nodex.api.misc.PerformanceMonitor
 import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.ReadOnlyBooleanWrapper
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
 
 class BottomBarViewModel(
-    private val performanceService: PerformanceService
+    private val monitor: PerformanceMonitor
 ) {
     val ideVersionProperty: ReadOnlyStringProperty = SimpleStringProperty("Nodex v${ModInfo.version}")
 
-    val fpsProperty: ReadOnlyStringProperty get() = performanceService.fpsProperty
-    val memoryProperty: ReadOnlyStringProperty get() = performanceService.memoryProperty
+    val fpsProperty: ReadOnlyStringProperty get() = monitor.fpsProperty
+    val memoryProperty: ReadOnlyStringProperty get() = monitor.memoryProperty
 
     private val _isDocumentLocked = ReadOnlyBooleanWrapper(false)
     val isDocumentLocked: ReadOnlyBooleanProperty = _isDocumentLocked.readOnlyProperty

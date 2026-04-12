@@ -1,9 +1,8 @@
 package io.github.frostzie.nodex.ui.viewmodel.ide.workbench
 
+import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.domain.uicontract.PanelPosition
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
-import io.github.frostzie.nodex.services.core.LayoutService
-import io.github.frostzie.nodex.services.ui.ToolWindowService
 import javafx.beans.property.*
 import kotlin.math.abs
 
@@ -11,10 +10,10 @@ import kotlin.math.abs
  * ViewModel for the DockLayer area of the Workbench.
  * Handles docking logic, tool window states, and drag-and-drop.
  */
-class DockLayerViewModel(private val layoutService: LayoutService) {
-    private val toolWindowService: ToolWindowService get() = layoutService.toolWindowService
+class DockLayerViewModel(private val layoutService: Layout) {
+    private val toolWindowManager get() = layoutService.toolWindowProvider
 
-    val toolWindowStates get() = toolWindowService.states
+    val toolWindowStates get() = toolWindowManager.states
 
     /**
      * The current potential drop target position.
@@ -27,7 +26,7 @@ class DockLayerViewModel(private val layoutService: LayoutService) {
      * actual SplitPane divider position.
      */
     fun getEffectiveDividerPosition(toolType: ToolWindow): Double {
-        val state = toolWindowService.states.find { it.toolType == toolType } ?: return 0.25
+        val state = toolWindowManager.states.find { it.toolType == toolType } ?: return 0.25
         return if (state.anchor == PanelPosition.RIGHT || state.anchor == PanelPosition.BOTTOM) {
             1.0 - state.sizeRatio
         } else {
@@ -39,7 +38,7 @@ class DockLayerViewModel(private val layoutService: LayoutService) {
      * Updates a tool's size based on a raw divider position from the View.
      */
     fun onDividerMoved(toolType: ToolWindow, rawPosition: Double) {
-        val state = toolWindowService.states.find { it.toolType == toolType } ?: return
+        val state = toolWindowManager.states.find { it.toolType == toolType } ?: return
         val pos = state.anchor
         val normalizedSize = if (pos == PanelPosition.RIGHT || pos == PanelPosition.BOTTOM) {
             1.0 - rawPosition
@@ -48,7 +47,7 @@ class DockLayerViewModel(private val layoutService: LayoutService) {
         }
 
         if (abs(state.sizeRatio - normalizedSize) > 0.001) {
-            toolWindowService.setSizeRatio(toolType, normalizedSize)
+            toolWindowManager.setSizeRatio(toolType, normalizedSize)
         }
     }
 
@@ -69,7 +68,7 @@ class DockLayerViewModel(private val layoutService: LayoutService) {
      * Updates the layout state based on a panel drop.
      */
     fun onPanelDropped(toolType: ToolWindow, newPosition: PanelPosition): Boolean {
-        toolWindowService.setAnchor(toolType, newPosition)
+        toolWindowManager.setAnchor(toolType, newPosition)
         return true
     }
 

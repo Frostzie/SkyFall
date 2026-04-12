@@ -1,10 +1,7 @@
 package io.github.frostzie.nodex.bootstrap
 
-import io.github.frostzie.nodex.services.ui.MainStageService
-import io.github.frostzie.nodex.services.ui.OverlayStageService
-import io.github.frostzie.nodex.services.ui.StylingService
+import io.github.frostzie.nodex.api.misc.Styling
 import io.github.frostzie.nodex.ui.ScreenHost
-import io.github.frostzie.nodex.ui.ViewFactory
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.application.Platform
 import javafx.scene.Scene
@@ -26,14 +23,14 @@ object UiBootstrap {
                 Platform.setImplicitExit(false)
 
                 val stylingService = ServiceBootstrap.stylingService
-                val viewFactory = createViewFactory()
+                val viewFactory = ServiceBootstrap.viewFactory
 
                 val screenHost = viewFactory.createScreenHost()
                 val rootView = viewFactory.createRootView(screenHost)
 
                 val scene = createScene(rootView, stylingService)
 
-                initializeStageServices(screenHost, rootView, scene, viewFactory)
+                initializeStageServices(screenHost, rootView, scene)
 
             } catch (e: Exception) {
                 logger.error("Failed to initialize UI", e)
@@ -41,20 +38,7 @@ object UiBootstrap {
         }
     }
 
-    private fun createViewFactory(): ViewFactory {
-        return ViewFactory(
-            layoutService = ServiceBootstrap.layoutService,
-            navigationService = ServiceBootstrap.navigationService,
-            performanceService = ServiceBootstrap.performanceService,
-            settingsService = ServiceBootstrap.settingsService,
-            fileTreeService = ServiceBootstrap.fileTreeService,
-            projectRuntimeService = ServiceBootstrap.projectRuntimeService,
-            fileTreePersistenceService = ServiceBootstrap.fileTreePersistenceService,
-            settingsRegistry = SettingsBootstrap.settingsRegistry
-        )
-    }
-
-    private fun createScene(rootView: Region, stylingService: StylingService): Scene {
+    private fun createScene(rootView: Region, stylingService: Styling): Scene {
         val scene = Scene(rootView)
         scene.stylesheets.addAll(stylingService.getStylesheetUrls())
         return scene
@@ -63,30 +47,15 @@ object UiBootstrap {
     private fun initializeStageServices(
         screenHost: ScreenHost,
         rootView: Region,
-        scene: Scene,
-        viewFactory: ViewFactory
+        scene: Scene
     ) {
-        val layoutService = ServiceBootstrap.layoutService
-        val navigationService = ServiceBootstrap.navigationService
-        val focusService = ServiceBootstrap.focusService
-        val stylingService = ServiceBootstrap.stylingService
-
         val primaryStage = createPrimaryStage()
 
-        val mainStageService = MainStageService(layoutService, navigationService, focusService)
-        mainStageService.registerNonCaptionNodes(screenHost.getNonCaptionNodes())
-        mainStageService.initialize(primaryStage, rootView, scene)
-        this.mainStageService = mainStageService
+        ServiceBootstrap.mainStage.registerNonCaptionNodes(screenHost.getNonCaptionNodes())
+        ServiceBootstrap.mainStage.initialize(primaryStage, rootView, scene)
 
-        val overlayStageService = OverlayStageService(
-            layoutService = layoutService,
-            navigationService = navigationService,
-            focusService = focusService,
-            stylingService = stylingService,
-            viewFactory = viewFactory
-        )
-        overlayStageService.setPrimaryStage(primaryStage)
-        overlayStageService.initialize()
+        ServiceBootstrap.overlayStage.setPrimaryStage(primaryStage)
+        ServiceBootstrap.overlayStage.initialize()
     }
 
     private fun createPrimaryStage(): Stage {
@@ -100,11 +69,9 @@ object UiBootstrap {
         return primaryStage
     }
 
-    private var mainStageService: MainStageService? = null
-
     fun toggleWindow() {
         ServiceBootstrap.concurrencyService.runOnUI {
-            val service = mainStageService ?: return@runOnUI
+            val service = ServiceBootstrap.mainStage
             if (service.isShowing() && !service.isIconified()) {
                 service.hide()
             } else {
@@ -115,7 +82,7 @@ object UiBootstrap {
 
     fun showAndFocusWindow() {
         ServiceBootstrap.concurrencyService.runOnUI {
-            mainStageService?.show()
+            ServiceBootstrap.mainStage.show()
         }
     }
 }

@@ -1,8 +1,8 @@
 package io.github.frostzie.nodex.ui.viewmodel.settings
 
-import io.github.frostzie.nodex.services.settings.ApplyResult
-import io.github.frostzie.nodex.services.settings.SettingsService
-import io.github.frostzie.nodex.services.ui.NavigationService
+import io.github.frostzie.nodex.domain.settings.ApplyResult
+import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.settings.Settings
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -11,9 +11,9 @@ import javafx.beans.property.SimpleBooleanProperty
  * ViewModel for the settings actions bar (Apply, Save, Discard buttons).
  */
 class SettingsActionsBarViewModel(
-    private val settingsService: SettingsService,
+    private val settingsService: Settings,
     private val featureViewModels: List<SettingsPanelViewModel>,
-    private val navigationService: NavigationService
+    private val navigationService: Navigation
 ) {
     private val logger = LoggerProvider.getLogger("SettingsActionsBarViewModel")
 

@@ -1,13 +1,13 @@
 package io.github.frostzie.nodex.ui
 
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.services.core.LayoutService
-import io.github.frostzie.nodex.services.core.PerformanceService
-import io.github.frostzie.nodex.services.files.FileTreePersistenceService
-import io.github.frostzie.nodex.services.files.FileTreeService
-import io.github.frostzie.nodex.services.settings.SettingsService
-import io.github.frostzie.nodex.services.ui.NavigationService
-import io.github.frostzie.nodex.services.workspace.ProjectRuntimeService
+import io.github.frostzie.nodex.api.file.FileTree
+import io.github.frostzie.nodex.api.config.FileTreePersistence
+import io.github.frostzie.nodex.api.navigation.Layout
+import io.github.frostzie.nodex.api.misc.PerformanceMonitor
+import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.settings.Settings
+import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import io.github.frostzie.nodex.settings.registry.SettingsRegistry
 import io.github.frostzie.nodex.ui.builder.IdeScreenBuilder
 import io.github.frostzie.nodex.ui.builder.IntroScreenBuilder
@@ -21,13 +21,13 @@ import javafx.scene.layout.StackPane
  * Factory for creating and assembling UI components.
  */
 class ViewFactory(
-    private val navigationService: NavigationService,
-    layoutService: LayoutService,
-    performanceService: PerformanceService,
-    settingsService: SettingsService,
-    fileTreeService: FileTreeService,
-    projectRuntimeService: ProjectRuntimeService,
-    fileTreePersistenceService: FileTreePersistenceService,
+    private val navigationService: Navigation,
+    layoutService: Layout,
+    performanceService: PerformanceMonitor,
+    settingsService: Settings,
+    fileTreeService: FileTree,
+    projectRuntimeService: ProjectRuntime,
+    fileTreePersistenceService: FileTreePersistence,
     settingsRegistry: SettingsRegistry
 ) {
     private val ideBuilder = IdeScreenBuilder(

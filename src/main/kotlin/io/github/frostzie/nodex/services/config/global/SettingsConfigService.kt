@@ -7,10 +7,10 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.github.frostzie.nodex.domain.settings.AppSettings
 import io.github.frostzie.nodex.services.settings.SettingsValidationService
 import io.github.frostzie.nodex.services.config.BackupService
-import io.github.frostzie.nodex.services.config.MigrationService
-import io.github.frostzie.nodex.services.config.stationary.ConfigService
-import io.github.frostzie.nodex.services.core.FileService
-import io.github.frostzie.nodex.services.core.ModVersionService
+import io.github.frostzie.nodex.api.config.Config
+import io.github.frostzie.nodex.api.config.Migration
+import io.github.frostzie.nodex.api.misc.ModVersion
+import io.github.frostzie.nodex.api.file.FileOperations
 import io.github.frostzie.nodex.utils.LoggerProvider
 import io.github.frostzie.nodex.utils.ModVersionUtils
 import java.nio.file.Path
@@ -22,10 +22,10 @@ import java.nio.file.Path
 class SettingsConfigService(
     private val settingsPath: Path,
     private val backupDir: Path,
-    private val fileService: FileService,
-    private val configService: ConfigService,
-    private val migrationService: MigrationService,
-    private val modVersionService: ModVersionService,
+    private val fileOps: FileOperations,
+    private val configService: Config,
+    private val migration: Migration,
+    private val modVersion: ModVersion,
     private val backupService: BackupService,
     private val validationService: SettingsValidationService
 ) {
@@ -40,22 +40,22 @@ class SettingsConfigService(
      * @return Loaded [AppSettings] or defaults if file doesn't exist or is corrupt.
      */
     fun load(): AppSettings {
-        if (!fileService.exists(settingsPath)) {
+        if (!fileOps.exists(settingsPath)) {
             logger.debug("Settings file not found at {}, using defaults.", settingsPath)
             configService.markSettingsLoadCompleted()
             return AppSettings()
         }
 
         return try {
-            val json = fileService.readText(settingsPath)
+            val json = fileOps.readText(settingsPath)
             val rootNode = mapper.readTree(json)
 
             val lastVersion = configService.lastUsedModVersion
-            val currentVersion = modVersionService.currentVersion
+            val currentVersion = modVersion.currentVersion
 
             val resultNode = if (ModVersionUtils.isOlderThan(lastVersion, currentVersion)) {
                 logger.info("Migrating settings from $lastVersion to $currentVersion")
-                migrationService.migrate(rootNode, lastVersion)
+                migration.migrate(rootNode, lastVersion)
             } else {
                 rootNode
             }
@@ -99,7 +99,7 @@ class SettingsConfigService(
     fun save(settings: AppSettings) {
         try {
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(settings)
-            fileService.writeAtomic(settingsPath, json)
+            fileOps.writeAtomic(settingsPath, json)
             logger.debug("Settings saved successfully to: {}", settingsPath)
 
             backupService.backup(settingsPath, backupDir, 5)

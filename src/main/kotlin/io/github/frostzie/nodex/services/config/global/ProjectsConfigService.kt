@@ -6,8 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.github.frostzie.nodex.domain.entity.RecentProject
 import io.github.frostzie.nodex.services.config.BackupService
-import io.github.frostzie.nodex.services.core.FileService
-import io.github.frostzie.nodex.services.files.FileWatcherService
+import io.github.frostzie.nodex.api.file.FileOperations
+import io.github.frostzie.nodex.api.file.FileWatcher
 import io.github.frostzie.nodex.utils.LoggerProvider
 import java.nio.file.Path
 
@@ -18,8 +18,8 @@ import java.nio.file.Path
 class ProjectsConfigService(
     private val projectsPath: Path,
     private val backupDir: Path,
-    private val fileService: FileService,
-    private val fileWatcherService: FileWatcherService,
+    private val fileOps: FileOperations,
+    private val fileWatcher: FileWatcher,
     private val backupService: BackupService
 ) {
     private val logger = LoggerProvider.getLogger("ProjectsConfigService")
@@ -34,7 +34,7 @@ class ProjectsConfigService(
      */
     fun initialize(onReload: (List<RecentProject>) -> Unit) {
         this.onReload = onReload
-        fileWatcherService.watchFile(projectsPath) { _, _ ->
+        fileWatcher.watchFile(projectsPath) { _, _ ->
             logger.info("External change detected in projects history, reloading")
             try {
                 val projects = load()
@@ -49,12 +49,12 @@ class ProjectsConfigService(
      * Loads projects history from disk.
      */
     fun load(): List<RecentProject> {
-        if (!fileService.exists(projectsPath)) {
+        if (!fileOps.exists(projectsPath)) {
             return emptyList()
         }
 
         return try {
-            val json = fileService.readText(projectsPath)
+            val json = fileOps.readText(projectsPath)
             mapper.readValue(json, object : TypeReference<List<RecentProject>>() {})
         } catch (e: Exception) {
             logger.error("Failed to load projects history from: $projectsPath", e)
@@ -67,10 +67,10 @@ class ProjectsConfigService(
      */
     fun save(projects: List<RecentProject>) {
         try {
-            fileWatcherService.ignorePath(projectsPath)
+            fileWatcher.ignorePath(projectsPath)
 
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(projects)
-            fileService.writeAtomic(projectsPath, json)
+            fileOps.writeAtomic(projectsPath, json)
             logger.info("Projects history saved successfully to: $projectsPath")
 
             backupService.backup(projectsPath, backupDir, 3)

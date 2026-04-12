@@ -1,7 +1,7 @@
 package io.github.frostzie.nodex.ui
 
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
-import io.github.frostzie.nodex.services.ui.NavigationService
+import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.ui.view.layout.IdeLayoutView
 import io.github.frostzie.nodex.ui.view.layout.IntroLayoutView
 import io.github.frostzie.nodex.ui.view.layout.ProjectManagerLayoutView
@@ -11,13 +11,13 @@ import javafx.scene.layout.StackPane
 /**
  * Manages switching between different app screens.
  *
- * Observing the [NavigationService] and updating its children based on the active [AppScreen].
+ * Observing the [Navigation] and updating its children based on the active [AppScreen].
  */
 class ScreenHost(
     private val ideLayoutView: IdeLayoutView,
     private val introLayoutView: IntroLayoutView,
     private val projectManagerLayoutView: ProjectManagerLayoutView,
-    navigationService: NavigationService
+    navigationService: Navigation
 ) : StackPane() {
 
     init {

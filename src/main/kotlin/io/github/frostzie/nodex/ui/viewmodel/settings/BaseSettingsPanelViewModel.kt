@@ -1,5 +1,6 @@
 package io.github.frostzie.nodex.ui.viewmodel.settings
 
+import io.github.frostzie.nodex.api.settings.SettingsAccess
 import io.github.frostzie.nodex.domain.settings.AppSettings
 import io.github.frostzie.nodex.settings.registry.SettingsRegistry
 import io.github.frostzie.nodex.settings.validation.SettingsValidationRules
@@ -21,11 +22,6 @@ abstract class BaseSettingsPanelViewModel(
     protected val settingsService: SettingsAccess,
     protected val registry: SettingsRegistry
 ) : SettingsPanelViewModel {
-
-    interface SettingsAccess {
-        val committed: AppSettings
-        fun stage(transform: (AppSettings) -> AppSettings)
-    }
 
     override val isDirty: BooleanProperty = SimpleBooleanProperty(false)
     override val isValid: BooleanProperty = SimpleBooleanProperty(true)

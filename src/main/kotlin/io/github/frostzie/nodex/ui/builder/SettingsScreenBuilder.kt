@@ -1,8 +1,8 @@
 package io.github.frostzie.nodex.ui.builder
 
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.services.settings.SettingsService
-import io.github.frostzie.nodex.services.ui.NavigationService
+import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.settings.Settings
 import io.github.frostzie.nodex.settings.registry.CategorySpec
 import io.github.frostzie.nodex.settings.registry.SettingsRegistry
 import io.github.frostzie.nodex.ui.builder.settings.CoreSettingsPanels
@@ -18,8 +18,8 @@ import io.github.frostzie.nodex.ui.viewmodel.settings.SettingsCategoryViewModel
 import javafx.scene.layout.Region
 
 class SettingsScreenBuilder(
-    private val settingsService: SettingsService,
-    private val navigationService: NavigationService,
+    private val settingsService: Settings,
+    private val navigationService: Navigation,
     private val settingsRegistry: SettingsRegistry
 ) : OverlayBuilder {
     override val screen: OverlayScreen = OverlayScreen.SETTINGS

@@ -1,7 +1,7 @@
 package io.github.frostzie.nodex.services.config
 
-import io.github.frostzie.nodex.services.config.stationary.ConfigService
-import io.github.frostzie.nodex.services.core.FileService
+import io.github.frostzie.nodex.api.config.Config
+import io.github.frostzie.nodex.api.file.FileOperations
 import io.github.frostzie.nodex.utils.LoggerProvider
 import java.nio.file.Path
 
@@ -10,8 +10,8 @@ import java.nio.file.Path
  * Handles switching between local and universal config paths. (Moves only Tier 2 configs)
  */
 class ConfigLocationService(
-    private val fileService: FileService,
-    private val configService: ConfigService,
+    private val fileOps: FileOperations,
+    private val configService: Config,
     private val configMoveService: ConfigMoveService
 ) {
     private val logger = LoggerProvider.getLogger("ConfigLocationService")
@@ -31,7 +31,7 @@ class ConfigLocationService(
             val src = localNodexDir.resolve(name)
             val dest = universalNodexDir.resolve(name)
 
-            if (fileService.exists(src)) {
+            if (fileOps.exists(src)) {
                 logger.info("Migrating config '$name' to universal path: $dest")
                 try {
                     configMoveService.moveConfig(src, dest)

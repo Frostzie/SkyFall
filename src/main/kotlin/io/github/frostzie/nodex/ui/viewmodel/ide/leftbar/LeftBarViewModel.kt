@@ -1,13 +1,13 @@
 package io.github.frostzie.nodex.ui.viewmodel.ide.leftbar
 
+import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
-import io.github.frostzie.nodex.services.core.LayoutService
 
-class LeftBarViewModel(private val layoutService: LayoutService) {
+class LeftBarViewModel(private val layoutService: Layout) {
 
     fun toggleFileTree() {
-        val toolWindowService = layoutService.toolWindowService
-        val filesState = toolWindowService.states.find { it.toolType == ToolWindow.FILES } ?: return
-        toolWindowService.setVisible(ToolWindow.FILES, !filesState.visible)
+        val toolWindowManager = layoutService.toolWindowProvider
+        val filesState = toolWindowManager.states.find { it.toolType == ToolWindow.FILES } ?: return
+        toolWindowManager.setVisible(ToolWindow.FILES, !filesState.visible)
     }
 }

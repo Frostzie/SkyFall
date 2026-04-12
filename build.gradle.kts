@@ -12,7 +12,7 @@ plugins {
 val mcVersion = property("mcVersion")!!.toString()
 
 val javafx: String = libs.versions.javafxapp.get()
-// http://insecure.repo1.maven.org/maven2/org/openjfx/javafx-base/21.0.8/
+// http://insecure.repo1.maven.org/maven2/org/openjfx/javafx-base/
 val javafxClassifiers = listOf(
 	"win",
 	"mac",
@@ -99,6 +99,10 @@ dependencies {
 	// Source: https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-javafx
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.10.2")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+
+	implementation(libs.koin.core)
+	include(libs.koin.core)
+	testImplementation(libs.koin.test)
 
 	// JavaFX
 	for (classifier in javafxClassifiers) {

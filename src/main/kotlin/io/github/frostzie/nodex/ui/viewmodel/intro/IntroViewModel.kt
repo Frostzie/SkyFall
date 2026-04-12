@@ -1,10 +1,10 @@
 package io.github.frostzie.nodex.ui.viewmodel.intro
 
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
-import io.github.frostzie.nodex.services.ui.NavigationService
+import io.github.frostzie.nodex.api.navigation.Navigation
 
 class IntroViewModel(
-    private val navigationService: NavigationService
+    private val navigationService: Navigation
 ) {
 
     fun tutorialStart() {

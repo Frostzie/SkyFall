@@ -1,12 +1,12 @@
 package io.github.frostzie.nodex.ui.builder
 
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
-import io.github.frostzie.nodex.services.core.LayoutService
-import io.github.frostzie.nodex.services.core.PerformanceService
-import io.github.frostzie.nodex.services.files.FileTreePersistenceService
-import io.github.frostzie.nodex.services.files.FileTreeService
-import io.github.frostzie.nodex.services.ui.NavigationService
-import io.github.frostzie.nodex.services.workspace.ProjectRuntimeService
+import io.github.frostzie.nodex.api.file.FileTree
+import io.github.frostzie.nodex.api.config.FileTreePersistence
+import io.github.frostzie.nodex.api.navigation.Layout
+import io.github.frostzie.nodex.api.misc.PerformanceMonitor
+import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import io.github.frostzie.nodex.ui.view.ide.bottombar.BottomBarView
 import io.github.frostzie.nodex.ui.view.ide.leftbar.LeftBarView
 import io.github.frostzie.nodex.ui.view.ide.overlay.ToolWindowDropOverlayView
@@ -28,12 +28,12 @@ import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree.FileTreeViewMode
  * Builds the IDE screen layout.
  */
 class IdeScreenBuilder(
-    private val layoutService: LayoutService,
-    private val navigationService: NavigationService,
-    private val performanceService: PerformanceService,
-    private val fileTreeService: FileTreeService,
-    private val projectRuntimeService: ProjectRuntimeService,
-    private val fileTreePersistenceService: FileTreePersistenceService
+    private val layoutService: Layout,
+    private val navigationService: Navigation,
+    private val performanceService: PerformanceMonitor,
+    private val fileTreeService: FileTree,
+    private val projectRuntimeService: ProjectRuntime,
+    private val fileTreePersistenceService: FileTreePersistence
 ) {
 
     fun build(): IdeLayoutView {

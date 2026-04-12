@@ -1,5 +1,6 @@
 package io.github.frostzie.nodex.ui.viewmodel.settings
 
+import io.github.frostzie.nodex.api.settings.SettingsAccess
 import io.github.frostzie.nodex.domain.settings.AppSettings
 import io.github.frostzie.nodex.domain.entity.RgbaColor
 import io.github.frostzie.nodex.domain.settings.SettingValueType

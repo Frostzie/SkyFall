@@ -2,8 +2,8 @@ package io.github.frostzie.nodex.services.config.project
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.github.frostzie.nodex.services.core.FileService
-import io.github.frostzie.nodex.services.files.FileWatcherService
+import io.github.frostzie.nodex.api.file.FileOperations
+import io.github.frostzie.nodex.api.file.FileWatcher
 import io.github.frostzie.nodex.utils.LoggerProvider
 import java.nio.file.Path
 import java.time.Instant
@@ -13,8 +13,8 @@ import java.time.Instant
  * It uses a `.nodex/project.json` file to store project metadata and the active instance details.
  */
 class ProjectConfigService(
-    private val fileService: FileService,
-    private val fileWatcherService: FileWatcherService
+    private val fileOps: FileOperations,
+    private val fileWatcher: FileWatcher
 ) {
     private val logger = LoggerProvider.getLogger("ProjectConfigService")
     private val mapper = ObjectMapper().registerKotlinModule()
@@ -53,9 +53,9 @@ class ProjectConfigService(
         val configPath = getConfigPath(projectRoot)
         val now = Instant.now().toString()
 
-        val currentConfig = if (fileService.exists(configPath)) {
+        val currentConfig = if (fileOps.exists(configPath)) {
             try {
-                val json = fileService.readText(configPath)
+                val json = fileOps.readText(configPath)
                 mapper.readValue(json, ProjectConfig::class.java)
             } catch (e: Exception) {
                 logger.error("Failed to read project config, creating new one.", e)
@@ -110,13 +110,13 @@ class ProjectConfigService(
         val configPath = getConfigPath(projectRoot)
         val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config)
 
-        fileWatcherService.ignorePath(configPath)
-        fileService.writeAtomic(configPath, json)
+        fileWatcher.ignorePath(configPath)
+        fileOps.writeAtomic(configPath, json)
     }
 
     private fun startWatching(projectRoot: Path) {
         val configPath = getConfigPath(projectRoot)
-        fileWatcherService.watchFile(configPath) { _, _ ->
+        fileWatcher.watchFile(configPath) { _, _ ->
             checkLockIntegrity(projectRoot)
         }
     }
@@ -124,7 +124,7 @@ class ProjectConfigService(
     private fun checkLockIntegrity(projectRoot: Path) {
         val configPath = getConfigPath(projectRoot)
         try {
-            if (!fileService.exists(configPath)) {
+            if (!fileOps.exists(configPath)) {
                 if (claimedProject == projectRoot) {
                     logger.warn("Config file for project $projectRoot was deleted externally.")
                     lockLost = true
@@ -132,7 +132,7 @@ class ProjectConfigService(
                 return
             }
 
-            val json = fileService.readText(configPath)
+            val json = fileOps.readText(configPath)
             val config = mapper.readValue(json, ProjectConfig::class.java)
             if (config.activeInstance?.pid != currentPid) {
                 logger.error("Lock for project $projectRoot was stolen or cleared by PID: ${config.activeInstance?.pid}.")

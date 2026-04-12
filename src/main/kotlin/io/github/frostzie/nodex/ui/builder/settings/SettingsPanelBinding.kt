@@ -1,7 +1,7 @@
 package io.github.frostzie.nodex.ui.builder.settings
 
+import io.github.frostzie.nodex.api.settings.SettingsAccess
 import io.github.frostzie.nodex.settings.registry.SettingsRegistry
-import io.github.frostzie.nodex.services.settings.SettingsService
 import io.github.frostzie.nodex.ui.view.settings.GenericCategoryView
 import io.github.frostzie.nodex.ui.viewmodel.settings.GenericSettingsPanelViewModel
 import io.github.frostzie.nodex.ui.viewmodel.settings.SettingsPanelViewModel
@@ -16,7 +16,7 @@ import javafx.scene.control.ScrollPane
  */
 data class SettingsPanelBinding(
     val categoryId: String,
-    val viewModelFactory: (SettingsService, SettingsRegistry) -> SettingsPanelViewModel,
+    val viewModelFactory: (SettingsAccess, SettingsRegistry) -> SettingsPanelViewModel,
     val panelFactory: (SettingsPanelViewModel, StringProperty, SettingsRegistry) -> Node
 ) {
     companion object {

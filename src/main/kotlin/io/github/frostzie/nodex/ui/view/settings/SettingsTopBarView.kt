@@ -4,25 +4,20 @@ import io.github.frostzie.nodex.ui.utils.extensions.withMaxLength
 import io.github.frostzie.nodex.ui.viewmodel.settings.SettingsCategoryViewModel
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.Node
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.HeaderBar
 
 class SettingsTopBarView(
     vm: SettingsCategoryViewModel
-) : BorderPane() {
+) : HeaderBar() {
     private val scopeDropdown = ComboBox<String>()
     private val searchField = TextField()
 
-    val nonCaptionNodes: List<Node>
-        get() = listOf(scopeDropdown, searchField)
-
     init {
         styleClass.add("settings-top-bar")
-        padding = Insets(8.0, 2.0, 8.0, 2.0)
+        padding = Insets(4.0, 2.0, 4.0, 2.0)
 
         scopeDropdown.items.setAll("Global Settings")
         scopeDropdown.value = "Global Settings"
@@ -38,8 +33,8 @@ class SettingsTopBarView(
             alignment = Pos.CENTER_LEFT
             isPickOnBounds = false
         }
-        val centerBox = StackPane(searchField, leftBox).apply { alignment = Pos.CENTER }
-        StackPane.setAlignment(leftBox, Pos.CENTER_LEFT)
-        center = centerBox
+
+        left = leftBox
+        center = searchField
     }
 }

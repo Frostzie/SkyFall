@@ -12,5 +12,6 @@ data class WindowPolicy(
     val isResizable: Boolean = true,
     val isPersistent: Boolean = true,
     val isModal: Boolean = false,
-    val alwaysOnTop: Boolean = false
+    val alwaysOnTop: Boolean = false,
+    val headerButtonHeight: Double? = null
 )

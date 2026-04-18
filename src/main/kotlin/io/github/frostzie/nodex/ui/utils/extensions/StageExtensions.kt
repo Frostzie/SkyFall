@@ -3,6 +3,7 @@ package io.github.frostzie.nodex.ui.utils.extensions
 import io.github.frostzie.nodex.domain.config.WindowBounds
 import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
+import javafx.scene.layout.HeaderBar
 import javafx.scene.layout.Region
 import javafx.stage.Stage
 
@@ -16,6 +17,10 @@ fun Stage.applyBasePolicy(content: Region, policy: WindowPolicy, state: WindowBo
     content.minHeight = policy.minHeight
 
     this.isResizable = policy.isResizable
+    
+    policy.headerButtonHeight?.let { height ->
+        HeaderBar.setPrefButtonHeight(this, height)
+    }
 
     // Resolve Dimensions:
     // 1. If non-resizable, always use Policy dimensions

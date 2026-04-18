@@ -17,7 +17,6 @@ jacksonCoreV = "2.17.1"
 junit = "5.10.2"
 mockito = "5.11.0"
 mockito-kotlin = "5.2.1"
-fxStageV = "0.8.4"
 koin = "4.2.1-RC1"
 kotlinx = "1.10.2"
 
@@ -38,7 +37,6 @@ flowless = { module = "org.fxmisc.flowless:flowless", version.ref = "flowlessV" 
 reactFX = { module = "org.reactfx:reactfx", version.ref = "reactFXv" }
 undofx = { module = "org.fxmisc.undo:undofx", version.ref = "undoFXv" }
 wellbehavedfx = { module = "org.fxmisc.wellbehaved:wellbehavedfx", version.ref = "wellbehavedFXv" }
-fxStage = { module = "io.github.micheljung:fxstage", version.ref = "fxStageV" }
 
 atlantaFX = { module = "io.github.mkpaz:atlantafx-base", version.ref = "atlantafx-base" }
 ikonliJavaFX = { module = "org.kordamp.ikonli:ikonli-javafx", version.ref = "ikonli"}

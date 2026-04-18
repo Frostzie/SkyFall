@@ -1,26 +1,22 @@
 package io.github.frostzie.nodex.services.ui
 
-import ch.micheljung.fxwindow.FxStage
 import io.github.frostzie.nodex.api.navigation.FocusTracker
 import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
-import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.navigation.MainStage
 import io.github.frostzie.nodex.api.navigation.WindowProfile
 import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
 import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
-import io.github.frostzie.nodex.utils.LoggerProvider
-import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.layout.Region
 import javafx.stage.Stage
+import javafx.stage.StageStyle
 
 /**
  * Service responsible for managing the primary application window lifecycle.
  *
- * Handles the window lifecycle, geometry tracking, and integration with
- * FxStage lib for native window behavior.
+ * Handles the window lifecycle, geometry tracking.
  */
 open class MainStageService(
     private val layoutService: Layout,
@@ -28,12 +24,9 @@ open class MainStageService(
     private val focusService: FocusTracker,
     private val windowProfile: WindowProfile
 ) : MainStage {
-    private val logger = LoggerProvider.getLogger("MainStageService")
     private var stage: Stage? = null
     private var content: Region? = null
-    private var fxStage: FxStage? = null
     private var tracker: WindowGeometryTracker? = null
-    private val pendingNonCaptionNodes = mutableListOf<Node>()
 
     /**
      * Initialize the service with the primary stage and content.
@@ -43,7 +36,10 @@ open class MainStageService(
         this.stage = primaryStage
         this.content = content
 
-        configureFxStage(primaryStage, content, scene)
+        primaryStage.initStyle(StageStyle.EXTENDED)
+        scene.root = content
+        primaryStage.scene = scene
+
         setupGeometryTracker(primaryStage)
 
         focusService.trackStage(primaryStage)
@@ -51,7 +47,7 @@ open class MainStageService(
 
         primaryStage.setOnCloseRequest { event ->
             event.consume()
-            hide() // Minimize instead of closing so FxStage doesn't break
+            hide()
         }
     }
 
@@ -71,23 +67,6 @@ open class MainStageService(
 
         currentStage.toFront()
         currentStage.requestFocus()
-    }
-
-    private fun configureFxStage(primaryStage: Stage, content: Region, scene: Scene) {
-        try {
-            fxStage = FxStage.configure(primaryStage)
-                .allowTopResize(true)
-                .allowMinimize(true)
-                .withSceneFactory { parent -> scene.apply { root = parent } }
-                .withContent(content)
-                .apply()
-            flushPendingNonCaptionNodes()
-            logger.debug("FxStage configured successfully for primary stage")
-        } catch (e: Exception) {
-            logger.error("Failed to configure FxStage", e)
-            scene.root = content
-            primaryStage.scene = scene
-        }
     }
 
     private fun setupGeometryTracker(primaryStage: Stage) {
@@ -111,43 +90,15 @@ open class MainStageService(
     }
 
     private fun applyPolicy(currentStage: Stage, content: Region, screen: AppScreen) {
-        val profile = windowProfile.getScreenPolicy(screen)
-        val policy = WindowPolicy(
-            title = profile.title,
-            minWidth = profile.minWidth,
-            minHeight = profile.minHeight,
-            prefWidth = profile.prefWidth,
-            prefHeight = profile.prefHeight,
-            isResizable = profile.isResizable,
-            isPersistent = profile.isPersistent,
-            isModal = profile.isModal,
-            alwaysOnTop = profile.alwaysOnTop
-        )
-
+        val policy = windowProfile.getScreenPolicy(screen)
         val state = layoutService.getWindowState(screen)
 
         // Shared logic via extension
         currentStage.applyBasePolicy(content, policy, state, tracker)
     }
 
-    override fun registerNonCaptionNodes(nodes: Collection<Node>) {
-        if (nodes.isEmpty()) return
-        val configuredFxStage = fxStage
-        if (configuredFxStage != null) {
-            configuredFxStage.nonCaptionNodes.addAll(nodes)
-        } else {
-            pendingNonCaptionNodes.addAll(nodes)
-        }
-    }
-
-    private fun flushPendingNonCaptionNodes() {
-        val configuredFxStage = fxStage ?: return
-        configuredFxStage.nonCaptionNodes.addAll(pendingNonCaptionNodes)
-        pendingNonCaptionNodes.clear()
-    }
-
     override fun hide() {
-        stage?.let { it.isIconified = true }
+        stage?.hide()
     }
 
     override fun isShowing(): Boolean = stage?.isShowing ?: false

@@ -4,8 +4,6 @@ import io.github.frostzie.nodex.ui.view.settings.SettingsActionsBarView
 import io.github.frostzie.nodex.ui.view.settings.SettingsCategoryView
 import io.github.frostzie.nodex.ui.view.settings.SettingsContentHostView
 import io.github.frostzie.nodex.ui.view.settings.SettingsTopBarView
-import io.github.frostzie.nodex.ui.utils.NonCaptionNodesProvider
-import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 
 /**
@@ -13,10 +11,10 @@ import javafx.scene.layout.BorderPane
  */
 class SettingsLayoutView(
     categoryView: SettingsCategoryView,
-    private val topBarView: SettingsTopBarView,
+    topBarView: SettingsTopBarView,
     contentView: SettingsContentHostView,
     actionsBarView: SettingsActionsBarView
-) : BorderPane(), NonCaptionNodesProvider {
+) : BorderPane() {
 
     init {
         top = topBarView
@@ -24,6 +22,4 @@ class SettingsLayoutView(
         center = contentView
         bottom = actionsBarView
     }
-
-    override fun getNonCaptionNodes(): List<Node> = topBarView.nonCaptionNodes
 }

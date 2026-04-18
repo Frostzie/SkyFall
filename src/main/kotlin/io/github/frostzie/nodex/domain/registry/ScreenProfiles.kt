@@ -22,10 +22,12 @@ object ScreenProfiles {
             prefWidth = 825.0,
             prefHeight = 750.0,
             isResizable = false,
-            isPersistent = false
+            isPersistent = false,
+            headerButtonHeight = 40.0
         ),
         AppScreen.IDE to WindowPolicy(
-            title = "Nodex"
+            title = "Nodex",
+            headerButtonHeight = 35.0
         )
     )
 
@@ -35,7 +37,8 @@ object ScreenProfiles {
             prefWidth = 950.0,
             prefHeight = 750.0,
             isModal = true,
-            isResizable = true
+            isResizable = true,
+            headerButtonHeight = 45.0
         )
     )
 }

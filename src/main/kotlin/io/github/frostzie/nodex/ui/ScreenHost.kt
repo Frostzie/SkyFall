@@ -5,7 +5,6 @@ import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.ui.view.layout.IdeLayoutView
 import io.github.frostzie.nodex.ui.view.layout.IntroLayoutView
 import io.github.frostzie.nodex.ui.view.layout.ProjectManagerLayoutView
-import javafx.scene.Node
 import javafx.scene.layout.StackPane
 
 /**
@@ -37,9 +36,4 @@ class ScreenHost(
         }
         children.setAll(view)
     }
-
-    /**
-     * Returns nodes that should be ignored by FxStage.
-     */
-    fun getNonCaptionNodes(): List<Node> = ideLayoutView.getNonCaptionNodes()
 }

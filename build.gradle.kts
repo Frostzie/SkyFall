@@ -109,10 +109,6 @@ dependencies {
     include(libs.jsvg)
     include(libs.directoryWatcher)
 
-    //TODO: Remove
-    implementation(libs.fxStage)
-    include(libs.fxStage)
-
     implementation(libs.kotlinx.coroutines.fx)
 
     implementation(libs.koin.core)

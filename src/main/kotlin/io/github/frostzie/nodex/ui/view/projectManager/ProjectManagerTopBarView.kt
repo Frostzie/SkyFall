@@ -5,22 +5,21 @@ import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.layout.HeaderBar
 import javafx.scene.layout.HBox
 
 /**
  * The top bar for the Project Manager screen.
  */
-class ProjectManagerTopBarView : HBox(10.0) {
+class ProjectManagerTopBarView : HeaderBar() {
 
     init {
-        alignment = Pos.CENTER_LEFT
+        styleClass.add("project-manager-top-bar")
         padding = Insets(5.0, 10.0, 5.0, 10.0)
         prefHeight = 40.0
 
         val icon = ImageView().apply {
-            try {
-                image = Image("assets/nodex/icon.png")
-            } catch (_: Exception) {}
+            image = Image("assets/nodex/icon.png")
             fitWidth = 20.0
             fitHeight = 20.0
             isPreserveRatio = true
@@ -28,6 +27,9 @@ class ProjectManagerTopBarView : HBox(10.0) {
 
         val title = Label("Project Manager")
 
-        children.addAll(icon, title)
+        val leftBox = HBox(10.0, icon, title).apply {
+            alignment = Pos.CENTER_LEFT
+        }
+        left = leftBox
     }
 }

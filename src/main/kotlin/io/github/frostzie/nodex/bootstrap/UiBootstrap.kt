@@ -1,12 +1,12 @@
 package io.github.frostzie.nodex.bootstrap
 
 import io.github.frostzie.nodex.api.misc.Styling
-import io.github.frostzie.nodex.ui.ScreenHost
 import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.image.Image
 import javafx.scene.layout.Region
+import javafx.scene.paint.Color
 import javafx.stage.Stage
 
 /**
@@ -30,7 +30,7 @@ object UiBootstrap {
 
                 val scene = createScene(rootView, stylingService)
 
-                initializeStageServices(screenHost, rootView, scene)
+                initializeStageServices(rootView, scene)
 
             } catch (e: Exception) {
                 logger.error("Failed to initialize UI", e)
@@ -41,17 +41,16 @@ object UiBootstrap {
     private fun createScene(rootView: Region, stylingService: Styling): Scene {
         val scene = Scene(rootView)
         scene.stylesheets.addAll(stylingService.getStylesheetUrls())
+        scene.fill = Color.valueOf("#1c2128") //TODO: Replace with dynamic color from themes
         return scene
     }
 
     private fun initializeStageServices(
-        screenHost: ScreenHost,
         rootView: Region,
         scene: Scene
     ) {
         val primaryStage = createPrimaryStage()
 
-        ServiceBootstrap.mainStage.registerNonCaptionNodes(screenHost.getNonCaptionNodes())
         ServiceBootstrap.mainStage.initialize(primaryStage, rootView, scene)
 
         ServiceBootstrap.overlayStage.setPrimaryStage(primaryStage)

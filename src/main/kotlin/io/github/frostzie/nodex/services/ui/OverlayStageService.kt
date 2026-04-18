@@ -1,23 +1,21 @@
 package io.github.frostzie.nodex.services.ui
 
-import ch.micheljung.fxwindow.FxStage
 import io.github.frostzie.nodex.api.misc.Styling
 import io.github.frostzie.nodex.api.navigation.FocusTracker
 import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.api.navigation.OverlayStage
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.domain.uicontract.WindowPolicy
 import io.github.frostzie.nodex.ui.ViewFactory
 import io.github.frostzie.nodex.api.navigation.WindowProfile
-import io.github.frostzie.nodex.ui.utils.NonCaptionNodesProvider
 import io.github.frostzie.nodex.ui.utils.WindowGeometryTracker
 import io.github.frostzie.nodex.ui.utils.extensions.applyBasePolicy
-import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.scene.Scene
 import javafx.scene.layout.Region
+import javafx.scene.paint.Color
 import javafx.stage.Modality
 import javafx.stage.Stage
+import javafx.stage.StageStyle
 
 /**
  * Service responsible for managing modal app windows (Overlays).
@@ -33,7 +31,6 @@ open class OverlayStageService(
     private val viewFactory: ViewFactory,
     private val windowProfile: WindowProfile
 ) : OverlayStage {
-    private val logger = LoggerProvider.getLogger("OverlayStageService")
     private val activeStages = mutableMapOf<OverlayScreen, Stage>()
     private var primaryWindowStage: Stage? = null
 
@@ -72,11 +69,12 @@ open class OverlayStageService(
         val scene = Scene(rootNode)
 
         scene.stylesheets.addAll(stylingService.getStylesheetUrls())
+        scene.fill = Color.valueOf("#1c2128") //TODO: Replace with dynamic color from themes
 
-        val fxStage = configureFxStage(stage, rootNode, scene)
-        if (fxStage != null && rootNode is NonCaptionNodesProvider) {
-            fxStage.nonCaptionNodes.addAll(rootNode.getNonCaptionNodes())
-        }
+        stage.initStyle(StageStyle.EXTENDED)
+        scene.root = rootNode
+        stage.scene = scene
+
         val tracker = setupGeometryTracker(stage, overlay)
         applyPolicy(stage, rootNode, overlay, tracker)
 
@@ -88,21 +86,6 @@ open class OverlayStageService(
         activeStages[overlay] = stage
         stage.show()
         focusService.trackStage(stage)
-    }
-
-    private fun configureFxStage(stage: Stage, rootNode: Region, scene: Scene): FxStage? {
-        return try {
-            val configured = FxStage.configure(stage)
-                .withSceneFactory { parent -> scene.apply { root = parent } }
-                .withContent(rootNode)
-                .allowMinimize(false)
-                .apply()
-            configured
-        } catch (e: Exception) {
-            logger.error("Failed to configure FxStage for overlay", e)
-            stage.scene = scene
-            null
-        }
     }
 
     private fun setupGeometryTracker(stage: Stage, overlay: OverlayScreen): WindowGeometryTracker {
@@ -120,19 +103,7 @@ open class OverlayStageService(
         overlay: OverlayScreen,
         tracker: WindowGeometryTracker
     ) {
-        val profile = windowProfile.getOverlayPolicy(overlay)
-        val policy = WindowPolicy(
-            title = profile.title,
-            minWidth = profile.minWidth,
-            minHeight = profile.minHeight,
-            prefWidth = profile.prefWidth,
-            prefHeight = profile.prefHeight,
-            isResizable = profile.isResizable,
-            isPersistent = profile.isPersistent,
-            isModal = profile.isModal,
-            alwaysOnTop = profile.alwaysOnTop
-        )
-
+        val policy = windowProfile.getOverlayPolicy(overlay)
         val state = layoutService.getOverlayWindowState(overlay)
 
         // Overlay specific settings

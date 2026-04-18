@@ -1,8 +1,8 @@
 package io.github.frostzie.nodex.loader.minecraft
 
-import net.minecraft.Util
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.util.Util
 import net.minecraft.world.level.storage.LevelResource
 import java.net.URI
 import java.nio.file.Path
@@ -23,14 +23,14 @@ object MCInterface {
      * Executes a task on the main Minecraft thread.
      */
     fun runOnRenderThread(action: () -> Unit) {
-        Minecraft.getInstance()?.execute(action)
+        Minecraft.getInstance().execute(action)
     }
 
     /**
      * Displays a client-side chat message to the player.
      */
-    fun displayClientMessage(message: Component, actionBar: Boolean = false) {
-        Minecraft.getInstance().player?.displayClientMessage(message, actionBar)
+    fun displayClientMessage(message: Component) {
+        Minecraft.getInstance().player?.sendSystemMessage(message)
     }
 
     // World State Checks
@@ -49,7 +49,7 @@ object MCInterface {
      * Gets the game directory path.
      */
     fun getGamePath(): Path? {
-        return Minecraft.getInstance().gameDirectory?.toPath()
+        return Minecraft.getInstance().gameDirectory.toPath()
     }
 
     /**

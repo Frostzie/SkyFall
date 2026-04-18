@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.3.20"
-fabric_kotlin = "1.13.4+kotlin.2.2.0"
+fabric_kotlin = "1.13.10+kotlin.2.3.20"
 devauth = "1.2.1"
-javafxapp = "21.0.8"
+javafxapp = "26"
 javafx_plugin = "0.1.0"
 atlantafx-base = "2.1.0"
 ikonli = "12.4.0"
@@ -19,6 +19,7 @@ mockito = "5.11.0"
 mockito-kotlin = "5.2.1"
 fxStageV = "0.8.4"
 koin = "4.2.1-RC1"
+kotlinx = "1.10.2"
 
 [libraries]
 fabric_kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric_kotlin" }
@@ -28,6 +29,8 @@ jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref 
 jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jacksonCoreV" }
 jacksonModuleKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonCoreV" }
 jacksonDatatypeJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jacksonCoreV" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonCoreV" }
+
 directoryWatcher = { module = "io.methvin:directory-watcher", version.ref = "directoryWatcherV" }
 jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvgV" }
 richTextFX = { module = "org.fxmisc.richtext:richtextfx", version.ref = "richTextFXv"}
@@ -42,6 +45,9 @@ ikonliJavaFX = { module = "org.kordamp.ikonli:ikonli-javafx", version.ref = "iko
 ikonliCore = { module = "org.kordamp.ikonli:ikonli-core", version.ref = "ikonli"}
 material2 = { module = "org.kordamp.ikonli:ikonli-material2-pack", version.ref = "ikonli"}
 feather = { module = "org.kordamp.ikonli:ikonli-feather-pack", version.ref = "ikonli"}
+
+kotlinx-coroutines-fx = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-javafx", version.ref = "kotlinx"}
+kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx"}
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

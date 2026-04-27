@@ -19,6 +19,9 @@ interface Config {
     /** Optional custom path override for the config root directory. */
     val universalPath: String?
 
+    /** Has the intro screen been finished */
+    val introFinished: Boolean
+
     /** Loads from nodex.json or creates defaults if missing. */
     fun initialize()
 
@@ -27,6 +30,11 @@ interface Config {
      * Updates the modVersion to current one.
      */
     fun markSettingsLoadCompleted()
+
+    /**
+     * Marks the intro view as completed.
+     */
+    fun markIntroCompleted()
 
     /** Saves the current state to nodex.json. */
     fun save()

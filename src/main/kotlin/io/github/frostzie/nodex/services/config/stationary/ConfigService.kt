@@ -24,15 +24,18 @@ class ConfigService(
     private var _lastUsedModVersion: String = "0.0.0"
     private var _universalPathEnabled: Boolean = false
     private var _universalPath: String? = null
+    private var _introFinished: Boolean = false
 
     override val lastUsedModVersion: String get() = _lastUsedModVersion
     override val universalPathEnabled: Boolean get() = _universalPathEnabled
     override val universalPath: String? get() = _universalPath
+    override val introFinished: Boolean get() = _introFinished
 
     private data class StationaryConfig(
         val modVersion: String,
         val universalPathEnabled: Boolean = false,
-        val universalPath: String? = null
+        val universalPath: String? = null,
+        val introFinished: Boolean = false
     )
 
     /**
@@ -54,6 +57,7 @@ class ConfigService(
             _lastUsedModVersion = config.modVersion
             _universalPathEnabled = config.universalPathEnabled
             _universalPath = config.universalPath
+            _introFinished = config.introFinished
 
             logger.info("Loaded stationary config. Last version recorded: $_lastUsedModVersion")
         } catch (e: Exception) {
@@ -66,6 +70,7 @@ class ConfigService(
         _lastUsedModVersion = modVersion.currentVersion
         _universalPathEnabled = false
         _universalPath = null
+        _introFinished = false
         save()
     }
 
@@ -82,6 +87,14 @@ class ConfigService(
     }
 
     /**
+     * Marks the intro view as completed.
+     */
+    override fun markIntroCompleted() {
+        _introFinished = true
+        save()
+    }
+
+    /**
      * Saves the current state to nodex.json.
      */
     override fun save() {
@@ -89,7 +102,8 @@ class ConfigService(
             val config = StationaryConfig(
                 modVersion = _lastUsedModVersion,
                 universalPathEnabled = _universalPathEnabled,
-                universalPath = _universalPath
+                universalPath = _universalPath,
+                introFinished = _introFinished
             )
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config)
             fileOps.writeAtomic(configPath, json)

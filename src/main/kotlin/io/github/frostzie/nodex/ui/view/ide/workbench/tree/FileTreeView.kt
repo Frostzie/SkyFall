@@ -10,8 +10,13 @@ import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.input.MouseEvent
+import java.nio.file.Path
 
-class FileTreeView(private val viewModel: FileTreeViewModel) : VBox() {
+class FileTreeView(
+    private val viewModel: FileTreeViewModel,
+    private val onFileOpen: (Path) -> Unit
+) : VBox() {
     private val header = HBox()
     private val treeView = TreeView<FileTreeItem>()
 
@@ -68,6 +73,15 @@ class FileTreeView(private val viewModel: FileTreeViewModel) : VBox() {
                     } else {
                         text = item.displayName
                     }
+                }
+            }
+        }
+
+        treeView.addEventHandler(MouseEvent.MOUSE_CLICKED) { event ->
+            if (event.clickCount == 2) {
+                val selectedItem = treeView.selectionModel.selectedItem
+                if (selectedItem != null && !selectedItem.value.isDirectory) {
+                    onFileOpen(selectedItem.value.path)
                 }
             }
         }

@@ -31,7 +31,6 @@ class TopBarView(private val viewModel: TopBarViewModel) : HeaderBar() {
                     "Screen Switching", null,
                     MenuItem("Intro").apply { setOnAction { viewModel.openIntro() } },
                     MenuItem("ProjectManager").apply { setOnAction { viewModel.openProjectManager() } },
-                    MenuItem("IDE").apply { setOnAction { viewModel.openIde() } },
                     MenuItem("Settings").apply { setOnAction { viewModel.openSettings() } }
                 )
             )

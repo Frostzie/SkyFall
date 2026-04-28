@@ -1,7 +1,8 @@
 package io.github.frostzie.nodex.ui.builder
 
+import io.github.frostzie.nodex.api.config.RecentProjects
 import io.github.frostzie.nodex.api.navigation.Navigation
-import io.github.frostzie.nodex.api.workspace.ProjectRuntime
+import io.github.frostzie.nodex.api.workspace.WorkspaceLifecycle
 import io.github.frostzie.nodex.ui.view.layout.ProjectManagerLayoutView
 import io.github.frostzie.nodex.ui.view.projectManager.MainAreaView
 import io.github.frostzie.nodex.ui.view.projectManager.ProjectManagerTopBarView
@@ -13,14 +14,18 @@ import io.github.frostzie.nodex.ui.viewmodel.projectManager.ProjectManagerViewMo
  */
 class ProjectManagerScreenBuilder(
     private val navigationService: Navigation,
-    private val projectRuntimeService: ProjectRuntime
+    private val workspaceLifecycle: WorkspaceLifecycle,
+    private val recentProjectsService: RecentProjects
 ) {
 
     fun build(): ProjectManagerLayoutView {
         val topBarView = ProjectManagerTopBarView()
-        val recentListView = RecentListView()
-
-        val projectManagerViewModel = ProjectManagerViewModel(navigationService, projectRuntimeService)
+        val projectManagerViewModel = ProjectManagerViewModel(
+            navigationService,
+            workspaceLifecycle,
+            recentProjectsService
+        )
+        val recentListView = RecentListView(projectManagerViewModel)
         val mainAreaView = MainAreaView(projectManagerViewModel.getMainAreaViewModel())
 
         return ProjectManagerLayoutView(

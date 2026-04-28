@@ -1,7 +1,6 @@
 package io.github.frostzie.nodex.services.workspace
 
 import io.github.frostzie.nodex.api.file.FileTree
-import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.api.file.FileWatcher
 import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import io.github.frostzie.nodex.domain.entity.Project
@@ -16,11 +15,11 @@ import java.nio.file.Path
  */
 class ProjectRuntimeService(
     private val fileWatcher: FileWatcher,
-    private val fileTreeService: FileTree,
-    private val fileTreePersistenceService: FileTreePersistence
+    private val fileTreeService: FileTree
 ) : ProjectRuntime {
     private val logger = LoggerProvider.getLogger("ProjectRuntimeService")
     private val _currentProject = SimpleObjectProperty<Project?>()
+    override val currentProjectProperty: ReadOnlyObjectProperty<Project?> = _currentProject
 
     private val _loadedExpandedPaths = SimpleObjectProperty<Set<Path>>(emptySet())
     override val loadedExpandedPathsProperty: ReadOnlyObjectProperty<Set<Path>> = _loadedExpandedPaths
@@ -42,7 +41,7 @@ class ProjectRuntimeService(
     /**
      * Switches the active project, rebuilding the file tree and watcher state.
      */
-    override fun setProject(project: Project) {
+    override fun setProject(project: Project, loadedExpandedPaths: Set<Path>) {
         val oldProject = _currentProject.get()
         if (oldProject == project) return
 
@@ -51,7 +50,7 @@ class ProjectRuntimeService(
         clearProject()
 
         _currentProject.set(project)
-        _loadedExpandedPaths.set(fileTreePersistenceService.loadOnProjectOpen(project.path))
+        _loadedExpandedPaths.set(loadedExpandedPaths)
 
         isBuilding = true
         pendingTick = false
@@ -78,7 +77,6 @@ class ProjectRuntimeService(
         val project = _currentProject.get() ?: return
 
         project.filesystemTick.removeListener(tickListener)
-        fileTreePersistenceService.flushPending()
         fileWatcher.unwatch(project.path)
 
         _currentProject.set(null)

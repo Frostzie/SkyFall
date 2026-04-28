@@ -4,7 +4,6 @@ import io.github.frostzie.nodex.api.concurrency.Concurrency
 import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.OverlayScreen
-import io.github.frostzie.nodex.utils.LoggerProvider
 import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
@@ -17,7 +16,6 @@ import javafx.beans.property.SimpleObjectProperty
  * State changes are assigned to the UI thread.
  */
 class NavigationService(private val concurrency: Concurrency) : Navigation {
-    private val logger = LoggerProvider.getLogger("NavigationService")
 
     /**
      * The currently active primary screen.
@@ -37,18 +35,6 @@ class NavigationService(private val concurrency: Concurrency) : Navigation {
      */
     private val _activeOverlay = SimpleObjectProperty<OverlayScreen?>(null)
     override val activeOverlay: ReadOnlyObjectProperty<OverlayScreen?> = _activeOverlay
-
-    override fun initialize(initialScreen: AppScreen) {
-        _currentScreen.set(initialScreen)
-
-        _currentScreen.addListener { _, old, new ->
-            if (old != new) {
-                logger.debug("Screen switch: {} -> {}", old, new)
-            }
-        }
-
-        logger.debug("NavigationService initialized. Screen: {}", initialScreen)
-    }
 
     /**
      * Switch the current screen to a specified screen.

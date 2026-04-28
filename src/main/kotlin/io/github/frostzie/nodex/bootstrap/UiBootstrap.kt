@@ -32,10 +32,17 @@ object UiBootstrap {
 
                 initializeStageServices(rootView, scene)
 
+                loadScreen()
             } catch (e: Exception) {
                 logger.error("Failed to initialize UI", e)
             }
         }
+    }
+
+    private fun loadScreen() {
+        val navigation = ServiceBootstrap.navigationService
+        val startupScreen = ServiceBootstrap.workspaceLifecycle.resolveStartupScreen()
+        navigation.navigateTo(startupScreen)
     }
 
     private fun createScene(rootView: Region, stylingService: Styling): Scene {

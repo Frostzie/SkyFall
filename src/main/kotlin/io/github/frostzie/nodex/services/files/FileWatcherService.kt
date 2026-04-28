@@ -62,8 +62,9 @@ class FileWatcherService(
      * @param onAction The callback to invoke when the file changes.
      */
     override fun watchFile(path: Path, onAction: (Path, EventType) -> Unit) {
-        val parent = path.parent ?: return
-        val fileName = path.fileName
+        val normalizedPath = path.toAbsolutePath().normalize()
+        val parent = normalizedPath.parent ?: return
+        val fileName = normalizedPath.fileName
 
         val callbacks = fileCallbacks.computeIfAbsent(parent) { ConcurrentHashMap() }
         callbacks[fileName] = onAction
@@ -75,8 +76,22 @@ class FileWatcherService(
                 }
             }
             watcher.start()
-            logger.debug("Monitoring parent directory for file: {}", path)
+            logger.debug("Monitoring parent directory for file: {}", normalizedPath)
             watcher
+        }
+    }
+
+    override fun unwatchFile(path: Path) {
+        val normalizedPath = path.toAbsolutePath().normalize()
+        val parent = normalizedPath.parent ?: return
+        val fileName = normalizedPath.fileName
+
+        val callbacks = fileCallbacks[parent] ?: return
+        callbacks.remove(fileName)
+
+        if (callbacks.isEmpty()) {
+            fileCallbacks.remove(parent)
+            genericWatchers.remove(parent)?.stop()
         }
     }
 

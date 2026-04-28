@@ -22,9 +22,6 @@ interface Navigation {
     /** The currently active overlay, or null if no overlay is shown. */
     val activeOverlay: ReadOnlyObjectProperty<OverlayScreen?>
 
-    /** Initializes the service with the starting screen. */
-    fun initialize(initialScreen: AppScreen)
-
     /** Switch the current screen to a specified [AppScreen]. */
     fun navigateTo(screen: AppScreen)
 

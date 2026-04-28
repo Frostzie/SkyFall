@@ -30,6 +30,7 @@ class StylingService : Styling {
         val base = "/assets/nodex/styling/components"
         registerCss("code-area", "$base/controls/code-area.css")
         registerCss("menu-button", "$base/controls/menu-button.css")
+        registerCss("tab", "$base/controls/tab-pane.css")
         registerCss("rectangle", "$base/primitives/rectangle.css")
         registerCss("settings", "$base/views/settings.css")
     }

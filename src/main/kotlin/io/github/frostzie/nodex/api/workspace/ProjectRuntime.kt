@@ -14,6 +14,8 @@ import java.nio.file.Path
  * @see io.github.frostzie.nodex.services.workspace.ProjectRuntimeService
  */
 interface ProjectRuntime {
+    /** Read-only property containing the currently active project, or null. */
+    val currentProjectProperty: ReadOnlyObjectProperty<Project?>
 
     /**
      * Read-only property of the file paths that were expanded in the file tree
@@ -30,7 +32,7 @@ interface ProjectRuntime {
      *
      * @param project The project to load.
      */
-    fun setProject(project: Project)
+    fun setProject(project: Project, loadedExpandedPaths: Set<Path>)
 
     /**
      * Clears the current project, stopping its watcher and flushing state.

@@ -92,7 +92,7 @@ class ConcurrencyService : Concurrency {
      * Call this when the application is shut down to ensure clean exit.
      */
     override fun shutdown() {
-        logger.info("Shutting down ConcurrencyService.")
+        logger.debug("Shutting down ConcurrencyService.")
         masterJob.cancel()
         logger.debug("All background scopes cancelled.")
     }

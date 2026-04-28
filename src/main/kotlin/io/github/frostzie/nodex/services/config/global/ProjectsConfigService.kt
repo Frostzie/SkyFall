@@ -71,9 +71,9 @@ class ProjectsConfigService(
 
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(projects)
             fileOps.writeAtomic(projectsPath, json)
-            logger.info("Projects history saved successfully to: $projectsPath")
+            logger.debug("Projects history saved.")
 
-            backupService.backup(projectsPath, backupDir, 3)
+            backupService.backup(projectsPath, backupDir, 2)
         } catch (e: Exception) {
             logger.error("Failed to save projects history to: $projectsPath", e)
             throw e

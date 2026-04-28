@@ -10,5 +10,6 @@ import java.time.Instant
  */
 data class RecentProject(
     val path: Path,
-    val lastOpened: Instant = Instant.now()
+    val lastOpened: Instant = Instant.now(),
+    val active: Boolean = false
 )

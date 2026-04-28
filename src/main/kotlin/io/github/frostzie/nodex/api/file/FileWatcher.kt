@@ -23,6 +23,11 @@ interface FileWatcher {
     fun watchFile(path: Path, onAction: (Path, EventType) -> Unit)
 
     /**
+     * Stops monitoring a specific file.
+     */
+    fun unwatchFile(path: Path)
+
+    /**
      * Starts monitoring disk state for a project.
      */
     fun watch(project: Project)

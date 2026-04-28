@@ -4,11 +4,11 @@ import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.layout.StackPane
 
-//TODO: Re-add
+//TODO: Add more desc + options similar to IntelliJ or VsCode ig
 class EmptyCodeEditorView : StackPane() {
 
     init {
-        val label = Label("No File Selected!\nNo point in trying trust me\nyou won't open anything haha\n-Frost")
+        val label = Label("Open a file to continue.")
 
         this.children.add(label)
         setAlignment(label, Pos.CENTER)

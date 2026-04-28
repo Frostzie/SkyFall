@@ -1,12 +1,15 @@
 package io.github.frostzie.nodex.ui.builder
 
+import io.github.frostzie.nodex.domain.uicontract.EditorTab
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 import io.github.frostzie.nodex.api.file.FileTree
 import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.misc.PerformanceMonitor
 import io.github.frostzie.nodex.api.navigation.Navigation
+import io.github.frostzie.nodex.api.workspace.EditorSession
 import io.github.frostzie.nodex.api.workspace.ProjectRuntime
+import io.github.frostzie.nodex.api.workspace.WorkspaceLifecycle
 import io.github.frostzie.nodex.ui.view.ide.bottombar.BottomBarView
 import io.github.frostzie.nodex.ui.view.ide.leftbar.LeftBarView
 import io.github.frostzie.nodex.ui.view.ide.overlay.ToolWindowDropOverlayView
@@ -21,7 +24,6 @@ import io.github.frostzie.nodex.ui.viewmodel.ide.leftbar.LeftBarViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.topbar.TopBarViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.DockLayerViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.editor.EditorAreaViewModel
-import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.editor.pane.CodeEditorViewModel
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree.FileTreeViewModel
 
 /**
@@ -33,30 +35,36 @@ class IdeScreenBuilder(
     private val performanceService: PerformanceMonitor,
     private val fileTreeService: FileTree,
     private val projectRuntimeService: ProjectRuntime,
-    private val fileTreePersistenceService: FileTreePersistence
+    private val fileTreePersistence: FileTreePersistence,
+    private val editorSession: EditorSession,
+    private val workspaceLifecycle: WorkspaceLifecycle,
 ) {
 
     fun build(): IdeLayoutView {
         val dockLayerViewModel = DockLayerViewModel(layoutService)
-        val fileTreeViewModel = FileTreeViewModel(fileTreeService, projectRuntimeService, fileTreePersistenceService)
-        val editorAreaViewModel = EditorAreaViewModel()
-        val codeEditorViewModel = CodeEditorViewModel()
+        val fileTreeViewModel = FileTreeViewModel(fileTreeService, projectRuntimeService, fileTreePersistence)
+        val editorAreaViewModel = EditorAreaViewModel(editorSession)
         val leftBarViewModel = LeftBarViewModel(layoutService)
-        val topBarViewModel = TopBarViewModel(navigationService)
+        val topBarViewModel = TopBarViewModel(navigationService, workspaceLifecycle)
         val bottomBarViewModel = BottomBarViewModel(performanceService)
-
-        val codeEditorView = CodeEditorView(codeEditorViewModel)
         val emptyCodeEditorView = EmptyCodeEditorView()
 
-        //TODO: Move it out of the builder
+        val codeEditorViewFactory: (EditorTab) -> CodeEditorView = { tab ->
+            CodeEditorView(tab.id, tab.content) { tabId, newContent ->
+                editorAreaViewModel.updateContent(tabId, newContent)
+            }
+        }
+
         val toolViews = mapOf(
-            ToolWindow.FILES to FileTreeView(fileTreeViewModel)
+            ToolWindow.FILES to FileTreeView(fileTreeViewModel) { path ->
+                editorAreaViewModel.openFile(path)
+            }
         )
 
         val workbenchView = WorkbenchView(
             dockLayerViewModel,
             editorAreaViewModel,
-            codeEditorView,
+            codeEditorViewFactory,
             emptyCodeEditorView,
             toolViews
         )

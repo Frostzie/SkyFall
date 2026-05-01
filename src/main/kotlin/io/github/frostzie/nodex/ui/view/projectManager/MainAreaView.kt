@@ -52,6 +52,7 @@ class MainAreaView(
             prefHeight = 40.0
             styleClass.add(Styles.LARGE)
             tooltip = Tooltip("Sync with universal folder.")
+            isDisable = true
         }
 
         children.addAll(icon, createBtn, importBtn, cloneBtn, syncInstance)

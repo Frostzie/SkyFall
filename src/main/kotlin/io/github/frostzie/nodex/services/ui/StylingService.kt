@@ -33,5 +33,6 @@ class StylingService : Styling {
         registerCss("tab", "$base/controls/tab-pane.css")
         registerCss("rectangle", "$base/primitives/rectangle.css")
         registerCss("settings", "$base/views/settings.css")
+        registerCss("ide", "$base/views/ide.css")
     }
 }

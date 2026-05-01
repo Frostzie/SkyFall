@@ -3,6 +3,10 @@ package io.github.frostzie.nodex.ui.view.ide.workbench.tree
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree.FileTreeItem
 import io.github.frostzie.nodex.ui.viewmodel.ide.workbench.tree.FileTreeViewModel
+import atlantafx.base.theme.Styles
+import javafx.geometry.Insets
+import javafx.geometry.Pos
+import javafx.scene.control.Label
 import javafx.scene.control.TreeCell
 import javafx.scene.control.TreeView
 import javafx.scene.input.ClipboardContent
@@ -31,6 +35,12 @@ class FileTreeView(
         header.minHeight = 30.0
         header.prefHeight = 30.0
         header.maxHeight = 30.0
+
+        val label = Label("Project")
+        label.styleClass.addAll(Styles.TEXT_CAPTION)
+        header.padding = Insets(0.0, 0.0, 0.0, 4.0)
+        header.alignment = Pos.CENTER_LEFT
+        header.children.add(label)
 
         // Reimplementing the drag logic for the Workbench
         header.setOnDragDetected { event ->

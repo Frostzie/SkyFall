@@ -2,7 +2,6 @@ package io.github.frostzie.nodex.ui.view.ide.rightbar
 
 import atlantafx.base.controls.Spacer
 import atlantafx.base.theme.Styles
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Priority
@@ -18,7 +17,7 @@ class RightBarView : VBox() {
         maxWidth = 40.0
         styleClass.add("right-bar")
 
-        val bottomBtnArea = VBox().apply {
+        val topBtnArea = VBox().apply {
             alignment = Pos.TOP_CENTER
 
 
@@ -28,16 +27,14 @@ class RightBarView : VBox() {
                 Styles.BUTTON_ICON
             )
 
-            notifBtn.onAction
-
+            notifBtn.isDisable = true
 
             children.add(notifBtn)
-            padding = Insets(2.0)
         }
 
         val spacer = Spacer()
         setVgrow(spacer, Priority.ALWAYS)
 
-        children.addAll(spacer, bottomBtnArea)
+        children.addAll(topBtnArea, spacer)
     }
 }

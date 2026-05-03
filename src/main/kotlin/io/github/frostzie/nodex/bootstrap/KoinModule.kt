@@ -126,7 +126,7 @@ val appModule = module {
     single<Styling> { StylingService() }
     single<EditorSession> { EditorSessionService(get(), get(), get()) }
     single<RecentProjects> { RecentProjectsService(get()) }
-    single<WorkspaceLifecycle> { WorkspaceLifecycleService(get(), get(), get(), get(), get(), get()) }
+    single<WorkspaceLifecycle> { WorkspaceLifecycleService(get(), get(), get(), get(), get(), get(), get()) }
 
     single {
         ViewFactory(

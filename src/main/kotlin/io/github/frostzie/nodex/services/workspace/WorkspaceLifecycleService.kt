@@ -4,6 +4,7 @@ import io.github.frostzie.nodex.api.concurrency.Concurrency
 import io.github.frostzie.nodex.api.config.Config
 import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.api.config.RecentProjects
+import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.workspace.EditorSession
 import io.github.frostzie.nodex.api.workspace.ProjectRuntime
 import io.github.frostzie.nodex.api.workspace.WorkspaceLifecycle
@@ -21,7 +22,8 @@ class WorkspaceLifecycleService(
     private val projectRuntime: ProjectRuntime,
     private val editorSession: EditorSession,
     private val concurrency: Concurrency,
-    private val fileTreePersistence: FileTreePersistence
+    private val fileTreePersistence: FileTreePersistence,
+    private val layout: Layout,
 ) : WorkspaceLifecycle {
 
     override fun resolveStartupScreen(): AppScreen {
@@ -51,16 +53,18 @@ class WorkspaceLifecycleService(
             projectRuntime.setProject(Project(normalizedPath), loadedPaths)
         }
         recentProjects.markProjectActive(normalizedPath)
+        layout.loadForProject(normalizedPath)
         return true
     }
 
     override fun closeCurrentProject() {
         editorSession.saveAll()
         editorSession.clear()
-        projectRuntime.clearProject()
-        recentProjects.clearActiveProject()
         recentProjects.flushPending()
         fileTreePersistence.flushPending()
+        layout.saveForProject(projectRuntime.getCurrentProject()!!.path)
+        projectRuntime.clearProject()
+        recentProjects.clearActiveProject()
     }
 
     override fun shutdown() {
@@ -68,9 +72,10 @@ class WorkspaceLifecycleService(
             editorSession.saveAll()
             editorSession.clear()
         }
-        projectRuntime.clearProject()
         recentProjects.flushPending()
         fileTreePersistence.flushPending()
+        layout.saveForProject(projectRuntime.getCurrentProject()!!.path)
+        projectRuntime.clearProject()
     }
 
     private fun normalizePath(path: Path): Path = path.toAbsolutePath().normalize()

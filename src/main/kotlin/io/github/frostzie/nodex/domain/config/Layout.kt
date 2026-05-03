@@ -1,6 +1,5 @@
 package io.github.frostzie.nodex.domain.config
 
-import io.github.frostzie.nodex.domain.uicontract.AppScreen
 import io.github.frostzie.nodex.domain.uicontract.ToolWindow
 
 /**
@@ -28,8 +27,6 @@ data class ToolWindowConfig(
  * Layout config for a project.
  */
 data class LayoutConfig(
-    var activeScreen: AppScreen? = null,
-
     /**
      * Window states for different screens, indexed by screen name.
      * Use the name of AppScreen or OverlayScreen as the key.

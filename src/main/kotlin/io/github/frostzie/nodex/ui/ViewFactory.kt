@@ -7,6 +7,7 @@ import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.api.config.RecentProjects
 import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.misc.PerformanceMonitor
+import io.github.frostzie.nodex.api.navigation.MainStage
 import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.api.settings.Settings
 import io.github.frostzie.nodex.api.workspace.EditorSession
@@ -36,7 +37,8 @@ class ViewFactory(
     recentProjects: RecentProjects,
     workspaceLifecycle: WorkspaceLifecycle,
     settingsRegistry: SettingsRegistry,
-    editorSession: EditorSession
+    editorSession: EditorSession,
+    mainStage: MainStage,
 ) {
     private val ideBuilder = IdeScreenBuilder(
         layoutService,
@@ -46,7 +48,8 @@ class ViewFactory(
         projectRuntimeService,
         fileTreePersistenceService,
         editorSession,
-        workspaceLifecycle
+        workspaceLifecycle,
+        mainStage
     )
     private val projectManagerBuilder = ProjectManagerScreenBuilder(
         navigationService,

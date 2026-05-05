@@ -141,6 +141,7 @@ val appModule = module {
             get(),
             get(),
             SettingsBootstrap.settingsRegistry,
+            get(),
             get()
         )
     }

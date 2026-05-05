@@ -15,14 +15,14 @@ object CoreSettingsOwners {
  * Built-in category definitions for core settings.
  */
 object CoreCategories {
-    val categories = listOf(
+    val categories = listOf(/*
         CategorySpec(
             id = "showcase",
             label = "Showcase",
             parentId = null,
             isLeaf = true,
             storeId = SettingsStores.CORE
-        ),
+        ),*/
         CategorySpec(
             id = "appearance",
             label = "Appearance",
@@ -36,7 +36,7 @@ object CoreCategories {
      * Returns the spec-to-owner mapping for all core specs.
      */
     val specOwners = mapOf(
-        CoreSettingsOwners.SHOWCASE to ShowcaseSpecs.specs,
+        //CoreSettingsOwners.SHOWCASE to ShowcaseSpecs.specs,
         CoreSettingsOwners.APPEARANCE to AppearanceSpecs().specs
     )
 }

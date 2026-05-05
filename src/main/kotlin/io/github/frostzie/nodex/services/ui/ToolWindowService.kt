@@ -53,8 +53,7 @@ class ToolWindowService(private val windowProfile: WindowProfile) : ToolWindowPr
             updateState(type) {
                 it.copy(
                     visible = config?.visible ?: profile.defaultVisible,
-                    anchor = anchor,
-                    sizeRatio = config?.sizeRatio ?: profile.defaultSizeRatio
+                    anchor = anchor
                 )
             }
         }
@@ -65,8 +64,7 @@ class ToolWindowService(private val windowProfile: WindowProfile) : ToolWindowPr
             state.toolType.name to ToolWindowConfig(
                 toolType = state.toolType.name,
                 anchor = state.anchor.name,
-                visible = state.visible,
-                sizeRatio = state.sizeRatio
+                visible = state.visible
             )
         }
     }

@@ -6,6 +6,7 @@ import io.github.frostzie.nodex.api.file.FileTree
 import io.github.frostzie.nodex.api.config.FileTreePersistence
 import io.github.frostzie.nodex.api.navigation.Layout
 import io.github.frostzie.nodex.api.misc.PerformanceMonitor
+import io.github.frostzie.nodex.api.navigation.MainStage
 import io.github.frostzie.nodex.api.navigation.Navigation
 import io.github.frostzie.nodex.api.workspace.EditorSession
 import io.github.frostzie.nodex.api.workspace.ProjectRuntime
@@ -38,6 +39,7 @@ class IdeScreenBuilder(
     private val fileTreePersistence: FileTreePersistence,
     private val editorSession: EditorSession,
     private val workspaceLifecycle: WorkspaceLifecycle,
+    private val mainStage: MainStage
 ) {
 
     fun build(): IdeLayoutView {
@@ -45,7 +47,7 @@ class IdeScreenBuilder(
         val fileTreeViewModel = FileTreeViewModel(fileTreeService, projectRuntimeService, fileTreePersistence)
         val editorAreaViewModel = EditorAreaViewModel(editorSession)
         val leftBarViewModel = LeftBarViewModel(layoutService)
-        val topBarViewModel = TopBarViewModel(navigationService, workspaceLifecycle)
+        val topBarViewModel = TopBarViewModel(navigationService, workspaceLifecycle, mainStage)
         val bottomBarViewModel = BottomBarViewModel(performanceService)
         val emptyCodeEditorView = EmptyCodeEditorView()
 

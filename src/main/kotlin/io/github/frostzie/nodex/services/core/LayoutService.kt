@@ -65,17 +65,29 @@ class LayoutService(
         )
     }
 
+    private fun updateState(type: String, bounds: WindowBounds) {
+        val existing = windowStates[type]
+        windowStates[type] = existing?.copy(
+            x = bounds.x.takeIf { it.isFinite() } ?: existing.x,
+            y = bounds.y.takeIf { it.isFinite() } ?: existing.y,
+            width = bounds.width.takeIf { it > 0 } ?: existing.width,
+            height = bounds.height.takeIf { it > 0 } ?: existing.height,
+            isMaximized = bounds.isMaximized
+        )
+            ?: bounds
+    }
+
     override fun getWindowState(screen: AppScreen): WindowBounds =
         windowStates.getOrPut(screen.name) { WindowBounds() }
 
     override fun updateWindowState(screen: AppScreen, bounds: WindowBounds) {
-        windowStates[screen.name] = bounds
+        updateState(screen.name, bounds)
     }
 
     override fun getOverlayWindowState(overlay: OverlayScreen): WindowBounds =
         windowStates.getOrPut(overlay.name) { WindowBounds() }
 
     override fun updateOverlayWindowState(overlay: OverlayScreen, bounds: WindowBounds) {
-        windowStates[overlay.name] = bounds
+        updateState(overlay.name, bounds)
     }
 }

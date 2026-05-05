@@ -63,7 +63,7 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
     implementation(libs.fabric.kotlin)
-    //runtimeOnly(libs.devauth) Disabled for now
+    runtimeOnly(libs.devauth)
 
     // Style and icon packs
     implementation(libs.atlantaFX)
@@ -71,12 +71,14 @@ dependencies {
     implementation(libs.ikonliCore)
     implementation(libs.material2)
     implementation(libs.feather)
+    implementation(libs.jsvg)
 
     include(libs.atlantaFX)
     include(libs.ikonliJavaFX)
     include(libs.ikonliCore)
     include(libs.material2)
     include(libs.feather)
+    include(libs.jsvg)
 
     // RichTextFX and it's dependencies
     implementation(libs.richTextFX)
@@ -91,6 +93,7 @@ dependencies {
     include(libs.undofx)
     include(libs.wellbehavedfx)
 
+    // Jackson //TODO: Update to 3.x
     implementation(libs.jacksonCore)
     implementation(libs.jacksonDatabind)
     implementation(libs.jacksonModuleKotlin)
@@ -103,28 +106,12 @@ dependencies {
     include(libs.jacksonDatatypeJsr310)
     include(libs.jacksonAnnotations)
 
-    implementation(libs.jsvg)
+    // File Watcher
     implementation(libs.directoryWatcher)
-
-    include(libs.jsvg)
     include(libs.directoryWatcher)
-
-    implementation(libs.kotlinx.coroutines.fx)
 
     implementation(libs.koin.core)
     include(libs.koin.core)
-
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.koin.test)
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testRuntimeOnly(libs.junit.platform.launcher)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.kotlin)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 // Taken from Stonecutter template

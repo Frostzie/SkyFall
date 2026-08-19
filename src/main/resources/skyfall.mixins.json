@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "io.github.frostzie.skyfall.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "refmap": "mixins.skyfall.refmap.json",
+  "client": [
+    "AbstractContainerScreenMixin",
+    "HitboxRenderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

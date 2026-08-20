@@ -45,12 +45,15 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-tasks.withType<JavaCompile> {
-    options.release.set(25)
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
 }
 
-java {
-    withSourcesJar()
+
+kotlin {
+    jvmToolchain(25)
 }
 
 tasks.named<Jar>("jar") {

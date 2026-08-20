@@ -10,7 +10,7 @@ import io.github.notenoughupdates.moulconfig.observer.PropertyTypeAdapterFactory
 import io.github.notenoughupdates.moulconfig.processor.BuiltinMoulConfigGuis
 import io.github.notenoughupdates.moulconfig.processor.ConfigProcessorDriver
 import io.github.notenoughupdates.moulconfig.processor.MoulConfigProcessor
-import net.fabricmc.loader.api.FabricLoader
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStreamReader
@@ -33,15 +33,24 @@ class ConfigManager {
 
     private val logger = LoggerProvider.getLogger("ConfigManager")
 
-    private val configFile = FabricLoader.getInstance().configDir.resolve("skyfall/config.json").toFile()
+    private val configDir = File("config/skyfall")
+    private val configFile = File(configDir, "config.json")
     var config: Features? = null
     
     var processor: MoulConfigProcessor<Features>
 
     init {
-        readConfig()
+        configDir.mkdirs()
 
-        val config = config!!
+        if (configFile.isFile) {
+            readConfig()
+        }
+
+        if (config == null) {
+            config = Features()
+        }
+
+        val config = config ?: error("[SkyFall]: Failed to init config")
         processor = MoulConfigProcessor(config)
         BuiltinMoulConfigGuis.addProcessors(processor)
         val driver = ConfigProcessorDriver(processor)

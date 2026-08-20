@@ -13,6 +13,7 @@ repositories {
     mavenLocal()
     maven("https://maven.notenoughupdates.org/releases/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://maven.terraformersmc.com/")
     mavenCentral()
 }
 
@@ -27,6 +28,8 @@ dependencies {
     implementation(libs.fabric.loader)
     implementation(libs.fabric.kotlin)
     runtimeOnly(libs.devauth)
+
+    implementation("com.terraformersmc:modmenu:${property("deps.mod_menu")}")
 
     shadowModImpl("org.notenoughupdates.moulconfig:${property("deps.moulconfig")}")
 }

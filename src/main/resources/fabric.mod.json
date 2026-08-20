@@ -19,6 +19,9 @@
 	"entrypoints": {
 		"client": [
 			"io.github.frostzie.skyfall.SkyFall"
+		],
+		"modmenu": [
+			"io.github.frostzie.skyfall.compat.ModMenuIntegration"
 		]
 	},
 	"mixins": [
@@ -34,7 +37,9 @@
 	"custom": {
 		"modmenu": {
 			"links": {
-				"modmenu.discord": "https://discord.gg/qZ885qTvkx"
+				"modmenu.discord": "https://discord.gg/qZ885qTvkx",
+				"modmenu.modrinth": "https://modrinth.com/mod/skyfall",
+				"modmenu.donate": "https://ko-fi.com/frostzie"
 			}
 		}
 	}

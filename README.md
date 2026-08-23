@@ -6,16 +6,15 @@ Skyfall is a QOL mod for Hypixel skyblock. Mostly a personal project so features
 
 ### Features
 - Highlight Active Pet.
-- Highlight Specific Pets.
 
-<sub>All features are made to follow Hypixel rules (still use at your own risk like any mod). But if any admin believes a feature goes too far, happy to remove it.</sub>
+<sub>All features are made to follow Hypixel rules (still use at your own risk like any mod). But if any admin believes a feature goes too far, I'd be happy to remove it.</sub>
 ### FAQ
-- Feature Suggestions: Honestly features will only be added if I think they sound useful or fun to make. But if you think you got something create a GitHub issue with your suggestions.
+- Feature Suggestions: Honestly features will only be added if I think they sound useful or fun to make. But if you think you got something, create a GitHub issue with your suggestions.
 - Bug Reports: Create a GitHub issue with bug tag.
-- Support: In discord server the #support chat or visit me on my skyblock island _(thanks for social xp)_.
+- Support: In the discord server, #support chat or visit me on my skyblock island _(thanks for social xp)_.
 
 ### Credits:
-Massive inspirations from existing mods:
+Massive inspirations from existing mods:<br>
 [SkyHanni](https://github.com/hannibal002/SkyHanni)<br>
 [Firmament](https://github.com/nea89o/Firmament)<br>
 [Odin](https://github.com/odtheking/Odin)<br>

@@ -6,8 +6,9 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
-version = ("2.0.0")
+version = "${property("mod.version")}+mc${property("mod.mc_targets")}"
 group = project.findProperty("maven_group") as String
+base.archivesName = property("mod.id") as String
 
 repositories {
     mavenLocal()
@@ -59,9 +60,30 @@ kotlin {
     jvmToolchain(25)
 }
 
+loom {
+    runConfigs.all {
+        ideConfigGenerated(true)
+        runDir = "../../run" // Shares the run directory between versions
+    }
+}
+
 tasks.named<Jar>("jar") {
     from("LICENSE") {
         rename { "${it}_${project.extra["archives_base_name"]}" }
+    }
+
+    exclude("module-info.class")
+    exclude("**/module-info.class")
+    exclude("META-INF/MANIFEST.MF")
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
+
+    doLast {
+        copy {
+            from(outputs.files)
+            into(rootProject.file("build/libs"))
+        }
     }
 }
 

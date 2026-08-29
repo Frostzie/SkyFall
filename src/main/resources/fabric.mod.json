@@ -3,7 +3,7 @@
 	"id": "skyfall",
 	"version": "${version}",
 	"name": "SkyFall",
-	"description": "QOL Hypixel Skyblock mod for newest versions of Minecraft",
+	"description": "QOL Hypixel Skyblock mod.",
 	"authors": [
 		"Frostzie"
 	],
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/Frostzie/SkyFall",
 		"issues": "https://github.com/Frostzie/SkyFall/issues"
 	},
-	"license": "LGPL-2.1",
+	"license": "LGPL-2.1 or later",
 	"icon": "assets/skyfall/icon.png",
 	"environment": "client",
 	"accessWidener": "skyfall.accesswidener",

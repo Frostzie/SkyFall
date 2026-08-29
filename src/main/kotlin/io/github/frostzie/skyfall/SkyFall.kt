@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.BaseCmd
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
+import io.github.frostzie.skyfall.feature.pets.Autopet
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -24,11 +25,15 @@ class SkyFall : ClientModInitializer {
                 client.gui.setScreen(screenToOpen)
                 screenToOpen = null
             }
-
         })
 
-
+        Autopet.load()
         BaseCmd.load()
+
+
+
+        //Highlight.loadCmd()
+        //Highlight.loadCmd2()
     }
 
     companion object {

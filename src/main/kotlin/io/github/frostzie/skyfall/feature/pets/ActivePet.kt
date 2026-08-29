@@ -32,7 +32,7 @@ object ActivePet {
         ItemUtils.customDataTag(stack)?.getString("petInfo")?.orElse(null)
 
     fun drawHighlight(graphics: GuiGraphicsExtractor, screen: AbstractContainerScreen<*>) {
-        if (!isPetMenu(screen)) return
+        if (!isPetMenu(screen) || !config.activeEnabled) return
         val color = config.activeColor.getEffectiveColourRGB()
 
         for (slot in screen.menu.slots) {

@@ -18,6 +18,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderTypes
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.decoration.ArmorStand
 import java.io.File
 
@@ -27,7 +28,10 @@ object CustomHighlight {
     private val mc = Minecraft.getInstance()
 
     private var selectedMobNames: MutableSet<String> = mutableSetOf()
-    private var currentMatches: List<MobUtils.MobMatch> = emptyList()
+    private var selectedVanillaNames: MutableSet<String> = mutableSetOf()
+
+    private var armorStandMatches: List<MobUtils.MobMatch> = emptyList() // For hypixel old mobs
+    private var nametagMatches: List<Entity> = emptyList() // For vanilla mobs and I think some new ones
 
     private val configFile = FabricLoader.getInstance().configDir
         .resolve("skyfall").resolve("CustomHighlight.json").toFile()
@@ -35,32 +39,58 @@ object CustomHighlight {
     init {
         highlightMobCommand()
 
-        if (!configFile.exists()) save(configFile, selectedMobNames)
+        if (!configFile.exists()) save(configFile, selectedMobNames, selectedVanillaNames)
         val saved = load(configFile)
         selectedMobNames = saved.hypixelMobs
+        selectedVanillaNames = saved.vanillaMobs
     }
 
     fun registerTick() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick {
-            if (!Location.isSkyblock() || !config.enabled || selectedMobNames.isEmpty()) {
-                currentMatches = emptyList()
+            if (!Location.isSkyblock() || !config.enabled) {
+                armorStandMatches = emptyList(); nametagMatches = emptyList()
+                return@EndTick
+            }
+            if (selectedMobNames.isEmpty() && selectedVanillaNames.isEmpty()) {
+                armorStandMatches = emptyList(); nametagMatches = emptyList()
                 return@EndTick
             }
 
             val level = mc.level ?: return@EndTick
             val player = mc.player ?: return@EndTick
 
-            val nameTags = level.entitiesForRendering()
-                .filterIsInstance<ArmorStand>()
-                .filter { tag ->
-                    val name = tag.name.string
-                    name.isNotBlank()
-                            && selectedMobNames.any { name.contains(it, ignoreCase = true) }
-                            && (!config.lineOfSight || player.hasLineOfSight(tag)) //TODO: prob should make my own lineOfSight since this isn't too great
+            // Hypixel
+            if (selectedMobNames.isNotEmpty()) {
+                val nameTags = level.entitiesForRendering()
+                    .filterIsInstance<ArmorStand>()
+                    .filter { tag ->
+                        val name = tag.name.string
+                        name.isNotBlank()
+                                && selectedMobNames.any { name.contains(it, ignoreCase = true) }
+                                && (!config.lineOfSight || player.hasLineOfSight(tag)) //TODO: prob should make my own lineOfSight since this isn't too great
 
-                }
+                    }
+                armorStandMatches = MobUtils.findMatches(level, nameTags)
+            } else {
+                armorStandMatches = emptyList()
+            }
 
-            currentMatches = MobUtils.findMatches(level, nameTags)
+            // Vanilla
+            nametagMatches = if (selectedVanillaNames.isNotEmpty()) {
+                level.entitiesForRendering()
+                    .filter { e -> // Filter go brrr
+                        // Allowing NPCs since I think some new mobs count as that now
+                        e !is ArmorStand
+                            && e !== player
+                            && !e.isInvisible
+                            && e.name.string.let { name ->
+                                name.isNotBlank() && selectedVanillaNames.any { name.contains(it, ignoreCase = true) }
+                                && (!config.lineOfSight || player.hasLineOfSight(e))
+                        }
+                    }
+            } else {
+                emptyList()
+            }
         })
     }
 
@@ -79,12 +109,11 @@ object CustomHighlight {
         val partial = mc.deltaTracker.getGameTimeDeltaPartialTick(false).toDouble()
         val color = config.color.getEffectiveColourRGB()
 
-        for (match in currentMatches) {
-            HitboxUtils.drawEntityBox(vc, match.entity, camPos, partial, color)
-        }
+        for (n in armorStandMatches) HitboxUtils.drawEntityBox(vc, n.entity, camPos, partial, color)
+        for (e in nametagMatches) HitboxUtils.drawEntityBox(vc, e, camPos, partial, color)
     }
 
-
+    //TODO: Figure out DSL and build it so this... doesn't happen again
     private fun highlightMobCommand() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(ClientCommands.literal("skyfallHighlight")
@@ -94,9 +123,11 @@ object CustomHighlight {
                             val name = ctx.getArgument("mob_hypixel", String::class.java)
                             if (selectedMobNames.add(name)) {
                                 CommandUtils.clientMessage("$name added!")
+                                save(configFile, selectedMobNames, selectedVanillaNames)
                             } else {
                                 selectedMobNames.remove(name)
                                 CommandUtils.clientMessage("$name removed!")
+                                save(configFile, selectedMobNames, selectedVanillaNames)
                             }
                             1
                         }
@@ -105,15 +136,22 @@ object CustomHighlight {
                 .then(ClientCommands.literal("vanilla")
                     .then(ClientCommands.argument("mob_vanilla", StringArgumentType.string())
                         .executes { ctx ->
-                            val name = ctx.getArgument("mob_vanilla", String::class.java)
-                            //TODO: add
+                            val nameVanilla = ctx.getArgument("mob_vanilla", String::class.java)
+                            if (selectedVanillaNames.add(nameVanilla)) {
+                                CommandUtils.clientMessage("$nameVanilla added!")
+                                save(configFile, selectedMobNames, selectedVanillaNames)
+                            } else {
+                                selectedVanillaNames.remove(nameVanilla)
+                                CommandUtils.clientMessage("$nameVanilla removed!")
+                                save(configFile, selectedMobNames, selectedVanillaNames)
+                            }
                             1
                         }
                     )
                 )
                 .then(ClientCommands.literal("list")
                     .executes {
-                        CommandUtils.clientMessage("Hypixel names: $selectedMobNames")
+                        CommandUtils.clientMessage("Hypixel names: $selectedMobNames\nVanilla$selectedVanillaNames")
                         1
                     }
                 )
@@ -123,28 +161,24 @@ object CustomHighlight {
 
     @Serializable
     data class SavedMobs(
-        val hypixelMobs: MutableSet<String>,
+        val hypixelMobs: MutableSet<String> = mutableSetOf(),
+        val vanillaMobs: MutableSet<String> = mutableSetOf()
     )
 
 
-    fun save(file: File, hypixelMobs: MutableSet<String>) {
+    fun save(file: File, hypixelMobs: Set<String>, vanillaMobs: Set<String>) {
         try {
-            val data = SavedMobs(hypixelMobs)
-            val jsonString = Json.encodeToString(data)
-            file.writeText(jsonString)
+            file.writeText(Json.encodeToString(SavedMobs(hypixelMobs.toMutableSet(), vanillaMobs.toMutableSet())))
         } catch (e: Exception) {
             logger.error("Failed to save CustomHighlight.json", e)
         }
 
     }
 
-    fun load(file: File): SavedMobs {
-        try {
-            val jsonString = file.readText()
-            return Json.decodeFromString<SavedMobs>(jsonString)
-        } catch (e: Exception) {
-            logger.error("Failed to load CustomHighlight.json", e)
-            return SavedMobs(mutableSetOf())
-        }
+    fun load(file: File): SavedMobs = try {
+        Json.decodeFromString<SavedMobs>(file.readText())
+    } catch (e: Exception) {
+        logger.error("Failed to load CustomHighlight.json", e)
+        SavedMobs()
     }
 }

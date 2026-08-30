@@ -4,6 +4,7 @@ plugins {
     `maven-publish`
     alias(libs.plugins.shadow)
     alias(libs.plugins.kotlin.jvm)
+    kotlin("plugin.serialization") version "2.4.10"
 }
 
 version = "${property("mod.version")}+mc${property("mod.mc_targets")}"
@@ -33,6 +34,8 @@ dependencies {
     implementation("com.terraformersmc:modmenu:${property("deps.mod_menu")}")
 
     shadowModImpl("org.notenoughupdates.moulconfig:${property("deps.moulconfig")}")
+
+    implementation(libs.kotlinx.serialization)
 }
 
 // Taken from https://notenoughupdates.org/MoulConfig/

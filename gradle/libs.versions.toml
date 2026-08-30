@@ -4,11 +4,13 @@ kotlin = "2.4.0"
 fabric_kotlin = "1.13.12+kotlin.2.4.0"
 fabric_loader = "0.19.3"
 devauth = "1.2.2"
+kotlinx-serialization = "1.11.0"
 
 [libraries]
 fabric_kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric_kotlin" }
 fabric_loader = {module = "net.fabricmc:fabric-loader", version.ref = "fabric_loader"}
 devauth = { module = "me.djtheredstoner:DevAuth-fabric", version.ref = "devauth" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization"}
 
 [plugins]
 kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

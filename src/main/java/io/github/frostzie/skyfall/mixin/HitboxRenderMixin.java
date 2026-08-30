@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall.mixin;
 
-import io.github.frostzie.skyfall.feature.CustomHitbox;
+import io.github.frostzie.skyfall.feature.mob.CustomHighlight;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
@@ -16,6 +16,6 @@ public class HitboxRenderMixin {
             at = @At("TAIL")
     )
     private void skyfallHitbox$submit(LevelRenderState levelRenderState, SubmitNodeCollector submitNodeCollector, boolean renderOutline, CallbackInfo ci) {
-        //CustomHitbox.INSTANCE.submitHitboxes(levelRenderState.cameraRenderState, submitNodeCollector);
+        CustomHighlight.INSTANCE.submitHitboxes(submitNodeCollector);
     }
 }

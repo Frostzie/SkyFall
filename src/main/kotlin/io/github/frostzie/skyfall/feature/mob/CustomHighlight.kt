@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.brigadier.arguments.StringArgumentType
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.util.CommandUtils
 import io.github.frostzie.skyfall.util.LoggerProvider
 import io.github.frostzie.skyfall.util.render.HitboxUtils
 import io.github.frostzie.skyfall.util.skyblock.Location
@@ -17,7 +18,6 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderTypes
-import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.decoration.ArmorStand
 import java.io.File
 
@@ -55,8 +55,8 @@ object CustomHighlight {
                 .filter { tag ->
                     val name = tag.name.string
                     name.isNotBlank()
-                        && selectedMobNames.any { name.contains(it, ignoreCase = true) }
-                        && (!config.lineOfSight || player.hasLineOfSight(tag)) //TODO: prob should make my own lineOfSight since this isn't too great
+                            && selectedMobNames.any { name.contains(it, ignoreCase = true) }
+                            && (!config.lineOfSight || player.hasLineOfSight(tag)) //TODO: prob should make my own lineOfSight since this isn't too great
 
                 }
 
@@ -80,7 +80,7 @@ object CustomHighlight {
         val color = config.color.getEffectiveColourRGB()
 
         for (match in currentMatches) {
-            HitboxUtils.drawEntityBox(vc, match.entity, camPos,partial, color)
+            HitboxUtils.drawEntityBox(vc, match.entity, camPos, partial, color)
         }
     }
 
@@ -88,24 +88,32 @@ object CustomHighlight {
     private fun highlightMobCommand() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(ClientCommands.literal("skyfallHighlight")
-                .then(ClientCommands.argument("mob_hypixel", StringArgumentType.string())
-                    .executes { context ->
-                        val name = context.getArgument("mob_hypixel", String::class.java)
-                        if (selectedMobNames.contains(name)) {
-                            logger.info("$name removed!")
-                            selectedMobNames.remove(name)
-                            save(configFile, selectedMobNames)
-                        } else {
-                            logger.info("Added $name")
-                            selectedMobNames.add(name)
-                            save(configFile, selectedMobNames)
+                .then(ClientCommands.literal("hypixel")
+                    .then(ClientCommands.argument("mob_hypixel", StringArgumentType.string())
+                        .executes { ctx ->
+                            val name = ctx.getArgument("mob_hypixel", String::class.java)
+                            if (selectedMobNames.add(name)) {
+                                CommandUtils.clientMessage("$name added!")
+                            } else {
+                                selectedMobNames.remove(name)
+                                CommandUtils.clientMessage("$name removed!")
+                            }
+                            1
                         }
-                        1
-                    }
+                    )
+                )
+                .then(ClientCommands.literal("vanilla")
+                    .then(ClientCommands.argument("mob_vanilla", StringArgumentType.string())
+                        .executes { ctx ->
+                            val name = ctx.getArgument("mob_vanilla", String::class.java)
+                            //TODO: add
+                            1
+                        }
+                    )
                 )
                 .then(ClientCommands.literal("list")
-                    .executes { context ->
-                        context.source.sendFeedback(Component.literal("Selected Mobs: $selectedMobNames"))
+                    .executes {
+                        CommandUtils.clientMessage("Hypixel names: $selectedMobNames")
                         1
                     }
                 )
@@ -114,7 +122,7 @@ object CustomHighlight {
     }
 
     @Serializable
-    data class SavedMobs (
+    data class SavedMobs(
         val hypixelMobs: MutableSet<String>,
     )
 

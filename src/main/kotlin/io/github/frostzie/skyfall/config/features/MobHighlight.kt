@@ -9,7 +9,7 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 class MobHighlight {
 
     @Expose
-    @ConfigOption(name = "Enable", desc = "Main toggle to enable custom mob highlighting.\n§cDoes not highlight behind objects/blocks!")
+    @ConfigOption(name = "Enable", desc = "Main toggle to enable custom mob highlighting.\nSet mobs with /skyfallHighlight...\n§cDoes not highlight behind objects/blocks!")
     @ConfigEditorBoolean
     var enabled: Boolean = false
 

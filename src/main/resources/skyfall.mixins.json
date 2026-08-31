@@ -5,7 +5,8 @@
   "refmap": "mixins.skyfall.refmap.json",
   "client": [
     "AbstractContainerScreenMixin",
-    "HitboxRenderMixin"
+    "HitboxRenderMixin",
+    "YggdrasilSignatureIgnoreMixin"
   ],
   "injectors": {
     "defaultRequire": 1

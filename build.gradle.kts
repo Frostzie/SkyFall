@@ -19,8 +19,7 @@ repositories {
     mavenCentral()
 }
 
-// Slightly modified from https://notenoughupdates.org/MoulConfig/
-val shadowModImpl by configurations.creating {
+val shadowImpl: Configuration = configurations.create("shadowImpl") {
     configurations.implementation.get().extendsFrom(this)
 }
 
@@ -33,15 +32,9 @@ dependencies {
 
     implementation("com.terraformersmc:modmenu:${property("deps.mod_menu")}")
 
-    shadowModImpl("org.notenoughupdates.moulconfig:${property("deps.moulconfig")}")
+    shadowImpl("org.notenoughupdates.moulconfig:modern-${property("deps.moulconfig")}")
 
     implementation(libs.kotlinx.serialization)
-}
-
-// Taken from https://notenoughupdates.org/MoulConfig/
-tasks.shadowJar {
-    configurations = listOf(shadowModImpl)
-    relocate("io.github.notenoughupdates.moulconfig", "io.github.frostzie.skyfall.deps.moulconfig")
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -53,9 +46,8 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-    }
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 
@@ -70,17 +62,19 @@ loom {
     }
 }
 
-tasks.named<Jar>("jar") {
+tasks.shadowJar {
+    archiveClassifier.set("")
+
     from("LICENSE") {
         rename { "${it}_${project.extra["archives_base_name"]}" }
     }
 
-    exclude("module-info.class")
-    exclude("**/module-info.class")
-    exclude("META-INF/MANIFEST.MF")
-    exclude("META-INF/*.SF")
-    exclude("META-INF/*.DSA")
-    exclude("META-INF/*.RSA")
+    configurations = listOf(shadowImpl)
+
+    exclude("META-INF/versions/**")
+    mergeServiceFiles()
+
+    relocate("io.github.notenoughupdates.moulconfig", "io.github.frostzie.skyfall.deps.moulconfig")
 
     doLast {
         copy {

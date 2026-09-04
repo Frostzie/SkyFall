@@ -6,7 +6,8 @@
   "client": [
     "AbstractContainerScreenMixin",
     "HitboxRenderMixin",
-    "YggdrasilSignatureIgnoreMixin"
+    "YggdrasilSignatureIgnoreMixin",
+    "features.EntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

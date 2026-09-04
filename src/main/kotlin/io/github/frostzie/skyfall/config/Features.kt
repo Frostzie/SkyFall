@@ -2,6 +2,7 @@ package io.github.frostzie.skyfall.config
 
 import com.google.gson.annotations.Expose
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.config.features.Misc
 import io.github.frostzie.skyfall.config.features.Pets
 import io.github.frostzie.skyfall.config.features.MobHighlight
 import io.github.notenoughupdates.moulconfig.Config
@@ -17,6 +18,10 @@ class Features : Config() {
     @Expose
     @Category(name = "Pets", desc = "")
     val pets: Pets = Pets()
+
+    @Expose
+    @Category(name = "Misc", desc = "")
+    val misc: Misc = Misc()
 
     override fun getTitle(): StructuredText {
         return StructuredText.of("SkyFall by Frostzie, config by §5Moulberry §rand §5nea89")

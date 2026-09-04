@@ -12,6 +12,9 @@ import net.minecraft.world.phys.Vec3
 object HitboxUtils {
 
     fun drawEntityBox(vc: VertexConsumer, entity: Entity, camPos: Vec3, partial: Double, argb: Int) {
+        // Hides death animation highlighting
+        if (!entity.isAlive) return
+
         val px = Mth.lerp(partial, entity.xo, entity.x)
         val py = Mth.lerp(partial, entity.yo, entity.y)
         val pz = Mth.lerp(partial, entity.zo, entity.z)

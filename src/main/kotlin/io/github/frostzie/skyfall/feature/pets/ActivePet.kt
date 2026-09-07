@@ -2,6 +2,7 @@ package io.github.frostzie.skyfall.feature.pets
 
 import com.google.gson.JsonParser
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.events.SlotHighlightListener
 import io.github.frostzie.skyfall.util.ItemUtils
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
@@ -9,7 +10,7 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 
-object ActivePet {
+object ActivePet : SlotHighlightListener {
     private val config get() = SkyFall.features.pets
 
     private fun isPetMenu(screen: AbstractContainerScreen<*>?): Boolean {
@@ -31,21 +32,19 @@ object ActivePet {
     private fun getPetInfo(stack: ItemStack): String? =
         ItemUtils.customDataTag(stack)?.getString("petInfo")?.orElse(null)
 
-    fun drawHighlight(graphics: GuiGraphicsExtractor, screen: AbstractContainerScreen<*>) {
-        if (!isPetMenu(screen) || !config.activeEnabled) return
-        val color = config.activeColor.getEffectiveColourRGB()
+    override fun onDrawHighlight(
+        graphics: GuiGraphicsExtractor,
+        screen: AbstractContainerScreen<*>,
+        slot: Slot
+    ) {
+        if (!config.activeEnabled || !isPetMenu(screen)) return
 
-        for (slot in screen.menu.slots) {
-            if (isActivePet(slot.item)) {
-                drawSlot(graphics, slot, color)
-            }
+        if (isActivePet(slot.item)) {
+            val color = config.activeColor.getEffectiveColourRGB()
+
+            val x = slot.x
+            val y = slot.y
+            graphics.fill(x, y, x+ 16, y + 16, color)
         }
-    }
-
-    // should be moved out of here when I think of what else to add
-    fun drawSlot(graphics: GuiGraphicsExtractor, slot: Slot, color: Int) {
-        val x = slot.x
-        val y = slot.y
-        graphics.fill(x, y, x + 16, y + 16, color)
     }
 }

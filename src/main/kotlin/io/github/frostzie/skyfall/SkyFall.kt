@@ -3,7 +3,9 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.BaseCmd
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
+import io.github.frostzie.skyfall.events.SlotRenderDispatch
 import io.github.frostzie.skyfall.feature.mob.CustomHighlight
+import io.github.frostzie.skyfall.feature.pets.ActivePet
 import io.github.frostzie.skyfall.feature.pets.Autopet
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
@@ -32,6 +34,8 @@ class SkyFall : ClientModInitializer {
         BaseCmd.load()
 
         CustomHighlight.registerTick()
+
+        SlotRenderDispatch.register(ActivePet)
     }
 
     companion object {

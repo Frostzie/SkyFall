@@ -3,10 +3,12 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.BaseCmd
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
+import io.github.frostzie.skyfall.events.SlotKeyPressDispatch
 import io.github.frostzie.skyfall.events.SlotRenderDispatch
 import io.github.frostzie.skyfall.feature.mob.CustomHighlight
 import io.github.frostzie.skyfall.feature.pets.ActivePet
 import io.github.frostzie.skyfall.feature.pets.Autopet
+import io.github.frostzie.skyfall.feature.pets.FavoritePets
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -35,7 +37,9 @@ class SkyFall : ClientModInitializer {
 
         CustomHighlight.registerTick()
 
-        SlotRenderDispatch.register(ActivePet)
+        SlotRenderDispatch.register(FavoritePets)
+        SlotRenderDispatch.register(ActivePet) // Needs to be below fav so it highlights over it
+        SlotKeyPressDispatch.register(FavoritePets)
     }
 
     companion object {

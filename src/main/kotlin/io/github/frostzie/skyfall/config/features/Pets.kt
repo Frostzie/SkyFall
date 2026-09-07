@@ -5,6 +5,7 @@ import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 
 class Pets {
@@ -20,9 +21,33 @@ class Pets {
     var activeColor: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
 
     @Expose
+    @ConfigOption(name = "Favorite Pets", desc = "")
+    @Accordion
+    val favoritePet: FavPet = FavPet()
+
+    @Expose
     @ConfigOption(name = "Autopet", desc = "")
     @Accordion
     val autoPet: AutoPet = AutoPet()
+
+}
+
+class FavPet {
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Enables highlighting for selected favorite pets.")
+    @ConfigEditorBoolean
+    var favEnable: Boolean = false
+
+    @Expose
+    @ConfigOption(name = "Favorite Color", desc = "Color of favorite pet highlight.")
+    @ConfigEditorColour
+    var favColor: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
+
+    @Expose
+    @ConfigOption(name = "Favorite Key", desc = "Key pressed to favorite a pet.")
+    @ConfigEditorKeybind(defaultKey = 0)
+    var favKey: Int = 0
 
 }
 

@@ -10,3 +10,5 @@ SkyFall mod uses the following open source software.
 | [MoulConfig](https://github.com/NotEnoughUpdates/MoulConfig?tab=readme-ov-file) | [LGPL 3.0](https://github.com/NotEnoughUpdates/MoulConfig/blob/8b4d35d7cedbad6683ae2d38b480d2848b07322a/HEADER.txt#L8) |
 | [Fabric Loom](https://github.com/FabricMC/fabric-loom)                          | [MIT](https://github.com/FabricMC/fabric-loom/blob/dev/1.10/LICENSE)                                                   |
 | [DevAuth](https://github.com/DJtheRedstoner/DevAuth)                            | [MIT](https://github.com/DJtheRedstoner/DevAuth/blob/master/LICENSE)                                                   |
+| [Shadow](https://github.com/GradleUp/shadow)                                    | [Apache License 2.0](https://github.com/GradleUp/shadow/blob/main/LICENSE)                                             |
+| [Kotlinx Serialization](https://github.com/kotlin/kotlinx.serialization)        | [Apache License 2.0](https://github.com/Kotlin/kotlinx.serialization/blob/master/LICENSE.txt)                          |

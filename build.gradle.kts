@@ -4,7 +4,7 @@ plugins {
     `maven-publish`
     alias(libs.plugins.shadow)
     alias(libs.plugins.kotlin.jvm)
-    kotlin("plugin.serialization") version "2.4.10"
+    alias(libs.plugins.kotlin.serialization)
 }
 
 version = "${property("mod.version")}+mc${property("mod.mc_targets")}"
@@ -24,7 +24,7 @@ val shadowImpl: Configuration = configurations.create("shadowImpl") {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:26.2")
+    minecraft("com.mojang:minecraft:${property("mcVersion")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
     implementation(libs.fabric.loader)
     implementation(libs.fabric.kotlin)
@@ -56,9 +56,9 @@ kotlin {
 }
 
 loom {
-    runConfigs.all {
-        ideConfigGenerated(true)
-        runDir = "../../run" // Shares the run directory between versions
+
+    runs.configureEach {
+        generateRunConfig = true
     }
 }
 

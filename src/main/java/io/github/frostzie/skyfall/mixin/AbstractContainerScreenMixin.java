@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall.mixin;
 
 import io.github.frostzie.skyfall.events.SlotKeyPressDispatch;
+import io.github.frostzie.skyfall.events.SlotRenderContext;
 import io.github.frostzie.skyfall.events.SlotRenderDispatch;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -21,18 +22,30 @@ public abstract class AbstractContainerScreenMixin {
     @Nullable
     protected Slot hoveredSlot;
 
-    @Inject(method = "extractSlot", at = @At("HEAD"))
+    @Inject(method = "extractSlot", at = @At("HEAD"), cancellable = true)
     private void skyfall$drawCustomHighlight(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
-        SlotRenderDispatch.process(graphics, screen, slot);
+
+        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, slot);
+
+        if (!context.getShouldRenderSlot()) {
+            ci.cancel();
+            return;
+        }
+
+        if (context.getHighlightColor() != 0) {
+            int x = slot.x;
+            int y = slot.y;
+            graphics.fill(x, y, x+ 16, y + 16, context.getHighlightColor());
+        }
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onKeyPressed(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
+    private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (hoveredSlot == null) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
-        if (SlotKeyPressDispatch.dispatch(screen, hoveredSlot, keyEvent.key())) {
+        if (SlotKeyPressDispatch.dispatch(screen, hoveredSlot, event.key())) {
             cir.setReturnValue(true);
         }
     }

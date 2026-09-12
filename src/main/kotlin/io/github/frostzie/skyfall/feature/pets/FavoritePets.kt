@@ -1,8 +1,9 @@
 package io.github.frostzie.skyfall.feature.pets
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.events.SlotHighlightListener
+import io.github.frostzie.skyfall.events.SlotRenderListener
 import io.github.frostzie.skyfall.events.SlotKeyPressListener
+import io.github.frostzie.skyfall.events.SlotRenderContext
 import io.github.frostzie.skyfall.util.ItemUtils
 import io.github.frostzie.skyfall.util.LoggerProvider
 import io.github.frostzie.skyfall.util.skyblock.PetInfoReader
@@ -11,11 +12,10 @@ import io.github.frostzie.skyfall.util.skyblock.petSlotIds
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.inventory.Slot
 
-object FavoritePets : SlotHighlightListener, SlotKeyPressListener {
+object FavoritePets : SlotRenderListener, SlotKeyPressListener {
     private val logger = LoggerProvider.getLogger("FavoritePets")
     private val config get() = SkyFall.features.pets.favoritePet
 
@@ -28,19 +28,16 @@ object FavoritePets : SlotHighlightListener, SlotKeyPressListener {
         load()
     }
 
-    override fun onDrawHighlight(
-        graphics: GuiGraphicsExtractor,
-        screen: AbstractContainerScreen<*>,
-        slot: Slot
-    ) {
-        if (!config.favEnable || !isPetMenu(screen)) return
-        val info = PetInfoReader.read(slot.item) ?: return
+    override fun onRender(context: SlotRenderContext) {
+        if (!config.favEnable || !isPetMenu(context.screen)) return
+        val info = PetInfoReader.read(context.slot.item) ?: return
+
         if (info.uuid in favoriteData.uuid) {
             val color = config.favColor.getEffectiveColourRGB()
 
-            val x = slot.x
-            val y = slot.y
-            graphics.fill(x, y, x + 16, y + 16, color)
+            context.highlightColor = color
+        } else if (config.hideNonFav || !info.active) {
+            context.shouldRenderSlot = false
         }
     }
 

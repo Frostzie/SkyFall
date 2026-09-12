@@ -49,6 +49,11 @@ class FavPet {
     @ConfigEditorKeybind(defaultKey = 0)
     var favKey: Int = 0
 
+    @Expose
+    @ConfigOption(name = "Hide Non Favorite", desc = "Hides a favorite pets")
+    @ConfigEditorBoolean
+    var hideNonFav: Boolean = false
+
 }
 
 class AutoPet {

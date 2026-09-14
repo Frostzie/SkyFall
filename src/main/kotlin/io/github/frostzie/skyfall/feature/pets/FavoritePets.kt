@@ -38,6 +38,7 @@ object FavoritePets : SlotRenderListener, SlotKeyPressListener {
             context.highlightColor = color
         } else if (config.hideNonFav || !info.active) {
             context.shouldRenderSlot = false
+            context.shouldRenderTooltips = false
         }
     }
 
@@ -48,7 +49,7 @@ object FavoritePets : SlotRenderListener, SlotKeyPressListener {
     ): Boolean {
         if (!isPetMenu(screen) || !config.favEnable) return false
         if (slot.index !in petSlotIds) return false
-        if (config.favKey != key) return false
+        //if (config.favKey != key) return false
 
         val uuid = ItemUtils.customDataTag(slot.item)?.getString("uuid")?.orElse(null) ?: return false
         if (uuid in favoriteData.uuid) {

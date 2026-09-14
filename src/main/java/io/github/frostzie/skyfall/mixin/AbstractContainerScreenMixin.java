@@ -23,7 +23,7 @@ public abstract class AbstractContainerScreenMixin {
     protected Slot hoveredSlot;
 
     @Inject(method = "extractSlot", at = @At("HEAD"), cancellable = true)
-    private void skyfall$drawCustomHighlight(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+    private void skyfall$extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
 
         SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, slot);
@@ -47,6 +47,18 @@ public abstract class AbstractContainerScreenMixin {
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         if (SlotKeyPressDispatch.dispatch(screen, hoveredSlot, event.key())) {
             cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "extractTooltip", at = @At("HEAD"), cancellable = true)
+    private void skyfall$onDrawTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
+        if (hoveredSlot == null) return;
+
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
+        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, hoveredSlot);
+
+        if (!context.getShouldRenderTooltips()) {
+            ci.cancel();
         }
     }
 }

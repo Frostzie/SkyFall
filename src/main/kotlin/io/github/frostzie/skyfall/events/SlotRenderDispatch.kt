@@ -11,6 +11,7 @@ class SlotRenderContext {
 
     var shouldRenderSlot: Boolean = true
     var highlightColor: Int = 0
+    var shouldRenderTooltips: Boolean = true
 
     fun reset(graphics: GuiGraphicsExtractor, screen: AbstractContainerScreen<*>, slot: Slot) {
         this.graphics = graphics
@@ -19,6 +20,7 @@ class SlotRenderContext {
 
         this.shouldRenderSlot = true
         this.highlightColor = 0
+        this.shouldRenderTooltips = true
     }
 }
 

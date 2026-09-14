@@ -54,6 +54,11 @@ class FavPet {
     @ConfigEditorBoolean
     var hideNonFav: Boolean = false
 
+    @Expose
+    @ConfigOption(name = "Only Favorite Click", desc = "Only allows you to click on favorite pets.")
+    @ConfigEditorBoolean
+    var onlyFavClick: Boolean = false
+
 }
 
 class AutoPet {

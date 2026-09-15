@@ -1,11 +1,14 @@
 package io.github.frostzie.skyfall.mixin;
 
 import io.github.frostzie.skyfall.events.SlotKeyPressDispatch;
+import io.github.frostzie.skyfall.events.SlotClickDispatch;
 import io.github.frostzie.skyfall.events.SlotRenderContext;
 import io.github.frostzie.skyfall.events.SlotRenderDispatch;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,6 +43,18 @@ public abstract class AbstractContainerScreenMixin {
         }
     }
 
+    @Inject(method = "extractTooltip", at = @At("HEAD"), cancellable = true)
+    private void skyfall$onDrawTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
+        if (hoveredSlot == null) return;
+
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
+        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, hoveredSlot);
+
+        if (!context.getShouldRenderTooltips()) {
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (hoveredSlot == null) return;
@@ -50,14 +65,12 @@ public abstract class AbstractContainerScreenMixin {
         }
     }
 
-    @Inject(method = "extractTooltip", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onDrawTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
-        if (hoveredSlot == null) return;
+    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
+    private void skyfall$onSlotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+        if (slot == null) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
-        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, hoveredSlot);
-
-        if (!context.getShouldRenderTooltips()) {
+        if (SlotClickDispatch.dispatch(screen, slot, buttonNum)) {
             ci.cancel();
         }
     }

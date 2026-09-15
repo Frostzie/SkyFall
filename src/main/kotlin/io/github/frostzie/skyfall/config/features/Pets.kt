@@ -45,9 +45,9 @@ class FavPet {
     var favColor: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
 
     @Expose
-    @ConfigOption(name = "Favorite Key", desc = "Key pressed to favorite a pet.")
+    @ConfigOption(name = "Favorite Key", desc = "Key pressed to favorite a pet.\nMouse buttons do not work!")
     @ConfigEditorKeybind(defaultKey = 0)
-    var favKey: Int = 0
+    var favKey: Int = 72
 
     @Expose
     @ConfigOption(name = "Hide Non Favorite", desc = "Hides a favorite pets")

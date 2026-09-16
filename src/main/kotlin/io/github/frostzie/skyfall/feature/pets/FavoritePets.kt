@@ -2,7 +2,6 @@ package io.github.frostzie.skyfall.feature.pets
 
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.events.SlotRenderListener
-import io.github.frostzie.skyfall.events.SlotKeyPressListener
 import io.github.frostzie.skyfall.events.SlotClickListener
 import io.github.frostzie.skyfall.events.SlotRenderContext
 import io.github.frostzie.skyfall.util.ItemUtils
@@ -16,7 +15,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.inventory.Slot
 
-object FavoritePets : SlotRenderListener, SlotKeyPressListener, SlotClickListener {
+object FavoritePets : SlotRenderListener, SlotClickListener {
     private val logger = LoggerProvider.getLogger("FavoritePets")
     private val config get() = SkyFall.features.pets.favoritePet
 
@@ -43,33 +42,23 @@ object FavoritePets : SlotRenderListener, SlotKeyPressListener, SlotClickListene
         }
     }
 
-    //TODO: Figure out how I can combine mouse and key clicks since this is just annoying
-    override fun onKeyPress(
-        screen: AbstractContainerScreen<*>,
-        slot: Slot,
-        key: Int
-    ): Boolean {
-        if (!isPetMenu(screen) || !config.favEnable) return false
-        if (slot.index !in petSlotIds) return false
-        if (config.favKey != key) return false
-
-        val uuid = ItemUtils.customDataTag(slot.item)?.getString("uuid")?.orElse(null) ?: return false
-        if (uuid in favoriteData.uuid) {
-            print(config.favKey)
-            favoriteData.uuid.remove(uuid)
-        } else {
-            favoriteData.uuid.add(uuid)
-        }
-        save()
-        return true
-    }
-
     override fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
         if (!isPetMenu(screen) || !config.favEnable) return false
         if (slot.index !in petSlotIds) return false
+        if (button == 256 || button == 69) return false // for escape and e key to allow leaving the menu. //TODO: there must be a better way
         val uuid = ItemUtils.customDataTag(slot.item)?.getString("uuid")?.orElse(null) ?: return false
 
-        return config.onlyFavClick && uuid !in favoriteData.uuid
+        if (config.favKey == button) {
+            if (uuid in favoriteData.uuid) {
+                print(config.favKey)
+                favoriteData.uuid.remove(uuid)
+            } else {
+                favoriteData.uuid.add(uuid)
+            }
+            save()
+        }
+
+        return (config.onlyFavClick && uuid !in favoriteData.uuid)
     }
 
 

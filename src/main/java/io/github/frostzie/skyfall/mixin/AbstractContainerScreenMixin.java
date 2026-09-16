@@ -60,13 +60,13 @@ public abstract class AbstractContainerScreenMixin {
         if (hoveredSlot == null) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
-        if (SlotKeyPressDispatch.dispatch(screen, hoveredSlot, event.key())) {
+        if (SlotClickDispatch.dispatch(screen, hoveredSlot, event.key())) {
             cir.setReturnValue(true);
         }
     }
 
     @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onSlotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+    private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         if (slot == null) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;

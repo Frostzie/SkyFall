@@ -3,7 +3,6 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.BaseCmd
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
-import io.github.frostzie.skyfall.events.SlotKeyPressDispatch
 import io.github.frostzie.skyfall.events.SlotRenderDispatch
 import io.github.frostzie.skyfall.events.SlotClickDispatch
 import io.github.frostzie.skyfall.feature.mob.CustomHighlight
@@ -40,7 +39,6 @@ class SkyFall : ClientModInitializer {
 
         SlotRenderDispatch.register(FavoritePets)
         SlotRenderDispatch.register(ActivePet) // Needs to be below fav so it highlights over it
-        SlotKeyPressDispatch.register(FavoritePets)
         SlotClickDispatch.register(FavoritePets)
     }
 

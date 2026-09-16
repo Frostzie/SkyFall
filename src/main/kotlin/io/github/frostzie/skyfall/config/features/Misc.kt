@@ -13,9 +13,22 @@ class Misc {
     var deadRendering: Boolean = false
 
     @Expose
+    @ConfigOption(name = "Animations", desc = "")
+    @Accordion
+    val animations: Animations = Animations()
+
+    @Expose
     @ConfigOption(name = "Pause Menu", desc = "")
     @Accordion
     val pauseMenu: PauseMenu = PauseMenu()
+}
+
+class Animations {
+
+    @Expose
+    @ConfigOption(name = "Disable Swing", desc = "Disables arm swinging animation.")
+    @ConfigEditorBoolean
+    var disableSwing: Boolean = false
 }
 
 class PauseMenu {

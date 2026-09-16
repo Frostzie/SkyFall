@@ -56,9 +56,11 @@ kotlin {
 }
 
 loom {
-
-    runs.configureEach {
-        generateRunConfig = true
+    // From stonecutter
+    runConfigs.all {
+        ideConfigGenerated(true)
+        vmArgs("-Dmixin.debug.export=true") // Exports transformed classes for debugging
+        runDir = "../../run" // Shares the run directory between versions
     }
 }
 

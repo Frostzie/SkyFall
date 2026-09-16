@@ -8,6 +8,7 @@
     "HitboxRenderMixin",
     "YggdrasilSignatureIgnoreMixin",
     "features.EntityRendererMixin",
+    "features.ItemInHandRendererMixin",
     "features.PauseScreenMixin"
   ],
   "injectors": {

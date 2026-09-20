@@ -79,6 +79,6 @@ class ConfigManager {
         } catch (e: Exception) {
             logger.error("Could not save config", e)
         }
-        logger.info("Saved config")
+        logger.debug("Saved config")
     }
 }

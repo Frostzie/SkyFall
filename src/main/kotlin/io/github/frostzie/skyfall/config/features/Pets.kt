@@ -50,15 +50,13 @@ class FavPet {
     var favKey: Int = 72
 
     @Expose
-    @ConfigOption(name = "Hide Non Favorite", desc = "Hides a favorite pets")
+    @ConfigOption(name = "Favorite Button", desc = "Adds a toggle button in pets menu (top right) to toggle hiding non favorite pets and making them non clickable.")
     @ConfigEditorBoolean
-    var hideNonFav: Boolean = false
+    var toggleButton: Boolean = false
 
     @Expose
-    @ConfigOption(name = "Only Favorite Click", desc = "Only allows you to click on favorite pets.")
     @ConfigEditorBoolean
-    var onlyFavClick: Boolean = false
-
+    var favOnlyToggle: Boolean = false
 }
 
 class AutoPet {

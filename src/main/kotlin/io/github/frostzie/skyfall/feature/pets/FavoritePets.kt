@@ -36,7 +36,7 @@ object FavoritePets : SlotRenderListener, SlotClickListener {
             val color = config.favColor.getEffectiveColourRGB()
 
             context.highlightColor = color
-        } else if (config.hideNonFav && !info.active) {
+        } else if (config.favOnlyToggle && !info.active) {
             context.shouldRenderSlot = false
             context.shouldRenderTooltips = false
         }
@@ -58,7 +58,7 @@ object FavoritePets : SlotRenderListener, SlotClickListener {
             save()
         }
 
-        return (config.onlyFavClick && uuid !in favoriteData.uuid)
+        return (config.favOnlyToggle && uuid !in favoriteData.uuid)
     }
 
 

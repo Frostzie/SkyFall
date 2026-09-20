@@ -5,6 +5,7 @@
   "refmap": "mixins.skyfall.refmap.json",
   "client": [
     "AbstractContainerScreenMixin",
+    "ScreenInvoker",
     "HitboxRenderMixin",
     "YggdrasilSignatureIgnoreMixin",
     "features.EntityRendererMixin",

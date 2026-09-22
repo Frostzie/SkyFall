@@ -1,29 +1,21 @@
 package io.github.frostzie.skyfall.feature.mob
 
+import com.github.stivais.commodore.Commodore
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
-import com.mojang.brigadier.arguments.StringArgumentType
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.util.CommandUtils
-import io.github.frostzie.skyfall.util.LoggerProvider
 import io.github.frostzie.skyfall.util.render.HitboxUtils
 import io.github.frostzie.skyfall.util.skyblock.Location
 import io.github.frostzie.skyfall.util.skyblock.MobUtils
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.decoration.ArmorStand
-import java.io.File
 
 object CustomHighlight {
-    private val logger = LoggerProvider.getLogger("CustomHighlight")
     private val config get() = SkyFall.features.hitbox
     private val mc = Minecraft.getInstance()
 
@@ -32,18 +24,6 @@ object CustomHighlight {
 
     private var armorStandMatches: List<MobUtils.MobMatch> = emptyList() // For hypixel old mobs
     private var nametagMatches: List<Entity> = emptyList() // For vanilla mobs and I think some new ones
-
-    private val configFile = FabricLoader.getInstance().configDir
-        .resolve("skyfall").resolve("CustomHighlight.json").toFile()
-
-    init {
-        highlightMobCommand()
-
-        if (!configFile.exists()) save(configFile, selectedMobNames, selectedVanillaNames)
-        val saved = load(configFile)
-        selectedMobNames = saved.hypixelMobs
-        selectedVanillaNames = saved.vanillaMobs
-    }
 
     fun registerTick() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick {
@@ -78,8 +58,7 @@ object CustomHighlight {
             // Vanilla
             nametagMatches = if (selectedVanillaNames.isNotEmpty()) {
                 level.entitiesForRendering()
-                    .filter { e -> // Filter go brrr
-                        // Allowing NPCs since I think some new mobs count as that now
+                    .filter { e ->
                         e !is ArmorStand
                             && e !== player
                             && !e.isInvisible
@@ -113,72 +92,36 @@ object CustomHighlight {
         for (e in nametagMatches) HitboxUtils.drawEntityBox(vc, e, camPos, partial, color)
     }
 
-    //TODO: Figure out DSL and build it so this... doesn't happen again
-    private fun highlightMobCommand() {
-        ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            dispatcher.register(ClientCommands.literal("skyfallHighlight")
-                .then(ClientCommands.literal("hypixel")
-                    .then(ClientCommands.argument("mob_hypixel", StringArgumentType.string())
-                        .executes { ctx ->
-                            val name = ctx.getArgument("mob_hypixel", String::class.java)
-                            if (selectedMobNames.add(name)) {
-                                CommandUtils.clientMessage("$name added!")
-                                save(configFile, selectedMobNames, selectedVanillaNames)
-                            } else {
-                                selectedMobNames.remove(name)
-                                CommandUtils.clientMessage("$name removed!")
-                                save(configFile, selectedMobNames, selectedVanillaNames)
-                            }
-                            1
-                        }
-                    )
-                )
-                .then(ClientCommands.literal("vanilla")
-                    .then(ClientCommands.argument("mob_vanilla", StringArgumentType.string())
-                        .executes { ctx ->
-                            val nameVanilla = ctx.getArgument("mob_vanilla", String::class.java)
-                            if (selectedVanillaNames.add(nameVanilla)) {
-                                CommandUtils.clientMessage("$nameVanilla added!")
-                                save(configFile, selectedMobNames, selectedVanillaNames)
-                            } else {
-                                selectedVanillaNames.remove(nameVanilla)
-                                CommandUtils.clientMessage("$nameVanilla removed!")
-                                save(configFile, selectedMobNames, selectedVanillaNames)
-                            }
-                            1
-                        }
-                    )
-                )
-                .then(ClientCommands.literal("list")
-                    .executes {
-                        CommandUtils.clientMessage("Hypixel names: $selectedMobNames\nVanilla$selectedVanillaNames")
-                        1
-                    }
-                )
+    val highlightCommands = Commodore("skyfallHighlight") {
+
+        literal("hypixel").runs { name: String ->
+            if (selectedMobNames.add(name)) {
+                config.hypixelMobs.add(name)
+                CommandUtils.clientMessage("Added hypixel mob: $name")
+            } else {
+                selectedMobNames.remove(name)
+                config.hypixelMobs.remove(name)
+                CommandUtils.clientMessage("Removed hypixel mob: $name")
+            }
+        }
+
+        literal("vanilla").runs { name: String ->
+            if (selectedVanillaNames.add(name)) {
+                config.vanillaMobs.add(name)
+                CommandUtils.clientMessage("Added vanilla mob: $name")
+            } else {
+                selectedVanillaNames.remove(name)
+                config.vanillaMobs.remove(name)
+                CommandUtils.clientMessage("Removed vanilla mob: $name")
+            }
+        }
+
+        literal("list").runs {
+
+            CommandUtils.clientMessage(
+                "\nHypixel: " + if (selectedMobNames.isEmpty()) "None" else selectedMobNames.joinToString(", ") +
+                "\nVanilla: " + if (selectedVanillaNames.isEmpty()) "None" else selectedVanillaNames.joinToString(", ")
             )
         }
-    }
-
-    @Serializable
-    data class SavedMobs(
-        val hypixelMobs: MutableSet<String> = mutableSetOf(),
-        val vanillaMobs: MutableSet<String> = mutableSetOf()
-    )
-
-
-    fun save(file: File, hypixelMobs: Set<String>, vanillaMobs: Set<String>) {
-        try {
-            file.writeText(Json.encodeToString(SavedMobs(hypixelMobs.toMutableSet(), vanillaMobs.toMutableSet())))
-        } catch (e: Exception) {
-            logger.error("Failed to save CustomHighlight.json", e)
-        }
-
-    }
-
-    fun load(file: File): SavedMobs = try {
-        Json.decodeFromString<SavedMobs>(file.readText())
-    } catch (e: Exception) {
-        logger.error("Failed to load CustomHighlight.json", e)
-        SavedMobs()
     }
 }

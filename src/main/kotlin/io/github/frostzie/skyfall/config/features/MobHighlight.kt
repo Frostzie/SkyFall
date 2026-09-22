@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose
 import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDraggableList
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 
 class MobHighlight {
@@ -22,4 +23,12 @@ class MobHighlight {
     @ConfigOption(name = "Line of Sight", desc = "Renders only if mob is seeable. Will slightly improve FPS but won't highlight mobs behind fences/glass/etc.")
     @ConfigEditorBoolean
     var lineOfSight: Boolean = false
+
+    @Expose
+    @ConfigEditorDraggableList
+    var hypixelMobs: MutableSet<String> = mutableSetOf()
+
+    @Expose
+    @ConfigEditorDraggableList
+    var vanillaMobs: MutableSet<String> = mutableSetOf()
 }

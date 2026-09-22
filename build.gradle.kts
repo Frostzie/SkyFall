@@ -16,6 +16,7 @@ repositories {
     maven("https://maven.notenoughupdates.org/releases/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://maven.terraformersmc.com/")
+    maven("https://jitpack.io/")
     mavenCentral()
 }
 
@@ -34,7 +35,7 @@ dependencies {
 
     shadowImpl("org.notenoughupdates.moulconfig:modern-${property("deps.moulconfig")}")
 
-    implementation(libs.kotlinx.serialization)
+    implementation(libs.commodore)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -53,6 +54,10 @@ java {
 
 kotlin {
     jvmToolchain(25)
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xlambdas=class")
+    }
 }
 
 loom {

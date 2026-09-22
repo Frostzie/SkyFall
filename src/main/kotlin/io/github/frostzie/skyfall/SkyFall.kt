@@ -1,6 +1,6 @@
 package io.github.frostzie.skyfall
 
-import io.github.frostzie.skyfall.commands.BaseCmd
+import io.github.frostzie.skyfall.commands.mainCommands
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
 import io.github.frostzie.skyfall.events.SlotRenderDispatch
@@ -10,6 +10,7 @@ import io.github.frostzie.skyfall.feature.pets.ActivePet
 import io.github.frostzie.skyfall.feature.pets.Autopet
 import io.github.frostzie.skyfall.feature.pets.FavoritePets
 import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screens.Screen
@@ -32,8 +33,14 @@ class SkyFall : ClientModInitializer {
             }
         })
 
+        ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
+            arrayOf(
+                mainCommands,
+                CustomHighlight.highlightCommands
+            ).forEach { commodore -> commodore.register(dispatcher) }
+        }
+
         Autopet.load()
-        BaseCmd.load()
 
         CustomHighlight.registerTick()
 

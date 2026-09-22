@@ -36,7 +36,6 @@ object MobUtils {
         if (entity is WitherBoss) return false
         if (entity.isInvisible) return false
         if (entity == mc.player) return false
-        if (entity.uuid.version() == 2) return false // No NPC
         return true
     }
 }

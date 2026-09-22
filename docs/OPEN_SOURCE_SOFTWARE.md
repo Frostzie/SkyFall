@@ -12,3 +12,4 @@ SkyFall mod uses the following open source software.
 | [DevAuth](https://github.com/DJtheRedstoner/DevAuth)                            | [MIT](https://github.com/DJtheRedstoner/DevAuth/blob/master/LICENSE)                                                   |
 | [Shadow](https://github.com/GradleUp/shadow)                                    | [Apache License 2.0](https://github.com/GradleUp/shadow/blob/main/LICENSE)                                             |
 | [Kotlinx Serialization](https://github.com/kotlin/kotlinx.serialization)        | [Apache License 2.0](https://github.com/Kotlin/kotlinx.serialization/blob/master/LICENSE.txt)                          |
+| [Commodore](https://github.com/Stivais/Commodore)                               | ---                                                                                                                    |

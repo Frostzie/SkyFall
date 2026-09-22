@@ -10,7 +10,9 @@ Skyfall is a QOL mod for Hypixel skyblock. Mostly a personal project so features
 - Custom mob highlight. (Supports both hypixel name and vanilla)
 - Disable death animation for mobs.
 - Favorite Pets highlight.
+- Option to only show favorite and active pets.
 - Disable hypixel server links button in pause menu.
+- Disable swing animation and re-swing animations for held items.
 
 Hopefully potato mode (from Odin 1.8.9) and favorite pets/contacts next.
 

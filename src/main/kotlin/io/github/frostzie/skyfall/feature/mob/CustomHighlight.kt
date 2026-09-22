@@ -117,11 +117,10 @@ object CustomHighlight {
         }
 
         literal("list").runs {
+            val hypixelMobs = if (selectedMobNames.isEmpty()) "None" else selectedMobNames.joinToString(", ")
+            val vanillaMobs = if (selectedVanillaNames.isEmpty()) "None" else selectedVanillaNames.joinToString(", ")
 
-            CommandUtils.clientMessage(
-                "\nHypixel: " + if (selectedMobNames.isEmpty()) "None" else selectedMobNames.joinToString(", ") +
-                "\nVanilla: " + if (selectedVanillaNames.isEmpty()) "None" else selectedVanillaNames.joinToString(", ")
-            )
+            CommandUtils.clientMessage("\nHypixel: $hypixelMobs\nVanilla: $vanillaMobs")
         }
     }
 }

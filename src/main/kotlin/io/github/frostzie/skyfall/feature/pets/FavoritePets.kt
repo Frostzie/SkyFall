@@ -7,8 +7,8 @@ import io.github.frostzie.skyfall.events.SlotClickListener
 import io.github.frostzie.skyfall.events.SlotRenderContext
 import io.github.frostzie.skyfall.util.ItemUtils
 import io.github.frostzie.skyfall.util.skyblock.PetInfoReader
+import io.github.frostzie.skyfall.util.skyblock.commonSlotLayout
 import io.github.frostzie.skyfall.util.skyblock.isPetMenu
-import io.github.frostzie.skyfall.util.skyblock.petSlotIds
 import io.github.frostzie.skyfall.util.update.FavPetsConfig
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.inventory.Slot
@@ -39,7 +39,7 @@ object FavoritePets : SlotRenderListener, SlotClickListener {
 
     override fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
         if (!isPetMenu(screen) || !config.favEnable) return false
-        if (slot.index !in petSlotIds) return false
+        if (slot.index !in commonSlotLayout) return false
         if (button == 256 || button == 69) return false // for escape and e key to allow leaving the menu. //TODO: there must be a better way
         val uuid = ItemUtils.customDataTag(slot.item).getString("uuid").orElse(null) ?: return false
 

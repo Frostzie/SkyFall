@@ -14,7 +14,7 @@ object PetInfoReader {
     private var lastResult: PetInfo? = null
 
     fun read(stack: ItemStack): PetInfo? {
-        val raw = ItemUtils.customDataTag(stack)?.getString("petInfo")?.orElse(null) ?: return null
+        val raw = ItemUtils.customDataTag(stack).getString("petInfo").orElse(null) ?: return null
 
         if (raw == lastRaw) return lastResult
 

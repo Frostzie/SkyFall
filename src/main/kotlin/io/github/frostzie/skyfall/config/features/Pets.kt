@@ -5,6 +5,7 @@ import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDraggableList
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 
@@ -57,6 +58,10 @@ class FavPet {
     @Expose
     @ConfigEditorBoolean
     var favOnlyToggle: Boolean = false
+
+    @Expose
+    @ConfigEditorDraggableList
+    var favoritePets: MutableSet<String> = mutableSetOf()
 }
 
 class AutoPet {

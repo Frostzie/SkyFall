@@ -1,20 +1,18 @@
 package io.github.frostzie.skyfall.feature.misc
 
 import io.github.frostzie.skyfall.SkyFall
-import io.github.frostzie.skyfall.events.SlotClickListener
-import io.github.frostzie.skyfall.events.SlotRenderContext
-import io.github.frostzie.skyfall.events.SlotRenderListener
 import io.github.frostzie.skyfall.util.skyblock.commonSlotLayout
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.world.inventory.Slot
 
-object FavoriteContacts : SlotRenderListener, SlotClickListener {
+object FavoriteContacts {
     private val config get() = SkyFall.features.misc.abiphone
 
     private val favoriteData = config.favoriteContacts
 
-    override fun onRender(context: SlotRenderContext) {
+    //TODO: tmr
+    /*override fun onRender(context: SlotRenderContext) {
         if (!config.favEnable || !isAbiphoneMenu(context.screen)) return
 
         val name = context.slot.item.customName.toString()
@@ -27,9 +25,9 @@ object FavoriteContacts : SlotRenderListener, SlotClickListener {
             context.shouldRenderSlot = false
             context.shouldRenderTooltips = false
         }
-    }
+    }*/
 
-    override fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
+    /*override fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
         if (!isAbiphoneMenu(screen) || !config.favEnable) return false
         if (slot.index !in commonSlotLayout) return false
         if (button == 256 || button == 69) return false // for escape and e key to allow leaving the menu. //TODO: there must be a better way
@@ -44,7 +42,7 @@ object FavoriteContacts : SlotRenderListener, SlotClickListener {
         }
 
         return (config.favOnlyToggle && name !in favoriteData)
-    }
+    }*/
 
     private fun isAbiphoneMenu(screen: AbstractContainerScreen<*>?): Boolean {
         if (screen !is ContainerScreen) return false

@@ -1,16 +1,12 @@
 package io.github.frostzie.skyfall.mixin;
 
 import io.github.frostzie.skyfall.SkyFall;
-import io.github.frostzie.skyfall.events.SlotClickDispatch;
-import io.github.frostzie.skyfall.events.SlotRenderContext;
-import io.github.frostzie.skyfall.events.SlotRenderDispatch;
+import io.github.frostzie.skyfall.events.GuiEvents;
 import io.github.frostzie.skyfall.util.skyblock.PetUtilsKt;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -19,7 +15,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin {
@@ -59,19 +54,19 @@ public abstract class AbstractContainerScreenMixin {
 
     @Inject(method = "extractSlot", at = @At("HEAD"), cancellable = true)
     private void skyfall$extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
-        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, slot);
+        var context = GuiEvents.SLOT_RENDER.invoker().getContext(screen, slot);
+        int color = context.getHighlightColor();
 
-        if (!context.getShouldRenderSlot()) {
-            ci.cancel();
-            return;
-        }
-
-        if (context.getHighlightColor() != 0) {
+        if (color != 0) {
             int x = slot.x;
             int y = slot.y;
-            graphics.fill(x, y, x+ 16, y + 16, context.getHighlightColor());
+            graphics.fill(x, y, x + 16, y + 16, color);
+        }
+
+        if (!context.getRenderSlot()) {
+            ci.cancel();
         }
     }
 
@@ -79,30 +74,9 @@ public abstract class AbstractContainerScreenMixin {
     private void skyfall$onDrawTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
         if (hoveredSlot == null) return;
 
-        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
-        SlotRenderContext context = SlotRenderDispatch.process(graphics, screen, hoveredSlot);
-
-        if (!context.getShouldRenderTooltips()) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
-        if (hoveredSlot == null) return;
-
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
-        if (SlotClickDispatch.dispatch(screen, hoveredSlot, event.key())) {
-            cir.setReturnValue(true);
-        }
-    }
 
-    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
-        if (slot == null) return;
-
-        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
-        if (SlotClickDispatch.dispatch(screen, slot, buttonNum)) {
+        if (!GuiEvents.SLOT_RENDER.invoker().getContext(screen, hoveredSlot).getRenderTooltip()) {
             ci.cancel();
         }
     }

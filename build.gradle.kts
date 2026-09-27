@@ -17,6 +17,7 @@ repositories {
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://maven.terraformersmc.com/")
     maven("https://jitpack.io/")
+    maven("https://maven.teamresourceful.com/repository/maven-public/")
     mavenCentral()
 }
 
@@ -36,6 +37,13 @@ dependencies {
     shadowImpl("org.notenoughupdates.moulconfig:modern-${property("deps.moulconfig")}")
 
     implementation(libs.commodore)
+
+    api("tech.thatgravyboat:skyblock-api:4.2.27") {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+    }
+    include("tech.thatgravyboat:skyblock-api:4.2.27") {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {

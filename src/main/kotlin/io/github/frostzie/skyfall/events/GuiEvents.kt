@@ -35,4 +35,35 @@ object GuiEvents {
     fun interface SlotRenderCallback {
         fun getContext(screen: AbstractContainerScreen<*>, slot: Slot): SlotRenderContext
     }
+
+    @JvmField
+    val SLOT_CLICK_KEY: Event<SlotClickKeyCallback> =
+        EventFactory.createArrayBacked(SlotClickKeyCallback::class.java) { listeners ->
+            SlotClickKeyCallback { screen, slot, button ->
+                for (listener in listeners) {
+                    if (!listener.onSlotKeyClick(screen, slot, button)) return@SlotClickKeyCallback true
+                }
+                false
+            }
+        }
+
+    fun interface SlotClickKeyCallback {
+        fun onSlotKeyClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean
+    }
+
+
+    @JvmField
+    val SLOT_CLICK: Event<SlotClickCallback> =
+        EventFactory.createArrayBacked(SlotClickCallback::class.java) { listeners ->
+            SlotClickCallback { screen, slot, button ->
+                for (listener in listeners) {
+                    if (!listener.onSlotClick(screen, slot, button)) return@SlotClickCallback false
+                }
+                true
+            }
+        }
+
+    fun interface SlotClickCallback {
+        fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean
+    }
 }

@@ -3,14 +3,11 @@ package io.github.frostzie.skyfall.feature.pets
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.events.GuiEvents
 import io.github.frostzie.skyfall.events.GuiEvents.SlotRenderContext
-import io.github.frostzie.skyfall.util.ItemUtils
 import io.github.frostzie.skyfall.util.skyblock.PetInfoReader
 import io.github.frostzie.skyfall.util.skyblock.commonSlotLayout
 import io.github.frostzie.skyfall.util.skyblock.isPetMenu
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.inventory.Slot
-import tech.thatgravyboat.skyblockapi.api.events.base.Subscription
-import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent
 
 object FavoritePets {
     private val config get() = SkyFall.features.pets.favoritePet
@@ -19,10 +16,13 @@ object FavoritePets {
 
     fun register() {
         GuiEvents.SLOT_RENDER.register(::onRender)
+        GuiEvents.SLOT_CLICK.register(::onSlotClick)
+        GuiEvents.SLOT_CLICK_KEY.register(::onSlotKey)
     }
 
     private fun onRender(screen: AbstractContainerScreen<*>, slot: Slot): SlotRenderContext {
         if (!config.favEnable || !isPetMenu(screen)) return SlotRenderContext()
+        if (slot.index !in commonSlotLayout) return SlotRenderContext()
         val info = PetInfoReader.read(slot.item) ?: return SlotRenderContext()
 
         if (info.uuid in favoriteData) {
@@ -39,23 +39,23 @@ object FavoritePets {
         }
     }
 
-    @Subscription(event = [SlotClickEvent::class])
-    private fun onSlotClick(event: SlotClickEvent) {
-        if (!isPetMenu(event.screen) || !config.favEnable) return
-        if (event.slot.index !in commonSlotLayout) return
-        val uuid = ItemUtils.customDataTag(event.slot.item).getString("uuid").orElse(null) ?: return
-        println(event.button)
+    private fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
+        if (!config.favEnable || !isPetMenu(screen)) return true
+        if (slot.index !in commonSlotLayout) return true
+        val uuid = PetInfoReader.read(slot.item)?.uuid ?: return true
 
-        if (config.favKey == event.button) {
-            if (uuid in favoriteData) {
-                favoriteData.remove(uuid)
-            } else {
-                favoriteData.add(uuid)
-            }
-        }
+        return (!config.favOnlyToggle || uuid in favoriteData)
+    }
 
-        if (config.favOnlyToggle && uuid !in favoriteData) {
-            event.cancel()
-        }
+
+    private fun onSlotKey(screen: AbstractContainerScreen<*>, slot: Slot, key: Int): Boolean {
+        if (!config.favEnable || !isPetMenu(screen)) return false
+        if (slot.index !in commonSlotLayout) return false
+        if (key != config.favKey) return false
+
+        val uuid = PetInfoReader.read(slot.item)?.uuid ?: return false
+
+        if (!favoriteData.add(uuid)) favoriteData.remove(uuid)
+        return true
     }
 }

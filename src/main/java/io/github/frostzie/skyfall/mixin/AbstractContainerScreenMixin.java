@@ -1,20 +1,26 @@
 package io.github.frostzie.skyfall.mixin;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import io.github.frostzie.skyfall.SkyFall;
 import io.github.frostzie.skyfall.events.GuiEvents;
 import io.github.frostzie.skyfall.util.skyblock.PetUtilsKt;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin {
@@ -77,6 +83,30 @@ public abstract class AbstractContainerScreenMixin {
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
         if (!GuiEvents.SLOT_RENDER.invoker().getContext(screen, hoveredSlot).getRenderTooltip()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
+        if (hoveredSlot == null) return;
+        if (event.key() == GLFW.GLFW_KEY_ESCAPE) return;
+        if (Minecraft.getInstance().options.keyInventory.matches(event)) return;
+
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
+
+        if (GuiEvents.SLOT_CLICK_KEY.invoker().onSlotKeyClick(screen, hoveredSlot, event.key())) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
+    private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+        if (slot == null) return;
+
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
+
+        if (!GuiEvents.SLOT_CLICK.invoker().onSlotClick(screen, slot, buttonNum)) {
             ci.cancel();
         }
     }

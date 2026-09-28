@@ -1,6 +1,8 @@
 package io.github.frostzie.skyfall.feature.misc
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.events.GuiEvents
+import io.github.frostzie.skyfall.events.GuiEvents.SlotRenderContext
 import io.github.frostzie.skyfall.util.skyblock.commonSlotLayout
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
@@ -11,38 +13,50 @@ object FavoriteContacts {
 
     private val favoriteData = config.favoriteContacts
 
-    //TODO: tmr
-    /*override fun onRender(context: SlotRenderContext) {
-        if (!config.favEnable || !isAbiphoneMenu(context.screen)) return
+    fun register() {
+        GuiEvents.SLOT_RENDER.register(::onRender)
+        GuiEvents.SLOT_CLICK.register(::onSlotClick)
+        GuiEvents.SLOT_CLICK_KEY.register(::onSlotKey)
+    }
 
-        val name = context.slot.item.customName.toString()
+    private fun onRender(screen: AbstractContainerScreen<*>, slot: Slot): SlotRenderContext {
+        if (!config.favEnable || !isAbiphoneMenu(screen)) return SlotRenderContext()
+        if (slot.index !in commonSlotLayout) return SlotRenderContext()
 
-        if (name in favoriteData) {
-            val color = config.favColor.getEffectiveColourRGB()
-
-            context.highlightColor = color
-        } else if (config.favOnlyToggle) {
-            context.shouldRenderSlot = false
-            context.shouldRenderTooltips = false
-        }
-    }*/
-
-    /*override fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
-        if (!isAbiphoneMenu(screen) || !config.favEnable) return false
-        if (slot.index !in commonSlotLayout) return false
-        if (button == 256 || button == 69) return false // for escape and e key to allow leaving the menu. //TODO: there must be a better way
         val name = slot.item.customName.toString()
 
-        if (config.favKey == button) {
-            if (name in favoriteData) {
-                favoriteData.remove(name)
-            } else {
-                favoriteData.add(name)
-            }
+        if (name in favoriteData) {
+            return SlotRenderContext(config.favColor.getEffectiveColourRGB())
         }
 
-        return (config.favOnlyToggle && name !in favoriteData)
-    }*/
+        return if (config.favOnlyToggle) {
+            SlotRenderContext(
+                renderSlot = false,
+                renderTooltip = false
+            )
+        } else {
+            SlotRenderContext()
+        }
+    }
+
+    private fun onSlotClick(screen: AbstractContainerScreen<*>, slot: Slot, button: Int): Boolean {
+        if (!config.favEnable || !isAbiphoneMenu(screen)) return true
+        if (slot.index !in commonSlotLayout) return true
+        val name = slot.item.customName.toString()
+
+        return (!config.favOnlyToggle || name in favoriteData)
+    }
+
+    private fun onSlotKey(screen: AbstractContainerScreen<*>, slot: Slot, key: Int): Boolean {
+        if (!config.favEnable || !isAbiphoneMenu(screen)) return false
+        if (slot.index !in commonSlotLayout) return false
+        if (key != config.favKey) return false
+
+        val name = slot.item.customName.toString()
+
+        if (!favoriteData.add(name)) favoriteData.remove(name)
+        return true
+    }
 
     private fun isAbiphoneMenu(screen: AbstractContainerScreen<*>?): Boolean {
         if (screen !is ContainerScreen) return false

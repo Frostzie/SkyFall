@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.mainCommands
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
+import io.github.frostzie.skyfall.feature.misc.FavoriteContacts
 import io.github.frostzie.skyfall.feature.mob.CustomHighlight
 import io.github.frostzie.skyfall.feature.pets.ActivePet
 import io.github.frostzie.skyfall.feature.pets.Autopet
@@ -47,6 +48,7 @@ class SkyFall : ClientModInitializer {
 
         ActivePet.register()
         FavoritePets.register()
+        FavoriteContacts.register()
     }
 
     companion object {

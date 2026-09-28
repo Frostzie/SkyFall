@@ -4,8 +4,8 @@ import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.events.GuiEvents
 import io.github.frostzie.skyfall.events.GuiEvents.SlotRenderContext
 import io.github.frostzie.skyfall.util.skyblock.commonSlotLayout
+import io.github.frostzie.skyfall.util.skyblock.isAbiphoneMenu
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.world.inventory.Slot
 
 object FavoriteContacts {
@@ -56,12 +56,5 @@ object FavoriteContacts {
 
         if (!favoriteData.add(name)) favoriteData.remove(name)
         return true
-    }
-
-    private fun isAbiphoneMenu(screen: AbstractContainerScreen<*>?): Boolean {
-        if (screen !is ContainerScreen) return false
-        val title = screen.title.string
-        // Blocks out the levels abiphone menu from working idk if there is another menu containing Abiphone tho
-        return title.contains("Abiphone") && !title.contains("Abiphone Contacts")
     }
 }

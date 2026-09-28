@@ -41,7 +41,7 @@ object GuiEvents {
         EventFactory.createArrayBacked(SlotClickKeyCallback::class.java) { listeners ->
             SlotClickKeyCallback { screen, slot, button ->
                 for (listener in listeners) {
-                    if (!listener.onSlotKeyClick(screen, slot, button)) return@SlotClickKeyCallback true
+                    if (listener.onSlotKeyClick(screen, slot, button)) return@SlotClickKeyCallback true
                 }
                 false
             }

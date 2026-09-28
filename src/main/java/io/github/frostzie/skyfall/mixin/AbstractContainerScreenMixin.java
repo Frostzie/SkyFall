@@ -1,12 +1,12 @@
 package io.github.frostzie.skyfall.mixin;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import io.github.frostzie.skyfall.SkyFall;
 import io.github.frostzie.skyfall.events.GuiEvents;
 import io.github.frostzie.skyfall.util.skyblock.PetUtilsKt;
-import net.minecraft.client.Minecraft;
+import io.github.frostzie.skyfall.util.skyblock.SkyBlockMenusKt;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
-public abstract class AbstractContainerScreenMixin {
+public abstract class AbstractContainerScreenMixin extends Screen {
 
     @Shadow
     @Nullable
@@ -33,29 +33,46 @@ public abstract class AbstractContainerScreenMixin {
     @Shadow protected int topPos;
     @Final @Shadow protected int imageWidth;
 
-    // For the time being I think it's fine to build it here but in future factory it is
+    protected AbstractContainerScreenMixin(Component title) {
+        super(title);
+    }
+
+    // Hopefully one day I can change this but that won't be today
     @Inject(method = "init", at = @At("TAIL"))
-    private void skyfall$addButton(CallbackInfo ci) {
-        AbstractContainerScreen<?> self = (AbstractContainerScreen<?>) (Object) this;
-        if (!PetUtilsKt.isPetMenu(self)) return;
-        var config = SkyFall.features.getPets().getFavoritePet();
-        if (!config.getToggleButton()) {
-            config.setFavOnlyToggle(false);
-            return;
+    private void skyfall$onInit(CallbackInfo ci) {
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
+
+        var configPets = SkyFall.features.getPets().getFavoritePet();
+        if (!configPets.getToggleButton()) {
+            configPets.setFavOnlyToggle(false);
+        } else if (PetUtilsKt.isPetMenu(screen)) {
+
+            addRenderableWidget(
+                    Button.builder(Component.literal("F"), _ -> {
+                                boolean newVal = !configPets.getFavOnlyToggle();
+                                configPets.setFavOnlyToggle(newVal);
+                            })
+                            .pos(leftPos + imageWidth - 18, topPos + 4)
+                            .size(12, 12)
+                            .build()
+            );
         }
 
-        int x = leftPos + imageWidth - 12 - 6;
-        int y = topPos + 4;
+        var configAbi = SkyFall.features.getMisc().getAbiphone();
+        if (!configAbi.getToggleButton()) {
+            configAbi.setFavOnlyToggle(false);
+        } else if (SkyBlockMenusKt.isAbiphoneMenu(screen)) {
 
-        Button skyfall$button = Button.builder(Component.literal("F"), _ -> {
-                    boolean newVal = !config.getFavOnlyToggle();
-                    config.setFavOnlyToggle(newVal);
-
-                    SkyFall.configManager.save();
-                })
-                .bounds(x, y, 12, 12)
-                .build();
-        ((ScreenInvoker) this).skyfall$addRenderableWidget(skyfall$button);
+            addRenderableWidget(
+                    Button.builder(Component.literal("F"), _ -> {
+                                boolean newVal = !configAbi.getFavOnlyToggle();
+                                configAbi.setFavOnlyToggle(newVal);
+                            })
+                            .pos(leftPos + imageWidth - 18, topPos + 4)
+                            .size(12, 12)
+                            .build()
+            );
+        }
     }
 
     @Inject(method = "extractSlot", at = @At("HEAD"), cancellable = true)
@@ -91,7 +108,7 @@ public abstract class AbstractContainerScreenMixin {
     private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (hoveredSlot == null) return;
         if (event.key() == GLFW.GLFW_KEY_ESCAPE) return;
-        if (Minecraft.getInstance().options.keyInventory.matches(event)) return;
+        if (minecraft.options.keyInventory.matches(event)) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
@@ -104,7 +121,7 @@ public abstract class AbstractContainerScreenMixin {
     private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         if (slot == null) return;
 
-        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>)(Object)this;
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
         if (!GuiEvents.SLOT_CLICK.invoker().onSlotClick(screen, slot, buttonNum)) {
             ci.cancel();

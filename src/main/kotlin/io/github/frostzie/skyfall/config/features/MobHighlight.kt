@@ -20,6 +20,11 @@ class MobHighlight {
     var color: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
 
     @Expose
+    @ConfigOption(name = "Disable Model", desc = "Disables highlighted mobs model from being rendered. (Makes the hitbox be the only highlighted thing.)")
+    @ConfigEditorBoolean
+    var model: Boolean = false
+
+    @Expose
     @ConfigOption(name = "Line of Sight", desc = "Renders only if mob is seeable. Will slightly improve FPS but won't highlight mobs behind fences/glass/etc.")
     @ConfigEditorBoolean
     var lineOfSight: Boolean = false

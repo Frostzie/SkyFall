@@ -1,6 +1,7 @@
 package io.github.frostzie.skyfall.mixin.features;
 
 import io.github.frostzie.skyfall.SkyFall;
+import io.github.frostzie.skyfall.events.MobEvents;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
@@ -18,6 +19,10 @@ public class EntityRendererMixin {
                 && entity instanceof LivingEntity livingEntity
                 && !livingEntity.isAlive()) {
 
+            cir.setReturnValue(false);
+        }
+
+        if (MobEvents.ENTITY_RENDER.invoker().onEntityRender(entity)) {
             cir.setReturnValue(false);
         }
     }

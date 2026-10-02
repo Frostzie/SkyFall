@@ -44,7 +44,7 @@ class SkyFall : ClientModInitializer {
 
         Autopet.load()
 
-        CustomHighlight.registerTick()
+        CustomHighlight.register()
 
         ActivePet.register()
         FavoritePets.register()

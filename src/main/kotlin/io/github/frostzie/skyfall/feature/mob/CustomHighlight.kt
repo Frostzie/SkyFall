@@ -4,6 +4,7 @@ import com.github.stivais.commodore.Commodore
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.events.MobEvents
 import io.github.frostzie.skyfall.util.CommandUtils
 import io.github.frostzie.skyfall.util.render.HitboxUtils
 import io.github.frostzie.skyfall.util.skyblock.Location
@@ -25,7 +26,12 @@ object CustomHighlight {
     private var armorStandMatches: List<MobUtils.MobMatch> = emptyList() // For hypixel old mobs
     private var nametagMatches: List<Entity> = emptyList() // For vanilla mobs and I think some new ones
 
-    fun registerTick() {
+    fun register() {
+        registerTick()
+        MobEvents.ENTITY_RENDER.register(::renderModel)
+    }
+
+    private fun registerTick() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick {
             if (!Location.isSkyblock() || !config.enabled) {
                 armorStandMatches = emptyList(); nametagMatches = emptyList()
@@ -71,6 +77,20 @@ object CustomHighlight {
                 emptyList()
             }
         })
+    }
+
+    private fun renderModel(entity: Entity): Boolean {
+        if (!config.model) return true
+
+        for (n in armorStandMatches) {
+            if (entity == n.entity) return false
+        }
+
+        for (e in nametagMatches) {
+            if (entity == e) return false
+        }
+
+        return true
     }
 
     private val identityPose = PoseStack()

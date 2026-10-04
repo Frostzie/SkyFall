@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.events.MobEvents
-import io.github.frostzie.skyfall.util.CommandUtils
+import io.github.frostzie.skyfall.util.ChatUtils
 import io.github.frostzie.skyfall.util.render.HitboxUtils
 import io.github.frostzie.skyfall.util.skyblock.Location
 import io.github.frostzie.skyfall.util.skyblock.MobUtils
@@ -117,22 +117,22 @@ object CustomHighlight {
         literal("hypixel").runs { name: String ->
             if (selectedMobNames.add(name)) {
                 config.hypixelMobs.add(name)
-                CommandUtils.clientMessage("Added hypixel mob: $name")
+                ChatUtils.clientMessage("Added hypixel mob: $name")
             } else {
                 selectedMobNames.remove(name)
                 config.hypixelMobs.remove(name)
-                CommandUtils.clientMessage("Removed hypixel mob: $name")
+                ChatUtils.clientMessage("Removed hypixel mob: $name")
             }
         }
 
         literal("vanilla").runs { name: String ->
             if (selectedVanillaNames.add(name)) {
                 config.vanillaMobs.add(name)
-                CommandUtils.clientMessage("Added vanilla mob: $name")
+                ChatUtils.clientMessage("Added vanilla mob: $name")
             } else {
                 selectedVanillaNames.remove(name)
                 config.vanillaMobs.remove(name)
-                CommandUtils.clientMessage("Removed vanilla mob: $name")
+                ChatUtils.clientMessage("Removed vanilla mob: $name")
             }
         }
 
@@ -140,7 +140,7 @@ object CustomHighlight {
             val hypixelMobs = if (selectedMobNames.isEmpty()) "None" else selectedMobNames.joinToString(", ")
             val vanillaMobs = if (selectedVanillaNames.isEmpty()) "None" else selectedVanillaNames.joinToString(", ")
 
-            CommandUtils.clientMessage("\nHypixel: $hypixelMobs\nVanilla: $vanillaMobs")
+            ChatUtils.clientMessage("\nHypixel: $hypixelMobs\nVanilla: $vanillaMobs")
         }
     }
 }

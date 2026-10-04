@@ -3,6 +3,7 @@ package io.github.frostzie.skyfall
 import io.github.frostzie.skyfall.commands.mainCommands
 import io.github.frostzie.skyfall.config.ConfigManager
 import io.github.frostzie.skyfall.config.Features
+import io.github.frostzie.skyfall.feature.mining.shaft.ShaftPartyMessage
 import io.github.frostzie.skyfall.feature.misc.FavoriteContacts
 import io.github.frostzie.skyfall.feature.mob.CustomHighlight
 import io.github.frostzie.skyfall.feature.pets.ActivePet
@@ -13,7 +14,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screens.Screen
-import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI
 
 class SkyFall : ClientModInitializer {
     override fun onInitializeClient() {
@@ -40,8 +40,6 @@ class SkyFall : ClientModInitializer {
             ).forEach { commodore -> commodore.register(dispatcher) }
         }
 
-        SkyBlockAPI.eventBus.register(this)
-
         Autopet.load()
 
         CustomHighlight.register()
@@ -49,6 +47,7 @@ class SkyFall : ClientModInitializer {
         ActivePet.register()
         FavoritePets.register()
         FavoriteContacts.register()
+        ShaftPartyMessage.register()
     }
 
     companion object {

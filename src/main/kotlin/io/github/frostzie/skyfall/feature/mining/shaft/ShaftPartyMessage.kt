@@ -22,7 +22,7 @@ object ShaftPartyMessage {
         val type = event.type
         val hasCrystal = event.isCrystal
 
-        val text = "Shaft Type: $type" + if (hasCrystal) ", Crystal: $type" else ""
+        val text = "Shaft Type: $type" + if (hasCrystal) ", Crystal: True" else ""
 
         ChatUtils.sendCommand("pc $text")
     }

@@ -1,5 +1,5 @@
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT" apply false
+    id("net.fabricmc.fabric-loom") version "1.18-SNAPSHOT" apply false
     id("dev.kikugie.stonecutter")
 }
 

@@ -38,11 +38,11 @@ dependencies {
 
     implementation(libs.commodore)
 
-    api("tech.thatgravyboat:skyblock-api:4.2.27") {
-        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+    api(libs.skyblock.api) {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${property("mcVersion")}") }
     }
-    include("tech.thatgravyboat:skyblock-api:4.2.27") {
-        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-26.2") }
+    include(libs.skyblock.api) {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${property("mcVersion")}") }
     }
 }
 

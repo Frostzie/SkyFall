@@ -4,12 +4,14 @@ fabric_kotlin = "1.14.1+kotlin.2.4.20"
 fabric_loader = "0.19.5"
 devauth = "1.2.2"
 commodore = "1.0.2"
+skyblock_api = "4.2.33"
 
 [libraries]
 fabric_kotlin = { module = "net.fabricmc:fabric-language-kotlin", version.ref = "fabric_kotlin" }
 fabric_loader = {module = "net.fabricmc:fabric-loader", version.ref = "fabric_loader"}
 devauth = { module = "me.djtheredstoner:DevAuth-fabric", version.ref = "devauth" }
 commodore = { module = "com.github.Stivais:Commodore", version.ref = "commodore" }
+skyblock_api = { module = "tech.thatgravyboat:skyblock-api", version.ref = "skyblock_api" }
 
 [plugins]
 kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -20,8 +20,8 @@ object CustomHighlight {
     private val config get() = SkyFall.features.hitbox
     private val mc = Minecraft.getInstance()
 
-    private var selectedMobNames: MutableSet<String> = mutableSetOf()
-    private var selectedVanillaNames: MutableSet<String> = mutableSetOf()
+    private var selectedMobNames: MutableSet<String> = config.hypixelMobs.toMutableSet()
+    private var selectedVanillaNames: MutableSet<String> = config.vanillaMobs.toMutableSet()
 
     private var armorStandMatches: List<MobUtils.MobMatch> = emptyList() // For hypixel old mobs
     private var nametagMatches: List<Entity> = emptyList() // For vanilla mobs and I think some new ones
@@ -46,19 +46,18 @@ object CustomHighlight {
             val player = mc.player ?: return@EndTick
 
             // Hypixel
-            if (selectedMobNames.isNotEmpty()) {
-                val nameTags = level.entitiesForRendering()
+            armorStandMatches = if (selectedMobNames.isNotEmpty()) {
+                level.entitiesForRendering()
                     .filterIsInstance<ArmorStand>()
                     .filter { tag ->
-                        val name = tag.name.string
-                        name.isNotBlank()
-                                && selectedMobNames.any { name.contains(it, ignoreCase = true) }
-                                && (!config.lineOfSight || player.hasLineOfSight(tag)) //TODO: prob should make my own lineOfSight since this isn't too great
-
+                        selectedMobNames.any { tag.name.string.contains(it, true) }
                     }
-                armorStandMatches = MobUtils.findMatches(level, nameTags)
+
+                    .mapNotNull { MobUtils.resolve(it, level) }
+
+                    .filter { !config.lineOfSight || player.hasLineOfSight(it.entity) }
             } else {
-                armorStandMatches = emptyList()
+                emptyList()
             }
 
             // Vanilla
@@ -83,7 +82,7 @@ object CustomHighlight {
         if (!config.model) return true
 
         for (n in armorStandMatches) {
-            if (entity == n.entity) return false
+            if (entity == n.entity || entity in n.extras) return false
         }
 
         for (e in nametagMatches) {

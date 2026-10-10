@@ -1,7 +1,7 @@
 package io.github.frostzie.skyfall.mixin.features;
 
 import io.github.frostzie.skyfall.SkyFall;
-import io.github.frostzie.skyfall.events.MobEvents;
+import io.github.frostzie.skyfall.core.MobStore;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +22,7 @@ public class EntityRendererMixin {
             cir.setReturnValue(false);
         }
 
-        if (MobEvents.ENTITY_RENDER.invoker().onEntityRender(entity)) {
+        if (MobStore.INSTANCE.isHidden(entity.getId())) {
             cir.setReturnValue(false);
         }
     }

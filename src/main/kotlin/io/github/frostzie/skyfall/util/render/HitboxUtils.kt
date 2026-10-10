@@ -1,6 +1,12 @@
 package io.github.frostzie.skyfall.util.render
 
+import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import io.github.frostzie.skyfall.core.BoxStyle
+import io.github.frostzie.skyfall.core.MobStore
+import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.SubmitNodeCollector
+import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.phys.Vec3
@@ -10,8 +16,26 @@ import net.minecraft.world.phys.Vec3
 
 //TODO: add culling
 object HitboxUtils {
+    private val mc = Minecraft.getInstance()
 
-    fun drawEntityBox(vc: VertexConsumer, entity: Entity, camPos: Vec3, partial: Double, argb: Int) {
+    fun submitBoxes(collector: SubmitNodeCollector) {
+        val tasks = MobStore.boxes
+        if (tasks.isEmpty()) return
+
+        val cam = mc.entityRenderDispatcher.camera ?: return
+        val camPos = cam.position()
+        val partial = mc.deltaTracker.getGameTimeDeltaPartialTick(false).toDouble()
+
+        collector.submitCustomGeometry(PoseStack(), RenderTypes.debugQuads()) { _, vc ->
+            for (i in tasks.indices) {
+                val t = tasks[i]
+                if (t.style == BoxStyle.FILLED)
+                    drawEntityBox(vc, t.entity, camPos, partial,t.color)
+            }
+        }
+    }
+
+    private fun drawEntityBox(vc: VertexConsumer, entity: Entity, camPos: Vec3, partial: Double, argb: Int) {
         // Hides death animation highlighting
         if (!entity.isAlive) return
 

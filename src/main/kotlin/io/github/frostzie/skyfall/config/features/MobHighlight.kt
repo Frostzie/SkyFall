@@ -1,10 +1,12 @@
 package io.github.frostzie.skyfall.config.features
 
 import com.google.gson.annotations.Expose
+import io.github.frostzie.skyfall.core.BoxStyle
 import io.github.notenoughupdates.moulconfig.ChromaColour
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDraggableList
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorDropdown
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 
 class MobHighlight {
@@ -25,9 +27,9 @@ class MobHighlight {
     var model: Boolean = false
 
     @Expose
-    @ConfigOption(name = "Line of Sight", desc = "Renders only if mob is seeable. Will slightly improve FPS but won't highlight mobs behind fences/glass/etc.")
-    @ConfigEditorBoolean
-    var lineOfSight: Boolean = false
+    @ConfigOption(name = "Style", desc = "")
+    @ConfigEditorDropdown
+    var style: BoxStyle = BoxStyle.FILLED
 
     @Expose
     @ConfigEditorDraggableList

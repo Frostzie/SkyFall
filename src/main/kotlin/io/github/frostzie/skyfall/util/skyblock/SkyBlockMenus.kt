@@ -15,5 +15,6 @@ fun isAbiphoneMenu(screen: AbstractContainerScreen<*>?): Boolean {
     if (screen !is ContainerScreen) return false
     val title = screen.title.string
     // Blocks out the levels abiphone menu from working idk if there is another menu containing Abiphone tho
-    return title.contains("Abiphone") && !title.contains("Abiphone Contacts")
+    // edit: Yes there was indeed the bit shops exists how could I forget about such a important part of the game...
+    return title.contains("Abiphone") && !title.contains("Abiphone Contacts") && !title.contains("Bits Shop")
 }

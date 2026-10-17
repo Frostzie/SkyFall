@@ -22,6 +22,7 @@ object CustomHighlight {
                 config.hypixelMobs,
                 config.vanillaMobs,
                 config.color.getEffectiveColourRGB(),
+                config.outlineColor.getEffectiveColourRGB(),
                 config.style,
                 config.model
             ))

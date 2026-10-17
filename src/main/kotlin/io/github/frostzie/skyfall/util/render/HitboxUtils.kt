@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3
 //TODO: add culling
 object HitboxUtils {
     private val mc = Minecraft.getInstance()
+    private const val OFF_SET = 0.00005f
 
     fun submitBoxes(collector: SubmitNodeCollector) {
         val tasks = MobStore.boxes
@@ -26,42 +27,48 @@ object HitboxUtils {
         val camPos = cam.position()
         val partial = mc.deltaTracker.getGameTimeDeltaPartialTick(false).toDouble()
 
-        collector.submitCustomGeometry(PoseStack(), RenderTypes.debugQuads()) { _, vc ->
-            for (i in tasks.indices) {
-                val t = tasks[i]
-                if (t.style == BoxStyle.FILLED)
-                    drawEntityBox(vc, t.entity, camPos, partial,t.color)
+        val wantsFilled = tasks.any { it.style == BoxStyle.FILLED || it.style == BoxStyle.FILLED_OUTLINE }
+        val wantsOutlined = tasks.any { it.style == BoxStyle.OUTLINE || it.style == BoxStyle.FILLED_OUTLINE }
+
+        if (wantsFilled) {
+            collector.submitCustomGeometry(PoseStack(), RenderTypes.debugQuads()) { _, vc ->
+                for (i in tasks) {
+                    if (i.style != BoxStyle.FILLED && i.style != BoxStyle.FILLED_OUTLINE) continue
+
+                    val pos = boxPositions(i.entity, camPos, partial) ?: continue
+
+                    fillBox(
+                        vc,
+                        pos.minX, pos.minY, pos.minZ,
+                        pos.maxX + OFF_SET, pos.maxY + OFF_SET, pos.maxZ + OFF_SET,
+                        i.fillColor
+                    )
+                }
+            }
+        }
+
+        if (wantsOutlined) {
+            collector.submitCustomGeometry(PoseStack(), RenderTypes.LINES) { pose, vc ->
+                for (i in tasks) {
+                    if (i.style != BoxStyle.OUTLINE && i.style != BoxStyle.FILLED_OUTLINE) continue
+
+                    val pos = boxPositions(i.entity, camPos, partial) ?: continue
+
+                    lineBox(
+                        pose, vc,
+                        pos.minX, pos.minY, pos.minZ,
+                        pos.maxX + OFF_SET, pos.maxY + OFF_SET, pos.maxZ + OFF_SET,
+                        i.outlineColor
+                    )
+                }
             }
         }
     }
 
-    private fun drawEntityBox(vc: VertexConsumer, entity: Entity, camPos: Vec3, partial: Double, argb: Int) {
-        // Hides death animation highlighting
-        if (!entity.isAlive) return
-
-        val px = Mth.lerp(partial, entity.xo, entity.x)
-        val py = Mth.lerp(partial, entity.yo, entity.y)
-        val pz = Mth.lerp(partial, entity.zo, entity.z)
-        val bb = entity.boundingBox
-        val dx = px - entity.x - camPos.x
-        val dy = py - entity.y - camPos.y
-        val dz = pz - entity.z - camPos.z
-        fillBox(
-            vc,
-            bb.minX + dx,
-            bb.minY + dy,
-            bb.minZ + dz,
-
-            bb.maxX + dx,
-            bb.maxY + dy,
-            bb.maxZ + dz,
-            argb
-        )
-    }
-
     private fun fillBox(
         vc: VertexConsumer,
-        minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double,
+        minX: Double, minY: Double, minZ: Double,
+        maxX: Double, maxY: Double, maxZ: Double,
         argb: Int,
     ) {
         quad(vc, minX, minY, minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY, maxZ, argb)
@@ -85,4 +92,70 @@ object HitboxUtils {
         vc.addVertex(x3.toFloat(), y3.toFloat(), z3.toFloat()).setColor(argb)
         vc.addVertex(x4.toFloat(), y4.toFloat(), z4.toFloat()).setColor(argb)
     }
+
+    // Credit to Odin
+    // https://github.com/odtheking/Odin/blob/main/src/main/kotlin/com/odtheking/odin/utils/render/RenderUtils.kt
+    private fun lineBox(
+        pose: PoseStack.Pose, vc: VertexConsumer,
+        minX: Double, minY: Double, minZ: Double,
+        maxX: Double, maxY: Double, maxZ: Double,
+        argb: Int
+    ) {
+        val corners = floatArrayOf(
+            minX.toFloat(), minY.toFloat(), minZ.toFloat(),
+            maxX.toFloat(), minY.toFloat(), minZ.toFloat(),
+            maxX.toFloat(), maxY.toFloat(), minZ.toFloat(),
+            minX.toFloat(), maxY.toFloat(), minZ.toFloat(),
+            minX.toFloat(), minY.toFloat(), maxZ.toFloat(),
+            maxX.toFloat(), minY.toFloat(), maxZ.toFloat(),
+            maxX.toFloat(), maxY.toFloat(), maxZ.toFloat(),
+            minX.toFloat(), maxY.toFloat(), maxZ.toFloat(),
+        )
+        val edges = intArrayOf(
+            0, 1, 1, 5, 5, 4, 4, 0,
+            3, 2, 2, 6, 6, 7, 7, 3,
+            0, 3, 1, 2, 5, 6, 4, 7
+        )
+
+        for (i in edges.indices step 2) {
+            val i0 = edges[i] * 3
+            val i1 = edges[i + 1] * 3
+            val dx = corners[i1] - corners[i0]
+            val dy = corners[i1 + 1] - corners[i0 + 1]
+            val dz = corners[i1 + 2] - corners[i0 + 2]
+
+            vc.addVertex(pose, corners[i0], corners[i0 + 1], corners[i0 + 2])
+                .setColor(argb)
+                .setNormal(pose, dx, dy, dz)
+                .setLineWidth(3f)
+
+            vc.addVertex(pose, corners[i1], corners[i1 + 1], corners[i1 + 2])
+                .setColor(argb)
+                .setNormal(pose, dx, dy, dz)
+                .setLineWidth(3f)
+        }
+    }
+
+
+    private fun boxPositions(entity: Entity, camPos: Vec3, partial: Double): BoxPositions? {
+        if (!entity.isAlive) return null
+
+        val px = Mth.lerp(partial, entity.xo, entity.x)
+        val py = Mth.lerp(partial, entity.yo, entity.y)
+        val pz = Mth.lerp(partial, entity.zo, entity.z)
+        val bb = entity.boundingBox
+        val dx = px - entity.x - camPos.x
+        val dy = py - entity.y - camPos.y
+        val dz = pz - entity.z - camPos.z
+
+        return BoxPositions(
+            bb.minX + dx, bb.minY + dy, bb.minZ + dz,
+            bb.maxX + dx, bb.maxY + dy, bb.maxZ + dz,
+        )
+    }
+
+    private data class BoxPositions(
+        val minX: Double, val minY: Double, val minZ: Double,
+        val maxX: Double, val maxY: Double, val maxZ: Double
+    )
 }

@@ -22,12 +22,17 @@ class MobHighlight {
     var color: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
 
     @Expose
+    @ConfigOption(name = "Outline Color", desc = "Color of the outline of the highlighted box.")
+    @ConfigEditorColour
+    var outlineColor: ChromaColour = ChromaColour.fromRGB(255, 255, 255, 0, 255)
+
+    @Expose
     @ConfigOption(name = "Disable Model", desc = "Disables highlighted mobs model from being rendered. (Makes the hitbox be the only highlighted thing.)")
     @ConfigEditorBoolean
     var model: Boolean = false
 
     @Expose
-    @ConfigOption(name = "Style", desc = "")
+    @ConfigOption(name = "Style", desc = "The style the mob should be highlighted.")
     @ConfigEditorDropdown
     var style: BoxStyle = BoxStyle.FILLED
 

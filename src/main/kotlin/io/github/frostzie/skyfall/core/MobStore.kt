@@ -39,7 +39,7 @@ object MobStore {
 
                 if (!want) continue
                 val m = MobUtils.resolve(e, level) ?: continue
-                boxes.add(BoxTask(m.entity, req.color, req.style))
+                boxes.add(BoxTask(m.entity, req.fillColor, req.outlineColor, req.style))
 
                 if (req.hideModel) {
                     hiddenIds.add(m.entity.id)
@@ -60,7 +60,7 @@ object MobStore {
                 }
 
                 if (!want) continue
-                boxes.add(BoxTask(e, req.color, req.style))
+                boxes.add(BoxTask(e, req.fillColor, req.outlineColor, req.style))
 
                 if (req.hideModel) {
                     hiddenIds.add(e.id)
@@ -75,7 +75,8 @@ object MobStore {
 data class MobScanRequest(
     val hypixelName: Set<String>,
     val vanillaName: Set<String>,
-    val color: Int,
+    val fillColor: Int,
+    val outlineColor: Int,
     val style: BoxStyle,
     val hideModel: Boolean
 )
@@ -83,12 +84,12 @@ data class MobScanRequest(
 enum class BoxStyle {
     FILLED,
     OUTLINE,
-    FILLED_OUTLINE,
-    TWO_DIMENSIONAL
+    FILLED_OUTLINE
 }
 
 data class BoxTask(
     val entity: Entity,
-    val color: Int,
+    val fillColor: Int,
+    val outlineColor: Int,
     val style: BoxStyle
 )

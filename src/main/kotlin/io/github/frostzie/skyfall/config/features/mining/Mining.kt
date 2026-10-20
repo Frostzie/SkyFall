@@ -21,4 +21,9 @@ class Shaft {
     @ConfigEditorBoolean
     var partyAnnouncer: Boolean = false
 
+    @Expose
+    @ConfigOption(name = "Click to Warp", desc = "Adds a clickable message in chat that would send !warp in party chat.\n§lRequires additional mod with chat commands to support !warp.§r(Odin, SkyHanni, etc.)")
+    @ConfigEditorBoolean
+    var clickableMessage: Boolean = false
+
 }

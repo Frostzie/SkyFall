@@ -4,7 +4,6 @@ plugins {
     `maven-publish`
     alias(libs.plugins.shadow)
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 version = "${property("mod.version")}+mc${property("mod.mc_targets")}"

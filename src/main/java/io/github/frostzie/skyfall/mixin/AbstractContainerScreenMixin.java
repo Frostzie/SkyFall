@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,6 +20,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+//? if 26.3
+import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.InputConstants;
+//? if 26.2
+//import org.lwjgl.glfw.GLFW;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin extends Screen {
@@ -107,7 +112,10 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void skyfall$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (hoveredSlot == null) return;
-        if (event.key() == GLFW.GLFW_KEY_ESCAPE) return;
+        //? if 26.3
+        if (event.key() == InputConstants.KEY_ESCAPE) return;
+        //? if 26.2
+        //if (event.key() == GLFW.GLFW_KEY_ESCAPE) return;
         if (minecraft.options.keyInventory.matches(event)) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
@@ -118,12 +126,19 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
-    private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+    //? if 26.3
+    private void skyfall$onMouseClicked(Slot slot, int slotId, MouseButtonEvent event, ContainerInput containerInput, CallbackInfo ci) {
+    //? if 26.2
+    //private void skyfall$onMouseClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+
         if (slot == null) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 
-        if (!GuiEvents.SLOT_CLICK.invoker().onSlotClick(screen, slot, buttonNum)) {
+        //? if 26.3
+        if (!GuiEvents.SLOT_CLICK.invoker().onSlotClick(screen, slot, event.input())) {
+        //? if 26.2
+        //if (!GuiEvents.SLOT_CLICK.invoker().onSlotClick(screen, slot, buttonNum)) {
             ci.cancel();
         }
     }

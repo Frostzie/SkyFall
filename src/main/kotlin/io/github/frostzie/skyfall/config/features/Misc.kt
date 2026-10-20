@@ -39,6 +39,7 @@ class Animations {
     @ConfigEditorBoolean
     var disableSwing: Boolean = false
 
+    /*
     @Expose
     @ConfigOption(name = "Disable Re-Swing", desc = "Disables the same item being re-swung.\nHappens with items that have their item lore change in action. Due to Book of stats, accumulation enchants, etc.")
     @ConfigEditorBoolean
@@ -48,6 +49,7 @@ class Animations {
     @ConfigOption(name = "Instant Swap", desc = "Disables the **animation** when switching between items.")
     @ConfigEditorBoolean
     var instantItemSwap: Boolean = false
+     */
 }
 
 class Abiphone {

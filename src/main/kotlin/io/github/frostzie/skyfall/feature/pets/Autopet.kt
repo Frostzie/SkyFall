@@ -1,15 +1,14 @@
 package io.github.frostzie.skyfall.feature.pets
 
 import io.github.frostzie.skyfall.SkyFall
+import io.github.frostzie.skyfall.util.modMessage
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 
 // §cAutopet §eequipped your §7[Lvl 200] §8[§6240§8§4✦§8] §6Golden Dragon§e! §a§lVIEW RULE
 // Autopet equipped your [Lvl 200] [240✦] Golden Dragon! VIEW RULE
 // Autopet equipped your [Lvl 100] Enderman! VIEW RULE
 
-//TODO: I have no idea how this works on non maxed cosmetic pets so if someone figures that out lmk
 object Autopet {
 
     private val config get() = SkyFall.features.pets.autoPet
@@ -38,12 +37,12 @@ object Autopet {
             
             if (config.combineLevel && !config.shorten) {
                 val combinedMsg = Component.literal("§cAutopet §eequipped your §7[Lvl $totalLevel] §$rarity$pet§e!")
-                Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(combinedMsg)
+                modMessage(combinedMsg, false)
                 return@register false
 
             } else if (config.shorten) { // Pretty sure this setting is also in skyhanni I was basing it off something I had enabled
                 val shortMsg = Component.literal("§4[§cAutopet§4] §7[Lvl $totalLevel] §$rarity$pet§e!")
-                Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(shortMsg)
+                modMessage(shortMsg, false)
                 return@register false
             }
 

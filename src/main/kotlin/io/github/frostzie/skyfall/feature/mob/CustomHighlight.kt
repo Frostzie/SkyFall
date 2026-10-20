@@ -4,7 +4,7 @@ import com.github.stivais.commodore.Commodore
 import io.github.frostzie.skyfall.SkyFall
 import io.github.frostzie.skyfall.core.MobStore
 import io.github.frostzie.skyfall.core.MobScanRequest
-import io.github.frostzie.skyfall.util.ChatUtils
+import io.github.frostzie.skyfall.util.modMessage
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 
@@ -33,19 +33,19 @@ object CustomHighlight {
 
         literal("hypixel").runs { name: String ->
             if (config.hypixelMobs.add(name)) {
-                ChatUtils.clientMessage("Added hypixel mob: $name")
+                modMessage("Added hypixel mob: $name")
             } else {
                 config.hypixelMobs.remove(name)
-                ChatUtils.clientMessage("Removed hypixel mob: $name")
+                modMessage("Removed hypixel mob: $name")
             }
         }
 
         literal("vanilla").runs { name: String ->
             if (config.vanillaMobs.add(name)) {
-                ChatUtils.clientMessage("Added vanilla mob: $name")
+                modMessage("Added vanilla mob: $name")
             } else {
                 config.vanillaMobs.remove(name)
-                ChatUtils.clientMessage("Removed vanilla mob: $name")
+                modMessage("Removed vanilla mob: $name")
             }
         }
 
@@ -53,7 +53,7 @@ object CustomHighlight {
             val hypixelMobs = if (config.hypixelMobs.isEmpty()) "None" else config.hypixelMobs.joinToString(", ")
             val vanillaMobs = if (config.vanillaMobs.isEmpty()) "None" else config.vanillaMobs.joinToString(", ")
 
-            ChatUtils.clientMessage("\nHypixel: $hypixelMobs\nVanilla: $vanillaMobs")
+            modMessage("\nHypixel: $hypixelMobs\nVanilla: $vanillaMobs")
         }
     }
 }
